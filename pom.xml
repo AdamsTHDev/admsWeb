@@ -80,6 +80,13 @@
 			</exclusions>
 		</dependency>
 
+		<!-- Import Export -->
+		<dependency>
+			<groupId>com.adms</groupId>
+			<artifactId>admsImex</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Util -->
 		<dependency>
 			<groupId>admsUtils</groupId>
@@ -161,6 +168,5 @@
 			<artifactId>spring-web</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-
 	</dependencies>
 </project>
