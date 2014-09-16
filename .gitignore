@@ -34,3 +34,25 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+.classpath
+.project
+.settings/.jsdtscope
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.m2e.core.prefs
+.settings/org.eclipse.wst.common.component
+.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
+.settings/org.eclipse.wst.common.project.facet.core.xml
+.settings/org.eclipse.wst.jsdt.ui.superType.container
+.settings/org.eclipse.wst.jsdt.ui.superType.name
+.settings/org.eclipse.wst.validation.prefs
+.settings/org.hibernate.eclipse.console.prefs
+.settings/org.jboss.ide.eclipse.as.core.prefs
+*.class
+target/classes/com/adms/msg/customer/customerMsg.properties
+target/classes/com/adms/msg/globalMsg.properties
+target/classes/config/config.properties
+target/m2e-wtp/web-resources/META-INF/MANIFEST.MF
+target/classes/com/adms/msg/importfile/importFileMsg.properties
+target/m2e-wtp/web-resources/META-INF/maven/admsWeb/admsWeb/pom.properties
+target/m2e-wtp/web-resources/META-INF/maven/admsWeb/admsWeb/pom.xml

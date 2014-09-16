@@ -1,0 +1,91 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/blankTemplate.xhtml">
+
+	<ui:define name="head">
+		<f:loadBundle basename="com.adms.msg.importfile.importFileMsg" var="msg"/>
+		<title>#{msg['txt.header']}</title>
+	</ui:define>
+	
+	<ui:define name="content">
+	<style>
+		.uploadPanelRemoval {
+			display:inline-block;
+			padding: 0 0 0 0 !important;
+			border: none !important;
+			background: none !important;
+		}
+		.uploadPanelRemoval > div {
+			padding: inherit !important;
+			border: inherit !important;
+			background: inherit !important;
+		}
+		.uploadPanelRemoval > div:nth-child(2) {
+			display:none !important;
+		}
+		.center {text-align:center;}
+		.right {text-align:right;}
+	</style>
+		<h:form id="frmImpt" enctype="multipart/form-data">
+			<p:panel>
+				<p:outputLabel value="Hi, #{loginBean.username}"/>
+			</p:panel>
+			<p:messages id="msgGlobal"/>
+			
+			<h:panelGroup id="panelFile">
+				<p:inputText id="fileUploadName" value="#{importFileView.fileUploadName}" style="width:400px;" readonly="true"/>
+				<p:fileUpload id="fileUpload" styleClass=""
+					fileUploadListener="#{importFileView.handleFileUpload}"
+					mode="advanced" 
+					auto="true" 
+					label="Browse"
+					allowTypes="/(\.|\/)(xls|xlsx)$/"
+					sizeLimit="1000000000"
+					update="@form"/>
+				<p:commandButton id="btnFile" value="Submit" actionListener="#{importFileView.submitFileUpload}" 
+				process="@('#panelFile')" update="@form"/>
+			</h:panelGroup>
+			
+			<h:panelGroup id="panelList">
+				<p:dataTable id="dataList" lazy="true"
+							value="#{importFileView.importFileModel}" var="var"
+							paginator="true" rows="#{importFileView.rowPerPage}"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+							paginatorPosition="bottom"
+							rowIndexVar="idx"
+							style="width: 1200px;">
+							
+					<f:facet name="header">
+						<h:outputText value="#{msg['table.file.header']}"/>
+					</f:facet>
+					<p:column style="width:30px;" styleClass="center">
+						<p:outputLabel value="#{idx+1}"/>
+					</p:column>
+					<p:column headerText="File Name">
+						<p:outputLabel value="#{var.fileName}"/>
+					</p:column>
+					<p:column headerText="File Size">
+						<p:outputLabel value="#{var.fileSize / 1048576}">
+							<f:convertNumber pattern="#0.00"/>
+						</p:outputLabel>
+						<p:outputLabel value="#{globalMsg['common.txt.size.mb']}"/>
+					</p:column>
+					<p:column headerText="Upload Date">
+						<p:outputLabel value="#{var.uploadDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="#{importFileView.timeZone}"/>
+						</p:outputLabel>
+					</p:column>
+					<p:column style="width:150px;">
+						<p:commandButton value="Download" actionListener="#{importFileView.downloadFile(var.id)}" ajax="false"/>
+					</p:column>
+					
+				</p:dataTable>
+			</h:panelGroup>
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

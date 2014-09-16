@@ -1,0 +1,30 @@
+.topLogo {
+	width: 552px;
+	height: 49px;
+	background-image: url(../img/logo/ADAMS-Thailand.gif);
+}
+
+.uploadPanelRemoval {
+	display: inline-block;
+	padding: 0 0 0 0 !important;
+	border: none !important;
+	background: none !important;
+}
+
+.uploadPanelRemoval>div {
+	padding: inherit !important;
+	border: inherit !important;
+	background: inherit !important;
+}
+
+.uploadPanelRemoval>div:nth-child(2) {
+	display: none !important;
+}
+
+.center {
+	text-align: center;
+}
+
+.right {
+	text-align: right;
+}

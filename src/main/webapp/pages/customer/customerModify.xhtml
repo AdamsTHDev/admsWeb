@@ -1,0 +1,47 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/mainTemplate.xhtml">
+
+	<ui:define name="head">
+		<f:loadBundle basename="com.adms.msg.customer.customerMsg" var="msg"/>
+		<title>#{msg['txt.header']}</title>
+	</ui:define>
+	
+	<ui:define name="content">
+	<style>
+	</style>
+		<h:form id="frmMain" enctype="multipart/form-data">
+			<p:panel>
+				<p:outputLabel value="Hi, #{loginBean.username}"/>
+			</p:panel>
+			<p:messages id="msgGlobal"/>
+			
+			<p:panelGrid id="gridMod" columns="3">
+				<p:outputLabel value="#{msg['txt.mod.1']}" for="firstName"/>
+				<p:inputText id="firstName" value="#{customerModify.firstName}" required="true" readonly="#{customerModify.readOnly}" disabled="#{customerModify.readOnly}"/>
+				<p:message for="firstName"/>
+				
+				<p:outputLabel value="#{msg['txt.mod.2']}" for="lastName"/>
+				<p:inputText id="lastName" value="#{customerModify.lastName}" required="true" readonly="#{customerModify.readOnly}" disabled="#{customerModify.readOnly}"/>
+				<p:message for="lastName"/>
+				
+				<p:outputLabel value="#{msg['txt.mod.3']}" for="birthDate"/>
+				<p:calendar id="birthDate" value="#{customerModify.birthDate}" 
+							pattern="dd/MM/yyyy" mask="true"
+							navigator="true"
+							yearRange="c-90:c"
+							required="true" 
+							readonly="#{customerModify.readOnly}"  disabled="#{customerModify.readOnly}"/>
+				<p:message for="birthDate"/>
+			</p:panelGrid>
+			
+			<p:commandButton id="edit" value="#{globalMsg['common.txt.btn.edit']}" actionListener="#{customerModify.handleEditValue}" update="@form" process="@this" rendered="#{customerModify.readOnly}"/>
+			<p:commandButton id="submit" value="#{globalMsg['common.txt.btn.submit']}" actionListener="#{customerModify.submit}" update="@form" rendered="#{!customerModify.readOnly}"/>			
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

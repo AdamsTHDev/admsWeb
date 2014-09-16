@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-4.0.xsd 
+	http://www.springframework.org/schema/util 
+	http://www.springframework.org/schema/util/spring-util-4.0.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	<context:component-scan base-package="com.adms" />
+	<context:annotation-config />
+	<context:spring-configured />
+	<aop:aspectj-autoproxy />
+
+	<bean id="hijackBo" class="com.adms.bo.interception.TimeStampIntercept">
+		<!-- configure properties of aspect here as normal -->
+	</bean>
+
+	<!-- Data Source -->
+	<bean id="DataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:jboss/datasources/MSSQLDS" />
+	</bean>
+
+	<!-- Session Factory Declaration -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="DataSource" />
+
+		<property name="annotatedClasses">
+			<list>
+				<value>com.adms.domain.Address</value>
+				<value>com.adms.domain.AddressDetail</value>
+				<value>com.adms.domain.BeneficiaryDetail</value>
+				<value>com.adms.domain.Campaign</value>
+				<value>com.adms.domain.Customer</value>
+				<value>com.adms.domain.FileBase</value>
+				<value>com.adms.domain.ImportFile</value>
+				<value>com.adms.domain.ImportFileHistory</value>
+				<value>com.adms.domain.KpiCategory</value>
+				<value>com.adms.domain.PaymentChannel</value>
+				<value>com.adms.domain.PaymentDetail</value>
+				<value>com.adms.domain.PaymentMode</value>
+				<value>com.adms.domain.PolicyInfo</value>
+				<value>com.adms.domain.ProductType</value>
+				<value>com.adms.domain.QaStatus</value>
+				<value>com.adms.domain.SalesRecord</value>
+				<value>com.adms.domain.SalesStatus</value>
+				<value>com.adms.domain.TsrInfo</value>
+				<value>com.adms.domain.TsrLevel</value>
+				<value>com.adms.domain.TsrStatus</value>
+				<value>com.adms.domain.TsrTalkTime</value>
+				<value>com.adms.domain.TsrTalkTimeDetail</value>
+			</list>
+		</property>
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<!-- Transaction Manager is defined -->
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- Enable the configuration of transactional behavior based on annotations -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:/config/config.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="false" />
+	</bean>
+
+</beans>

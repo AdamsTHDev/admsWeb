@@ -1,0 +1,85 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/mainTemplate.xhtml">
+
+	<ui:define name="head">
+		<f:loadBundle basename="com.adms.msg.customer.customerMsg" var="msg"/>
+		<title>#{msg['txt.header']}</title>
+	</ui:define>
+	
+	<ui:define name="content">
+	<style>
+	</style>
+		<h:form id="frmMain" enctype="multipart/form-data">
+			<p:toolbar>
+				<f:facet name="left">
+					<p:commandButton value="New" icon="ui-icon-document" action="#{customerView.navToMod}" ajax="false" process="@this">
+						<f:setPropertyActionListener value="" target="#{customerBean.editCustomer}"></f:setPropertyActionListener>
+					</p:commandButton>
+					
+					<span class="ui-separator">
+		                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+		            </span>
+				</f:facet>
+				
+				<f:facet name="right">
+				
+					<p:outputLabel value="Hi, #{loginBean.username}" style="margin-top:10px;"/>
+				</f:facet>
+			</p:toolbar>
+			<p:messages id="msgGlobal"/>
+			
+			<p:panel id="panelList">
+				<p:dataTable id="dataList" lazy="true"
+							value="#{customerView.customerModel}" var="var"
+							paginator="true" rows="#{customerView.rowPerPage}"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+							paginatorPosition="bottom"
+							rowIndexVar="idx" 
+							style="width: 1200px;">
+					<f:facet name="header">
+						<h:outputLabel value="#{msg['table.cus.header']}"/>
+					</f:facet>
+					
+					<p:column headerText="#{msg['table.cus.col.1']}">
+						<h:outputLabel value="#{var.firstName}"></h:outputLabel>
+					</p:column>
+					
+					<p:column headerText="#{msg['table.cus.col.2']}">
+						<h:outputLabel value="#{var.lastName}"></h:outputLabel>
+					</p:column>
+					
+					<p:column headerText="#{msg['table.cus.col.3']}">
+						<h:outputText value="#{var.birthDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" timeZone="#{customerView.timeZone}"/>
+						</h:outputText>
+					</p:column>
+					
+					<p:column headerText="#{msg['table.cus.col.4']}">
+						<h:outputLabel value="#{var.createDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="#{customerView.timeZone}"/>
+						</h:outputLabel>
+					</p:column>
+					
+					<p:column headerText="#{msg['table.cus.col.5']}">
+						<h:outputLabel value="#{var.updateDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="#{customerView.timeZone}"/>
+						</h:outputLabel>
+					</p:column>
+					
+					<p:column>
+						<p:commandButton icon="ui-icon-gear" title="Edit" action="#{customerView.navToMod}" ajax="false" process="@this">
+							<f:setPropertyActionListener value="#{var}" target="#{customerBean.editCustomer}"></f:setPropertyActionListener>
+						</p:commandButton>
+					</p:column>
+				
+				</p:dataTable>
+			</p:panel>
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

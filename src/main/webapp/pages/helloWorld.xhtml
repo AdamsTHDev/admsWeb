@@ -1,0 +1,45 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/blankTemplate.xhtml">
+
+	<ui:define name="head">
+		<title>Login</title>
+	</ui:define>
+	
+	<ui:define name="content">
+		<h:form id="frmHelloWorld">
+			<p:commandButton id="btnBack" value="Back" action="#{userInfoBeanView.toHelloWorld}" ajax="false"/>
+			<p:commandButton id="btnDoList" value="get list" action="#{userInfoBeanView.doList}" update="panelNames"/>
+			
+			<h:panelGroup>
+				<p:outputLabel value="Hi, #{loginBean.username}"/>
+			</h:panelGroup>
+			
+			<h:panelGroup id="panelNames">
+				<p:dataList value="#{userInfoBeanView.names}" var="var">
+					<f:facet name="header">
+						<h:outputText value="name list"/>
+					</f:facet>
+					<h:outputText value="#{var}"/>
+				</p:dataList>
+			</h:panelGroup>
+			
+			<h:panelGroup id="panelAddUser">
+				<p:outputLabel value="Username: " for="userName"/>
+				<p:inputText id="userName" value="#{userInfoBeanView.inUserName}" required="true"/>
+				
+				<p:outputLabel value="First Name: " for="firstName"/>
+				<p:inputText id="firstName" value="#{userInfoBeanView.inFirstName}" required="true"/>
+				
+				<p:outputLabel value="Last Name: " for="lastName"/>
+				<p:inputText id="lastName" value="#{userInfoBeanView.inLastName}" required="true"/>
+				
+				<p:commandButton value="Submit" actionListener="#{userInfoBeanView.addNewUser}" update="@form"/>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
