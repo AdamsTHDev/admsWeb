@@ -1,0 +1,180 @@
+package com.adms.web.model.customer;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortOrder;
+
+import com.adms.bo.customer.CustomerBo;
+import com.adms.domain.Customer;
+import com.adms.web.enums.ESqlSort;
+
+public class CustomerLazyDataModel extends LazyDataModel<Customer> {
+	private static final long serialVersionUID = -2052048428718174830L;
+	
+	private List<Customer> datas;
+	private CustomerBo customerBo;
+	private Customer example;
+	
+	private int pageSize;
+	private int rowIndex;
+	private int rowCount;
+	
+	public CustomerLazyDataModel(final CustomerBo customerBo) {
+		this.customerBo = customerBo;
+	}
+	
+	public CustomerLazyDataModel(CustomerBo customerBo, Customer example) {
+		this.customerBo = customerBo;
+		this.example = example;
+	}
+	
+	@Override
+	public List<Customer> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+		try {
+			String sorting = null;
+			if(StringUtils.isBlank(sortField) && sortOrder != null) {
+				if(ESqlSort.DESC.getCode().equals(sortOrder)) {
+					sorting = ESqlSort.DESC.getValue();
+				}
+			}
+			
+			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
+			
+			if(example != null) {
+				
+			}
+//			List<Customer> customers = new ArrayList<Customer>();
+//			
+//			for(Customer data : datas) {
+//				boolean match = true;
+//				
+//				if(filters != null) {
+//					for(Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
+//						try {
+//							String filterProperty = it.next();
+//							Object filterValue = filters.get(filterProperty);
+//							String fieldValue = String.valueOf(data.getClass().getField(filterProperty).get(data));
+//							
+//							if(filterValue == null || fieldValue.startsWith(filterValue.toString())) {
+//								match = true;
+//							} else {
+//								match = false;
+//								break;
+//							}
+//						} catch(Exception e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				}
+//				
+//				if(match) {
+//					customers.add(data);
+//				}
+//				
+//			}
+//			
+//			// sort
+//			if(sortField != null) {
+//				Collections.sort(customers, new CustomerLazySorter(sortField, sortOrder));
+//			}
+			
+//			// paginate
+//			if(dataSize > pageSize) {
+//				try {
+//					return datas.subList(first, first + pageSize);
+//				} catch(IndexOutOfBoundsException e) {
+//					return datas.subList(first, first + (dataSize % pageSize));
+//				}
+//			} else {
+//				return datas;
+//			}
+
+			// rowCount
+			setRowCount(customerBo.findTotalCount().intValue());
+			
+			return datas;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean isRowAvailable() {
+		if(datas == null) {
+			return false;
+		}
+		int index = rowIndex % pageSize;
+		return index >= 0 && index < datas.size();
+	}
+	
+	@Override
+	public Object getRowKey(Customer object) {
+		return object.getId();
+	}
+	
+	@Override
+	public Customer getRowData() {
+		Customer customer = null;
+		if(datas != null) {
+			int index = rowIndex % pageSize;
+			if(index <= datas.size()) {
+				customer = datas.get(index);
+			}
+		}
+		return customer;
+	}
+	
+	@Override
+	public Customer getRowData(String rowKey) {
+		if(datas != null) {
+			for(Customer customer : datas) {
+				if(customer.getId().toString().equals(rowKey)) {
+					return customer;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public void setWrappedData(List<Customer> list) {
+		this.datas = list;
+	}
+	
+	public List<Customer> getWrappedData() {
+		return datas;
+	}
+	
+	@Override
+	public int getPageSize() {
+		return pageSize;
+	}
+	
+	@Override
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+	
+	@Override
+	public int getRowIndex() {
+		return rowIndex;
+	}
+	
+	@Override
+	public void setRowIndex(int rowIndex) {
+		this.rowIndex = rowIndex;
+	}
+	
+	@Override
+	public int getRowCount() {
+		return rowCount;
+	}
+	
+	@Override
+	public void setRowCount(int rowCount) {
+		this.rowCount = rowCount;
+	}
+}
