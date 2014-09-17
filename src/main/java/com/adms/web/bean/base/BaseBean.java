@@ -3,24 +3,21 @@ package com.adms.web.bean.base;
 import java.io.Serializable;
 import java.util.TimeZone;
 
-public abstract class BaseBean implements Serializable {
+import com.adms.web.bean.login.LoginBean;
+import com.adms.web.utils.FacesUtils;
+
+public class BaseBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private int rowPerPage;
 	private TimeZone timeZone;
 	
 	public BaseBean() {
-		rowPerPage = 10;
 		timeZone = TimeZone.getTimeZone("Asia/Bangkok");
 	}
 	
-	public int getRowPerPage() {
-		return rowPerPage;
-	}
-
-	public void setRowPerPage(int rowPerPage) {
-		this.rowPerPage = rowPerPage;
+	public LoginBean getLoginBean() {
+		return (LoginBean) FacesUtils.getManagedBean("loginBean");
 	}
 
 	public TimeZone getTimeZone() {

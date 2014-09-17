@@ -9,22 +9,18 @@ import javax.faces.bean.ViewScoped;
 
 import com.adms.bo.customer.CustomerBo;
 import com.adms.domain.Customer;
-import com.adms.web.bean.base.BaseBean;
-import com.adms.web.bean.login.LoginBean;
-import com.adms.web.model.customer.CustomerLazyModel;
+import com.adms.web.bean.base.AbstractSearchBean;
+import com.adms.web.model.customer.CustomerLazyDataModel;
 
 @ManagedBean
 @ViewScoped
-public class CustomerView extends BaseBean {
+public class CustomerView extends AbstractSearchBean<Customer> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6038082994061062532L;
 
-	@ManagedProperty(value = "#{loginBean}")
-	LoginBean loginBean;
-	
 	@ManagedProperty(value = "#{customerBo}")
 	private CustomerBo customerBo;
 	
@@ -34,7 +30,8 @@ public class CustomerView extends BaseBean {
 	private String firstName;
 	private String lastName;
 	private Date birthDate;
-	private CustomerLazyModel customerModel;
+	private CustomerLazyDataModel customerModel;
+	private int count;
 	
 	public String navToMod() {
 		return "customerModify?faces-redirect=true";
@@ -47,9 +44,10 @@ public class CustomerView extends BaseBean {
 	
 	public void submitAddCustomer() {
 		Customer customer = new Customer(firstName, lastName, birthDate);
-		customer.setCreateBy(loginBean.getUsername());
+		String userName = super.getLoginBean().getUsername();
+		customer.setCreateBy(userName);
 		try {
-			customerBo.addCustomer(customer, loginBean.getUsername());
+			customerBo.addCustomer(customer, userName);
 			init();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -59,14 +57,11 @@ public class CustomerView extends BaseBean {
 	
 	public void getAllCustomer() {
 		try {
-			customerModel = new CustomerLazyModel(customerBo.findCustomerAll());
+			customerModel = new CustomerLazyDataModel(customerBo);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public void setLoginBean(LoginBean loginBean) {
-		this.loginBean = loginBean;
 	}
 	
 	public void setCustomerBo(CustomerBo customerBo) {
@@ -97,16 +92,24 @@ public class CustomerView extends BaseBean {
 		this.birthDate = birthDate;
 	}
 
-	public CustomerLazyModel getCustomerModel() {
+	public void setCustomerBean(CustomerBean customerBean) {
+		this.customerBean = customerBean;
+	}
+
+	public CustomerLazyDataModel getCustomerModel() {
 		return customerModel;
 	}
 
-	public void setCustomerModel(CustomerLazyModel customerModel) {
+	public void setCustomerModel(CustomerLazyDataModel customerModel) {
 		this.customerModel = customerModel;
 	}
 
-	public void setCustomerBean(CustomerBean customerBean) {
-		this.customerBean = customerBean;
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 	
 }
