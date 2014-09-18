@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.adms.bo.customer.CustomerBo;
 import com.adms.domain.Customer;
@@ -35,17 +37,30 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 	public List<Customer> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
 		try {
 			String sorting = null;
+			Direction direction = null;
+			PageRequest pageRequest = null;
+
+			if(example == null) {
+				example = new Customer();
+			}
+			
 			if(StringUtils.isBlank(sortField) && sortOrder != null) {
 				if(ESqlSort.DESC.getCode().equals(sortOrder)) {
 					sorting = ESqlSort.DESC.getValue();
 				}
 			}
 			
-			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
-			
-			if(example != null) {
-				
+			if(sorting != null) {
+				direction = Direction.fromString(sorting);
+				pageRequest = new PageRequest(first, first + pageSize, direction, sortField);
+			} else {
+				pageRequest = new PageRequest(first, first + pageSize);
 			}
+			
+			datas = customerBo.findByExamplePaging(example, pageRequest);
+			
+//			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
+			
 //			List<Customer> customers = new ArrayList<Customer>();
 //			
 //			for(Customer data : datas) {
