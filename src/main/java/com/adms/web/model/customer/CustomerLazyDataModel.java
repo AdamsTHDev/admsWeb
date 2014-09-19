@@ -56,55 +56,6 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 			}
 			
 			datas = customerBo.findByExamplePaging(example, pageRequest);
-//			datas = customerBo.searchByExamplePaging(example, pageRequest);
-			
-//			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
-			
-//			List<Customer> customers = new ArrayList<Customer>();
-//			
-//			for(Customer data : datas) {
-//				boolean match = true;
-//				
-//				if(filters != null) {
-//					for(Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
-//						try {
-//							String filterProperty = it.next();
-//							Object filterValue = filters.get(filterProperty);
-//							String fieldValue = String.valueOf(data.getClass().getField(filterProperty).get(data));
-//							
-//							if(filterValue == null || fieldValue.startsWith(filterValue.toString())) {
-//								match = true;
-//							} else {
-//								match = false;
-//								break;
-//							}
-//						} catch(Exception e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
-//				
-//				if(match) {
-//					customers.add(data);
-//				}
-//				
-//			}
-//			
-//			// sort
-//			if(sortField != null) {
-//				Collections.sort(customers, new CustomerLazySorter(sortField, sortOrder));
-//			}
-			
-//			// paginate
-//			if(dataSize > pageSize) {
-//				try {
-//					return datas.subList(first, first + pageSize);
-//				} catch(IndexOutOfBoundsException e) {
-//					return datas.subList(first, first + (dataSize % pageSize));
-//				}
-//			} else {
-//				return datas;
-//			}
 
 			// rowCount
 			setRowCount(customerBo.findTotalCount().intValue());
