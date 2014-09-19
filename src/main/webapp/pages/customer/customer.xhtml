@@ -44,7 +44,7 @@
 						<h:outputLabel value="#{msg['table.cus.header']}"/>
 					</f:facet>
 					
-					<p:column headerText="#{msg['table.cus.col.1']}">
+					<p:column headerText="#{msg['table.cus.col.1']}" sortBy="#{var.firstName}">
 						<h:outputLabel value="#{var.firstName}"></h:outputLabel>
 					</p:column>
 					

@@ -43,11 +43,9 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 			if(example == null) {
 				example = new Customer();
 			}
-			
-			if(StringUtils.isBlank(sortField) && sortOrder != null) {
-				if(ESqlSort.DESC.getCode().equals(sortOrder)) {
-					sorting = ESqlSort.DESC.getValue();
-				}
+			if(!StringUtils.isBlank(sortField) && sortOrder != null) {
+				ESqlSort eSql = ESqlSort.valueOf(sortOrder.toString());
+				sorting = eSql.getValue();
 			}
 			
 			if(sorting != null) {
@@ -57,7 +55,8 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 				pageRequest = new PageRequest(first, first + pageSize);
 			}
 			
-			datas = customerBo.findByExamplePaging(example, pageRequest);
+//			datas = customerBo.findByExamplePaging(example, pageRequest);
+			datas = customerBo.searchByExamplePaging(example, pageRequest);
 			
 //			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
 			
