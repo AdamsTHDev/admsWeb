@@ -43,41 +43,12 @@
 	</build>
 
 	<dependencies>
-		<!-- Domain -->
-		<dependency>
-			<groupId>admsDomain</groupId>
-			<artifactId>admsDomain</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<!-- Dao -->
-		<dependency>
-			<groupId>admsDao</groupId>
-			<artifactId>admsDao</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>admsDomain</groupId>
-					<artifactId>admsDomain</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- BO -->
 		<dependency>
 			<groupId>admsBo</groupId>
 			<artifactId>admsBo</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>admsDomain</groupId>
-					<artifactId>admsDomain</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>admsDao</groupId>
-					<artifactId>admsDao</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Import Export -->

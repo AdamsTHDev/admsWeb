@@ -9,7 +9,7 @@ import java.util.Map;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
 
-import com.adms.domain.ImportFile;
+import com.adms.domain.entities.ImportFile;
 
 public class ImportFileLazyModel extends LazyDataModel<ImportFile> {
 

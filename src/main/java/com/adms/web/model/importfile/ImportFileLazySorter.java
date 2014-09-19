@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import org.primefaces.model.SortOrder;
 
-import com.adms.domain.ImportFile;
+import com.adms.domain.entities.ImportFile;
 
 public class ImportFileLazySorter implements Comparator<ImportFile> {
 

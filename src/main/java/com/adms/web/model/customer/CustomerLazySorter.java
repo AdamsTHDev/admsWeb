@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import org.primefaces.model.SortOrder;
 
-import com.adms.domain.Customer;
+import com.adms.domain.entities.Customer;
 
 public class CustomerLazySorter implements Comparator<Customer> {
 

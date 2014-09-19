@@ -8,7 +8,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import com.adms.bo.customer.CustomerBo;
-import com.adms.domain.Customer;
+import com.adms.domain.entities.Customer;
 import com.adms.web.bean.base.BaseBean;
 import com.adms.web.bean.login.LoginBean;
 

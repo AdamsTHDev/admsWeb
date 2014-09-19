@@ -3,7 +3,7 @@ package com.adms.web.bean.customer;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
-import com.adms.domain.Customer;
+import com.adms.domain.entities.Customer;
 import com.adms.web.bean.base.BaseBean;
 
 @ManagedBean

@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.adms.bo.customer.CustomerBo;
-import com.adms.domain.Customer;
+import com.adms.domain.entities.Customer;
 import com.adms.web.enums.ESqlSort;
 
 public class CustomerLazyDataModel extends LazyDataModel<Customer> {
@@ -55,8 +55,8 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 				pageRequest = new PageRequest(first, first + pageSize);
 			}
 			
-//			datas = customerBo.findByExamplePaging(example, pageRequest);
-			datas = customerBo.searchByExamplePaging(example, pageRequest);
+			datas = customerBo.findByExamplePaging(example, pageRequest);
+//			datas = customerBo.searchByExamplePaging(example, pageRequest);
 			
 //			datas = customerBo.findAllPaging(first, first + pageSize, sortField, sorting);
 			

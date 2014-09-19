@@ -1,7 +1,5 @@
 package com.adms.web.bean.importfile;
 
-import java.util.Date;
-
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -12,10 +10,9 @@ import org.primefaces.model.UploadedFile;
 
 import com.adms.bo.filebase.FileBaseBo;
 import com.adms.bo.importfile.ImportFileBo;
-import com.adms.domain.FileBase;
-import com.adms.domain.ImportFile;
+import com.adms.domain.entities.FileBase;
+import com.adms.domain.entities.ImportFile;
 import com.adms.web.bean.base.BaseBean;
-import com.adms.web.bean.login.LoginBean;
 import com.adms.web.model.importfile.ImportFileLazyModel;
 import com.adms.web.utils.CryptUtil;
 import com.adms.web.utils.FileUtils;
@@ -28,9 +25,6 @@ public class ImportFileView extends BaseBean {
 	 * 
 	 */
 	private static final long serialVersionUID = 6038082994061062532L;
-
-	@ManagedProperty(value = "#{loginBean}")
-	LoginBean loginBean;
 
 	@ManagedProperty(value = "#{importFileBo}")
 	private ImportFileBo importFileBo;
@@ -73,11 +67,9 @@ public class ImportFileView extends BaseBean {
 				importFile.setFileName(uploadedFile.getFileName());
 				importFile.setContentType(uploadedFile.getContentType());
 				importFile.setFileSize(uploadedFile.getSize());
-				importFile.setUploadBy(loginBean.getUsername());
-				importFile.setUploadDate(new Date());
 				
 				// insert to importFile
-				ImportFile file = importFileBo.addImportFile(importFile);
+				ImportFile file = importFileBo.addImportFile(importFile, super.getLoginBean().getUsername());
 
 				FileBase fileBase = new FileBase();
 				fileBase.setId(file.getId());
@@ -113,10 +105,6 @@ public class ImportFileView extends BaseBean {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void setLoginBean(LoginBean loginBean) {
-		this.loginBean = loginBean;
 	}
 	
 	public void setImportFileBo(ImportFileBo importFileBo) {
