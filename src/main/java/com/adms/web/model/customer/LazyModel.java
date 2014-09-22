@@ -9,40 +9,34 @@ import org.primefaces.model.SortOrder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 
-import com.adms.bo.customer.CustomerBo;
-import com.adms.domain.entities.Customer;
+import com.adms.web.bean.base.ISearchBean;
 import com.adms.web.enums.ESqlSort;
 
-public class CustomerLazyDataModel extends LazyDataModel<Customer> {
-	private static final long serialVersionUID = -2052048428718174830L;
+public class LazyModel<T> extends LazyDataModel<T> {
+
+	private static final long serialVersionUID = 4403329614270854588L;
 	
-	private List<Customer> datas;
-	private CustomerBo customerBo;
-	private Customer example;
+	private ISearchBean<T> searchBean;
+	
+	private T example;
+	private List<T> datas;
 	
 	private int pageSize;
 	private int rowIndex;
 	private int rowCount;
 	
-	public CustomerLazyDataModel(final CustomerBo customerBo) {
-		this.customerBo = customerBo;
-	}
-	
-	public CustomerLazyDataModel(final CustomerBo customerBo, final Customer example) {
-		this.customerBo = customerBo;
+	public LazyModel(final T example, ISearchBean<T> searchBean) {
 		this.example = example;
+		this.searchBean = searchBean;
 	}
 	
 	@Override
-	public List<Customer> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+	public List<T> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
 		try {
 			String sorting = null;
 			Direction direction = null;
 			PageRequest pageRequest = null;
-
-			if(example == null) {
-				example = new Customer();
-			}
+			
 			if(!StringUtils.isBlank(sortField) && sortOrder != null) {
 				ESqlSort eSql = ESqlSort.valueOf(sortOrder.toString());
 				sorting = eSql.getValue();
@@ -55,10 +49,11 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 				pageRequest = new PageRequest(first, first + pageSize);
 			}
 			
-			datas = customerBo.findByExamplePaging(example, pageRequest);
+//			datas = customerBo.findByExamplePaging(example, pageRequest);
+			datas = searchBean.search(example, pageRequest);
 
 			// rowCount
-			setRowCount(customerBo.findTotalCount().intValue());
+			setRowCount(searchBean.getTotalCount(example).intValue());
 			
 			return datas;
 		} catch (Exception e) {
@@ -75,41 +70,12 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 		int index = rowIndex % pageSize;
 		return index >= 0 && index < datas.size();
 	}
-	
-	@Override
-	public Object getRowKey(Customer object) {
-		return object.getId();
-	}
-	
-	@Override
-	public Customer getRowData() {
-		Customer customer = null;
-		if(datas != null) {
-			int index = rowIndex % pageSize;
-			if(index <= datas.size()) {
-				customer = datas.get(index);
-			}
-		}
-		return customer;
-	}
-	
-	@Override
-	public Customer getRowData(String rowKey) {
-		if(datas != null) {
-			for(Customer customer : datas) {
-				if(customer.getId().toString().equals(rowKey)) {
-					return customer;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public void setWrappedData(List<Customer> list) {
+
+	public void setWrappedData(List<T> list) {
 		this.datas = list;
 	}
 	
-	public List<Customer> getWrappedData() {
+	public List<T> getWrappedData() {
 		return datas;
 	}
 	
@@ -142,4 +108,17 @@ public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 	public void setRowCount(int rowCount) {
 		this.rowCount = rowCount;
 	}
+	
+	@Override
+	public T getRowData() {
+		T object = null;
+		if(datas != null) {
+			int index = rowIndex % pageSize;
+			if(index <= datas.size()) {
+				object = datas.get(index);
+			}
+		}
+		return object;
+	}
+	
 }

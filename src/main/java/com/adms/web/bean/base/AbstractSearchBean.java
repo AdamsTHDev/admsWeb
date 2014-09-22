@@ -1,6 +1,6 @@
 package com.adms.web.bean.base;
 
-public abstract class AbstractSearchBean<T> extends BaseBean {
+public abstract class AbstractSearchBean<T> extends BaseBean implements ISearchBean<T>{
 
 	/**
 	 * 

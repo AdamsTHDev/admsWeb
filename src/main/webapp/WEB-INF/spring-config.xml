@@ -36,28 +36,28 @@
 
 		<property name="annotatedClasses">
 			<list>
-				<value>com.adms.domain.Address</value>
-				<value>com.adms.domain.AddressDetail</value>
-				<value>com.adms.domain.BeneficiaryDetail</value>
-				<value>com.adms.domain.Campaign</value>
-				<value>com.adms.domain.Customer</value>
-				<value>com.adms.domain.FileBase</value>
-				<value>com.adms.domain.ImportFile</value>
-				<value>com.adms.domain.ImportFileHistory</value>
-				<value>com.adms.domain.KpiCategory</value>
-				<value>com.adms.domain.PaymentChannel</value>
-				<value>com.adms.domain.PaymentDetail</value>
-				<value>com.adms.domain.PaymentMode</value>
-				<value>com.adms.domain.PolicyInfo</value>
-				<value>com.adms.domain.ProductType</value>
-				<value>com.adms.domain.QaStatus</value>
-				<value>com.adms.domain.SalesRecord</value>
-				<value>com.adms.domain.SalesStatus</value>
-				<value>com.adms.domain.TsrInfo</value>
-				<value>com.adms.domain.TsrLevel</value>
-				<value>com.adms.domain.TsrStatus</value>
-				<value>com.adms.domain.TsrTalkTime</value>
-				<value>com.adms.domain.TsrTalkTimeDetail</value>
+				<value>com.adms.domain.entities.Address</value>
+				<value>com.adms.domain.entities.AddressDetail</value>
+				<value>com.adms.domain.entities.BeneficiaryDetail</value>
+				<value>com.adms.domain.entities.Campaign</value>
+				<value>com.adms.domain.entities.Customer</value>
+				<value>com.adms.domain.entities.FileBase</value>
+				<value>com.adms.domain.entities.ImportFile</value>
+				<value>com.adms.domain.entities.ImportFileHistory</value>
+				<value>com.adms.domain.entities.KpiCategory</value>
+				<value>com.adms.domain.entities.PaymentChannel</value>
+				<value>com.adms.domain.entities.PaymentDetail</value>
+				<value>com.adms.domain.entities.PaymentMode</value>
+				<value>com.adms.domain.entities.PolicyInfo</value>
+				<value>com.adms.domain.entities.ProductType</value>
+				<value>com.adms.domain.entities.QaStatus</value>
+				<value>com.adms.domain.entities.SalesRecord</value>
+				<value>com.adms.domain.entities.SalesStatus</value>
+				<value>com.adms.domain.entities.TsrInfo</value>
+				<value>com.adms.domain.entities.TsrLevel</value>
+				<value>com.adms.domain.entities.TsrStatus</value>
+				<value>com.adms.domain.entities.TsrTalkTime</value>
+				<value>com.adms.domain.entities.TsrTalkTimeDetail</value>
 			</list>
 		</property>
 

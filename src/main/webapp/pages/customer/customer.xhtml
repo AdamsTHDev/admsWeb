@@ -34,12 +34,12 @@
 			
 			<p:panel id="panelList">
 				<p:dataTable id="dataList" lazy="true"
-							value="#{customerView.customerModel}" var="var"
+							value="#{customerView.dataModel}" var="var"
 							paginator="true" rows="#{customerView.rowPerPage}"
 							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
 							paginatorPosition="bottom"
 							rowIndexVar="idx" 
-							style="width: 1200px;">
+							style="width: 80%; min-width:600px;">
 					<f:facet name="header">
 						<h:outputLabel value="#{msg['table.cus.header']}"/>
 					</f:facet>

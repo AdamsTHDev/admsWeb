@@ -1,16 +1,19 @@
 package com.adms.web.bean.customer;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.springframework.data.domain.PageRequest;
+
 import com.adms.bo.customer.CustomerBo;
 import com.adms.domain.entities.Customer;
 import com.adms.web.bean.base.AbstractSearchBean;
-import com.adms.web.model.customer.CustomerLazyDataModel;
+import com.adms.web.model.customer.LazyModel;
 
 @ManagedBean
 @ViewScoped
@@ -30,8 +33,9 @@ public class CustomerView extends AbstractSearchBean<Customer> {
 	private String firstName;
 	private String lastName;
 	private Date birthDate;
-	private CustomerLazyDataModel customerModel;
 	private int count;
+	
+	private LazyModel<Customer> dataModel;
 	
 	public String navToMod() {
 		return "customerModify?faces-redirect=true";
@@ -57,11 +61,31 @@ public class CustomerView extends AbstractSearchBean<Customer> {
 	
 	public void getAllCustomer() {
 		try {
-			customerModel = new CustomerLazyDataModel(customerBo);
-			
+//			customerModel = new CustomerLazyDataModel(customerBo);
+			dataModel = new LazyModel<Customer>(new Customer(), this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<Customer> search(Customer object, PageRequest pageRequest) {
+		try {
+			return customerBo.findByExamplePaging(object, pageRequest);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public Long getTotalCount(Customer object) {
+		try {
+			return customerBo.findTotalCount(object);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public void setCustomerBo(CustomerBo customerBo) {
@@ -96,14 +120,6 @@ public class CustomerView extends AbstractSearchBean<Customer> {
 		this.customerBean = customerBean;
 	}
 
-	public CustomerLazyDataModel getCustomerModel() {
-		return customerModel;
-	}
-
-	public void setCustomerModel(CustomerLazyDataModel customerModel) {
-		this.customerModel = customerModel;
-	}
-
 	public int getCount() {
 		return count;
 	}
@@ -111,5 +127,13 @@ public class CustomerView extends AbstractSearchBean<Customer> {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	
+
+	public LazyModel<Customer> getDataModel() {
+		return dataModel;
+	}
+
+	public void setDataModel(LazyModel<Customer> dataModel) {
+		this.dataModel = dataModel;
+	}
+
 }
