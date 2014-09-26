@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import com.adms.bo.customer.CustomerBo;
 import com.adms.domain.entities.Customer;
 import com.adms.web.bean.base.AbstractSearchBean;
-import com.adms.web.model.customer.LazyModel;
+import com.adms.web.model.LazyModel;
 
 @ManagedBean
 @ViewScoped

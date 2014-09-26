@@ -1,5 +1,7 @@
 package com.adms.web.bean.importfile;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -7,19 +9,20 @@ import javax.faces.bean.ViewScoped;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
+import org.springframework.data.domain.PageRequest;
 
 import com.adms.bo.filebase.FileBaseBo;
 import com.adms.bo.importfile.ImportFileBo;
 import com.adms.domain.entities.FileBase;
 import com.adms.domain.entities.ImportFile;
-import com.adms.web.bean.base.BaseBean;
+import com.adms.web.bean.base.AbstractSearchBean;
 import com.adms.web.model.importfile.ImportFileLazyModel;
 import com.adms.web.utils.CryptUtil;
 import com.adms.web.utils.FileUtils;
 
 @ManagedBean
 @ViewScoped
-public class ImportFileView extends BaseBean {
+public class ImportFileView extends AbstractSearchBean<ImportFile> {
 
 	/**
 	 * 
@@ -137,6 +140,18 @@ public class ImportFileView extends BaseBean {
 
 	public void setUploadedFile(UploadedFile uploadedFile) {
 		this.uploadedFile = uploadedFile;
+	}
+
+	@Override
+	public List<ImportFile> search(ImportFile object, PageRequest pageRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long getTotalCount(ImportFile object) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

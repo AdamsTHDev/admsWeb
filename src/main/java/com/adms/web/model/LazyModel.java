@@ -1,4 +1,4 @@
-package com.adms.web.model.customer;
+package com.adms.web.model;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +11,11 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.adms.web.bean.base.ISearchBean;
 import com.adms.web.enums.ESqlSort;
-
+/**
+ * <p><b> Generic of Lazy Data Model </b>
+ *
+ * @param <T> Entity Class
+ */
 public class LazyModel<T> extends LazyDataModel<T> {
 
 	private static final long serialVersionUID = 4403329614270854588L;

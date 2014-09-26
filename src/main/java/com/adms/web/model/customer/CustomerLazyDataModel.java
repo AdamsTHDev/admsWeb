@@ -13,6 +13,17 @@ import com.adms.bo.customer.CustomerBo;
 import com.adms.domain.entities.Customer;
 import com.adms.web.enums.ESqlSort;
 
+/**
+ * <p>
+ * <b>Just keep for example of lazy data model</b>
+ * </p>
+ * <p>
+ * please, use <code> {@link com.adms.web.model.LazyModel} </code> instead.
+ * </p>
+ *
+ * @see {@link com.adms.web.model.LazyModel}
+ */
+@Deprecated
 public class CustomerLazyDataModel extends LazyDataModel<Customer> {
 	private static final long serialVersionUID = -2052048428718174830L;
 	

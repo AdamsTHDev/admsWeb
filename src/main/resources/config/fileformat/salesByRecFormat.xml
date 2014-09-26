@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="tsrTrackingData">
+		<DataSheet sheetName="" sheetIndex="0">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName"/>
+			<DataCell row="2" column="B" dataType="TEXT" fieldName="campaignName"/>
+			<DataCell row="4" column="B" dataType="TEXT" fieldName="period" />
+
+			<DataRecord listSourceName="salesByRecordList" beginRow="7" endRow="9999">
+			
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignCode" />
+				<DataCell row="1" column="D" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="approveDate" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef"/>
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName"/>
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="product"/>
+				<DataCell row="1" column="I" dataType="NUMBER" dataFormat="#,##0.00" fieldName="premium" />
+				<DataCell row="1" column="J" dataType="NUMBER" dataFormat="#,##0.00" fieldName="afyp" />
+				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="#,##0.00" fieldName="protectAmount" />
+				<DataCell row="1" column="L" dataType="TEXT" fieldName="paymentChannel" />
+				<DataCell row="1" column="M" dataType="TEXT" fieldName="paymentMode" /> 
+				<DataCell row="1" column="N" dataType="TEXT" fieldName="qaStatus" />
+				<DataCell row="1" column="P" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="saleDate" />
+				<DataCell row="1" column="Q" dataType="TEXT" fieldName="tsrCode" />
+				<DataCell row="1" column="R" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="S" dataType="TEXT" fieldName="tmrCode" />
+				<DataCell row="1" column="T" dataType="TEXT" fieldName="tmrName" />
+		
+				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+				
+			</DataRecord>
+		</DataSheet>
+	</DataSet>
+</FileFormat>

@@ -1,0 +1,65 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+<!-- 	<bean id="exampleJob" class="com.adms.batch.job.ExampleJob" /> -->
+
+	<!-- For times when you just need to invoke a method on a specific object -->
+	<bean id="simpleJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="exampleJob" />
+		<property name="targetMethod" value="printCurrentDate" />
+	</bean>
+
+	<!-- For times when you need more complex processing, passing data to the scheduled job -->
+<!-- 	<bean name="complexJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"> -->
+<!-- 		<property name="jobClass" value="com.websystique.spring.quartz.ScheduledJob" /> -->
+<!-- 		<property name="jobDataMap"> -->
+<!-- 			<map> -->
+<!-- 				<entry key="anotherBean" value-ref="anotherBean" /> -->
+<!-- 			</map> -->
+<!-- 		</property> -->
+<!-- 		<property name="durability" value="true" /> -->
+<!-- 	</bean> -->
+	<!-- jobClass refers to a class which extends QuartzJobBean, an implementation of Quartz job interface. On invocation of this job, it’s executeInternal method gets called.
+	jobDataMap provides opportunity to pass some data to underlying job bean. In this case, we are passing a bean ‘anotherBean’ which will be used by ScheduledJob. -->
+	
+	
+	<!-- Simple Trigger, using SimpleTriggerFactoryBean -->
+	<!-- Run the job every 10 seconds with initial delay of 1 second -->
+<!-- 	<bean id="simpleTrigger"  class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean"> -->
+<!-- 	    <property name="jobDetail" ref="simpleJobDetail" /> -->
+<!-- 	    <property name="startDelay" value="1000" /> -->
+<!-- 	    <property name="repeatInterval" value="10000" /> -->
+<!-- 	</bean> -->
+	
+	<!-- Cron Trigger, using CronTriggerFactoryBean -->
+	<!-- cronExpression: Seconds, Minutes, Hours, Day-of-Month, Month, Day-of-Week, Year(optional field) -->
+	<!-- It’s more flexible and allows you to choose scheduled job at specific instance (time, day, date,..) and frequency in future. -->
+	<bean id="cronTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+<!-- 	    <property name="jobDetail" ref="complexJobDetail" /> -->
+	    <property name="jobDetail" ref="simpleJobDetail" />
+	    <property name="cronExpression" value="0 0 0 ? * ?" />
+	    <!-- Run the job every 5 seconds only on Weekends -->
+<!-- 	    <property name="cronExpression" value="0/5 * * ? * SAT-SUN" /> -->
+	</bean>
+	
+	<!-- Scheduler factory bean to glue together jobDetails and triggers to Configure Quartz Scheduler -->
+	<bean  class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	    <property name="jobDetails">
+	        <list>
+	            <ref bean="simpleJobDetail" />
+	            <!-- <ref bean="complexJobDetail" /> -->
+	        </list>
+	    </property>
+	 
+	    <property name="triggers">
+	        <list>
+<!-- 	            <ref bean="simpleTrigger" /> -->
+	            <ref bean="cronTrigger" />
+	        </list>
+	    </property>
+	</bean>
+	
+</beans>
