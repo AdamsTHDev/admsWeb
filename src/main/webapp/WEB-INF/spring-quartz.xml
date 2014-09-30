@@ -11,6 +11,11 @@
 		<property name="targetObject" ref="exampleJob" />
 		<property name="targetMethod" value="printCurrentDate" />
 	</bean>
+	
+	<bean id="importKpiJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="importForKpiJob" />
+		<property name="targetMethod" value="execute" />
+	</bean>
 
 	<!-- For times when you need more complex processing, passing data to the scheduled job -->
 <!-- 	<bean name="complexJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"> -->
@@ -27,12 +32,12 @@
 	
 	
 	<!-- Simple Trigger, using SimpleTriggerFactoryBean -->
-	<!-- Run the job every 10 seconds with initial delay of 1 second -->
-<!-- 	<bean id="simpleTrigger"  class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean"> -->
-<!-- 	    <property name="jobDetail" ref="simpleJobDetail" /> -->
-<!-- 	    <property name="startDelay" value="1000" /> -->
-<!-- 	    <property name="repeatInterval" value="10000" /> -->
-<!-- 	</bean> -->
+	<!-- Run the job every 5 seconds with initial delay of 1 second -->
+	<bean id="simpleTrigger"  class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+	    <property name="jobDetail" ref="simpleJobDetail" />
+	    <property name="startDelay" value="1000" />
+	    <property name="repeatInterval" value="5000" />
+	</bean>
 	
 	<!-- Cron Trigger, using CronTriggerFactoryBean -->
 	<!-- cronExpression: Seconds, Minutes, Hours, Day-of-Month, Month, Day-of-Week, Year(optional field) -->
@@ -40,13 +45,19 @@
 	<bean id="cronTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 <!-- 	    <property name="jobDetail" ref="complexJobDetail" /> -->
 	    <property name="jobDetail" ref="simpleJobDetail" />
-	    <property name="cronExpression" value="0 0 0 ? * ?" />
+<!-- 	    <property name="cronExpression" value="0 0 0 ? * ?" /> -->
 	    <!-- Run the job every 5 seconds only on Weekends -->
-<!-- 	    <property name="cronExpression" value="0/5 * * ? * SAT-SUN" /> -->
+	    <property name="cronExpression" value="0/5 * * ? * SAT-SUN" />
+	</bean>
+	
+	<bean id="kpiTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean" >
+		<property name="jobDetail" ref="importKpiJob" />
+		<property name="startDelay" value="2000" />
+		<property name="repeatInterval" value="30000" />
 	</bean>
 	
 	<!-- Scheduler factory bean to glue together jobDetails and triggers to Configure Quartz Scheduler -->
-	<bean  class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	<bean id="exampleSchedule" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 	    <property name="jobDetails">
 	        <list>
 	            <ref bean="simpleJobDetail" />
@@ -56,8 +67,23 @@
 	 
 	    <property name="triggers">
 	        <list>
-<!-- 	            <ref bean="simpleTrigger" /> -->
-	            <ref bean="cronTrigger" />
+	            <ref bean="simpleTrigger" />
+<!-- 	            <ref bean="cronTrigger" /> -->
+	        </list>
+	    </property>
+	</bean>
+	
+	<bean id="kpiSchedule" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		
+	    <property name="jobDetails">
+	        <list>
+	            <ref bean="importKpiJob" />
+	        </list>
+	    </property>
+	 
+	    <property name="triggers">
+	        <list>
+	            <ref bean="kpiTrigger" />
 	        </list>
 	    </property>
 	</bean>

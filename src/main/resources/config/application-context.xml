@@ -20,7 +20,7 @@
 	<context:spring-configured />
 	<aop:aspectj-autoproxy />
 
-	<bean id="hijackBo" class="com.adms.common.service.aop.TimeStampIntercept">
+	<bean id="hijackBo" class="com.adms.bo.interception.TimeStampIntercept">
 		<!-- configure properties of aspect here as normal -->
 	</bean>
 
@@ -81,14 +81,5 @@
 	<!-- Enable the configuration of transactional behavior based on annotations -->
 	<tx:annotation-driven transaction-manager="txManager" />
 
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:/config/config.properties</value>
-			</list>
-		</property>
-		<property name="ignoreUnresolvablePlaceholders" value="false" />
-	</bean>
 
 </beans>

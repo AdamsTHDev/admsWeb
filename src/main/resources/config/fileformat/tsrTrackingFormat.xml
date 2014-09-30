@@ -2,13 +2,14 @@
 <FileFormat fileName="" fileType="xls" locale="US">
 	<DataSet description="tsrTrackingData">
 		<DataSheet sheetName="" sheetIndex="0">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
 
 			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
 
-			<DataRecord listSourceName="tsrTrackingList" beginRow="9"
-				endRow="1000">
+			<DataRecord listSourceName="tsrTrackingList" beginRow="9" endRow="1000">
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 				
 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
@@ -16,12 +17,14 @@
 		</DataSheet>
 
 		<DataSheet sheetName="" sheetIndex="1" skipWhenNull="TRUE">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
 
 			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
 
 			<DataRecord listSourceName="tsrTrackingList" beginRow="9" endRow="1000">
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 
 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
@@ -29,12 +32,14 @@
 		</DataSheet>
 
 		<DataSheet sheetName="" sheetIndex="2" skipWhenNull="TRUE">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
 		
 			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
 
 			<DataRecord listSourceName="tsrTrackingList" beginRow="9" endRow="1000">
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 				
 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />

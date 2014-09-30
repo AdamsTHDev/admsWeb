@@ -3,7 +3,8 @@ package com.adms.batch.enums;
 public enum EFileFormat {
 	TSR_TRACKING("tsrTracking", "config/fileformat/tsrTrackingFormat.xml"),
 	SALES_BY_RECORD("salesByRecord", "config/fileformat/salesByRecFormat.xml"),
-	QC_RECONFIRM("qcReconfirm", "config/fileformat/qcReconfirmFormat.xml");
+	QC_RECONFIRM("qcReconfirm", "config/fileformat/qcReconfirmFormat.xml"),
+	DAILY_PERFORMANCE("dailyPerformanceTracking", "config/fileformat/dailyPerformanceFormat.xml");
 	
 	private String code;
 	private String value;
