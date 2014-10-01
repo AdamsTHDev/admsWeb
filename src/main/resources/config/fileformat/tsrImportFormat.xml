@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="tsrImport">
+		<DataSheet sheetName="" sheetIndex="0">
+
+			<DataRecord listSourceName="tsrInfoList" beginRow="2" endRow="10000">
+				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrCode" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="site" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="firstName" />
+				<DataCell row="1" column="F" dataType="TEXT" fieldName="lastName" />
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="position" />
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="campaign" />
+				<DataCell row="1" column="I" dataType="DATE" dataFormat="d-MMM-yy" fieldName="startDate" />
+				<DataCell row="1" column="J" dataType="DATE" dataFormat="d-MMM-yy" fieldName="resignDate" />
+				<DataCell row="1" column="K" dataType="TEXT" fieldName="salesVol" />
+				<DataCell row="1" column="L" dataType="TEXT" fieldName="status" />
+				<DataCell row="1" column="M" dataType="TEXT" fieldName="remark" />
+				
+				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+			</DataRecord>
+		</DataSheet>
+
+	</DataSet>
+</FileFormat>

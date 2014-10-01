@@ -20,7 +20,7 @@
 	<context:spring-configured />
 	<aop:aspectj-autoproxy />
 
-	<bean id="hijackBo" class="com.adms.bo.interception.TimeStampIntercept">
+	<bean id="hijackBo" class="com.adms.common.service.aop.TimeStampIntercept">
 		<!-- configure properties of aspect here as normal -->
 	</bean>
 
@@ -40,6 +40,7 @@
 				<value>com.adms.domain.entities.AddressDetail</value>
 				<value>com.adms.domain.entities.BeneficiaryDetail</value>
 				<value>com.adms.domain.entities.Campaign</value>
+				<value>com.adms.domain.entities.CampaignLead</value>
 				<value>com.adms.domain.entities.Customer</value>
 				<value>com.adms.domain.entities.FileBase</value>
 				<value>com.adms.domain.entities.ImportFile</value>
@@ -53,8 +54,11 @@
 				<value>com.adms.domain.entities.QaStatus</value>
 				<value>com.adms.domain.entities.SalesRecord</value>
 				<value>com.adms.domain.entities.SalesStatus</value>
+				<value>com.adms.domain.entities.TsrContract</value>
 				<value>com.adms.domain.entities.TsrInfo</value>
+				<value>com.adms.domain.entities.TsrKpi</value>
 				<value>com.adms.domain.entities.TsrLevel</value>
+				<value>com.adms.domain.entities.TsrSite</value>
 				<value>com.adms.domain.entities.TsrStatus</value>
 				<value>com.adms.domain.entities.TsrTalkTime</value>
 				<value>com.adms.domain.entities.TsrTalkTimeDetail</value>
