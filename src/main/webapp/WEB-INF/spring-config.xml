@@ -26,7 +26,7 @@
 
 	<!-- Data Source -->
 	<bean id="DataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:jboss/datasources/MSSQLDS" />
+		<property name="jndiName" value="java:jboss/datasources/KPIDS" />
 	</bean>
 
 	<!-- Session Factory Declaration -->
@@ -40,6 +40,7 @@
 				<value>com.adms.domain.entities.AddressDetail</value>
 				<value>com.adms.domain.entities.BeneficiaryDetail</value>
 				<value>com.adms.domain.entities.Campaign</value>
+				<value>com.adms.domain.entities.CampaignKeyCode</value>
 				<value>com.adms.domain.entities.CampaignLead</value>
 				<value>com.adms.domain.entities.Customer</value>
 				<value>com.adms.domain.entities.FileBase</value>
@@ -50,6 +51,7 @@
 				<value>com.adms.domain.entities.PaymentDetail</value>
 				<value>com.adms.domain.entities.PaymentMode</value>
 				<value>com.adms.domain.entities.PolicyInfo</value>
+				<value>com.adms.domain.entities.PolicyStatus</value>
 				<value>com.adms.domain.entities.ProductType</value>
 				<value>com.adms.domain.entities.QaStatus</value>
 				<value>com.adms.domain.entities.SalesRecord</value>
@@ -58,6 +60,7 @@
 				<value>com.adms.domain.entities.TsrInfo</value>
 				<value>com.adms.domain.entities.TsrKpi</value>
 				<value>com.adms.domain.entities.TsrLevel</value>
+				<value>com.adms.domain.entities.TsrPosition</value>
 				<value>com.adms.domain.entities.TsrSite</value>
 				<value>com.adms.domain.entities.TsrStatus</value>
 				<value>com.adms.domain.entities.TsrTalkTime</value>

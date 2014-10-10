@@ -5,7 +5,9 @@ public enum EFileFormat {
 	SALES_BY_RECORD("salesByRecord", "config/fileformat/salesByRecFormat.xml"),
 	QC_RECONFIRM("qcReconfirm", "config/fileformat/qcReconfirmFormat.xml"),
 	DAILY_PERFORMANCE("dailyPerformanceTracking", "config/fileformat/dailyPerformanceFormat.xml"),
-	TSR_IMPORT("tsrImport", "config/fileformat/tsrImportFormat.xml");
+	TSR_IMPORT("tsrImport", "config/fileformat/tsrImportFormat.xml"),
+	CAMPAIGN_KEY_CODE("campaignKeyCode", "config/fileformat/campaignKeyCodeFormat.xml"),
+	POSITION_IMPORT("positionImportFormat", "config/fileformat/positionImportFormat.xml");
 	
 	private String code;
 	private String value;

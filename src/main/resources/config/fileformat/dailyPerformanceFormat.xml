@@ -7,13 +7,17 @@
 			<DataCell row="4" column="C" dataType="TEXT" fieldName="listLotName" />
 			<DataCell row="4" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
 			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
+			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
+			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
 
 			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
 				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
 				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
 				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />
 				<DataCell row="1" column="D" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsed" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="sale" />
+				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="productionSale" />
+				
+<!-- 				<DataCell row="1" column="N" dataType="NUMBER" dataFormat="0" fieldName="listConv" /> -->
 				
 				<EndRecordCondition column="A" comparator="EQ" checkValue="MTD" />
 			</DataRecord>
@@ -24,13 +28,17 @@
 			<DataCell row="4" column="C" dataType="TEXT" fieldName="listLotName" />
 			<DataCell row="4" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
 			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
+			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
+			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
 
 			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
 				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
 				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
 				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />
 				<DataCell row="1" column="D" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsed" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="sale" />
+				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="productionSale" />
+				
+<!-- 				<DataCell row="1" column="N" dataType="NUMBER" dataFormat="0" fieldName="listConv" /> -->
 				
 				<EndRecordCondition column="A" comparator="EQ" checkValue="MTD" />
 			</DataRecord>
@@ -41,13 +49,17 @@
 			<DataCell row="4" column="C" dataType="TEXT" fieldName="listLotName" />
 			<DataCell row="4" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
 			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
+			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
+			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
 
 			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
 				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
 				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
 				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />
 				<DataCell row="1" column="D" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsed" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="sale" />
+				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="productionSale" />
+				
+<!-- 				<DataCell row="1" column="N" dataType="NUMBER" dataFormat="0" fieldName="listConv" /> -->
 				
 				<EndRecordCondition column="A" comparator="EQ" checkValue="MTD" />
 			</DataRecord>

@@ -3,42 +3,25 @@
 	<DataSet description="tsrTrackingData">
 		<DataSheet sheetName="" sheetIndex="0">
 
-			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
-
-			<DataRecord listSourceName="tsrTrackingList" beginRow="9"
-				endRow="1000">
-				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
-				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
-				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
+			<DataRecord listSourceName="qcReconfirmList" beginRow="16" endRow="100">
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName" />
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="J" dataType="DATE" dataFormat="d/M/yyyy hh:mm:ss" fieldName="qcDate" />
+				<DataCell row="1" column="K" dataType="TEXT" fieldName="qcCode" />
+				<DataCell row="1" column="N" dataType="TEXT" fieldName="tsrStatus" />
+				<DataCell row="1" column="O" dataType="TEXT" fieldName="qcStatus" />
+				<DataCell row="1" column="P" dataType="TEXT" fieldName="reason" />
+				<DataCell row="1" column="Q" dataType="TEXT" fieldName="remark" />
+				<DataCell row="1" column="R" dataType="TEXT" fieldName="currentReason" />
+				<DataCell row="1" column="S" dataType="TEXT" fieldName="currentRemark" />
+								
 				
-				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+<!-- 			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/> -->
+<!-- 			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" /> -->
+				
+				<EndRecordCondition column="G" comparator="BLANK" checkValue="" />
 			</DataRecord>
 		</DataSheet>
-
-		<DataSheet sheetName="" sheetIndex="1" skipWhenNull="TRUE">
-
-			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
-
-			<DataRecord listSourceName="tsrTrackingList" beginRow="9" endRow="1000">
-				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
-				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
-				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
-
-				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
-			</DataRecord>
-		</DataSheet>
-
-		<DataSheet sheetName="" sheetIndex="2" skipWhenNull="TRUE">
 		
-			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
-
-			<DataRecord listSourceName="tsrTrackingList" beginRow="9" endRow="1000">
-				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
-				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
-				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
-				
-				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
-			</DataRecord>
-		</DataSheet>
 	</DataSet>
 </FileFormat>

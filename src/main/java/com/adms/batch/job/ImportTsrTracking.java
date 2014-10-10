@@ -6,11 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.adms.batch.app.AppConfig;
 import com.adms.batch.bean.TsrTrackingBean;
 import com.adms.batch.enums.EFileFormat;
 import com.adms.batch.service.KpiService;
-import com.adms.bo.tsrtalktime.TsrTalkTimeBo;
 import com.adms.domain.entities.TsrInfo;
 import com.adms.domain.entities.TsrTalkTime;
 import com.adms.domain.entities.TsrTalkTimeDetail;
@@ -52,9 +50,11 @@ public class ImportTsrTracking {
 			
 			if(isData) {
 				System.out.println("To DB");
-//				prepareDataToDB();
+				prepareDataToDB();
 			}
 			
+			fileFormat.close();
+			is.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -101,18 +101,10 @@ public class ImportTsrTracking {
 			try {
 				List<TsrInfo> tsrInfos = KpiService.getInstance().isTsrExist(bean.getFirstName(), bean.getLastName());
 				
-				if(tsrInfos != null && tsrInfos.size() > 0) {
-					System.out.println("Tsr Existed");
+				if(tsrInfos != null && !tsrInfos.isEmpty()) {
 					addTalkTimeByTsr(tsrInfos.get(0), bean.getTalkTime(), DateUtil.convStringToDate(bean.getPeriod()));
 				} else {
 					System.out.println("Not found TSR: " + bean.getFirstName() + " " + bean.getLastName());
-					System.out.println("Start adding new TSR");
-					TsrInfo newTsr = KpiService.getInstance().addTsr(bean.getFirstName(), bean.getLastName());
-					System.out.println("New Tsr Added");
-					
-					System.out.println("Start add Talk Time");
-					addTalkTimeByTsr(newTsr, bean.getTalkTime(), DateUtil.convStringToDate(bean.getPeriod()));
-					System.out.println("Finish added");
 				}
 				
 			} catch (Exception e) {
@@ -125,31 +117,33 @@ public class ImportTsrTracking {
 	
 	public void addTalkTimeByTsr(TsrInfo tsrInfo, BigDecimal talkTime, Date talkDate) {
 		try {
-			System.out.println(tsrInfo.toString());
-			System.out.println("Check is this talk date already exist: " + DateUtil.convDateToString(talkDate));
-			List<TsrTalkTimeDetail> talkDetails = KpiService.getInstance().isTalkDateExist(talkDate);
+			System.out.println("Checking talk date for this tsr");
+			List<TsrTalkTimeDetail> talkDetails = KpiService.getInstance().isTalkDateExist(talkDate, tsrInfo);
 			
-			if(talkDetails != null && talkDetails.size() > 0) {
-				System.out.println("This talkDate: " 
-						+ DateUtil.convDateToString(talkDate) 
-						+ ", and TSR: " + tsrInfo.getFirstName() + " " + tsrInfo.getLastName() 
-						+ " is existed");
-				System.out.println("Retriving old data of Talk Time");
-				for(TsrTalkTimeDetail talkDetail : talkDetails) {
-					TsrTalkTime tsrTalk = talkDetail.getTsrTalkTime();
-					System.out.println(tsrTalk.toString());
-				}
-			} else {
-				System.out.println("New record");
-				TsrTalkTime tsrTalkTime = KpiService.getInstance().addTalkTime(new TsrTalkTime(talkTime));
+			if(talkDetails != null && !talkDetails.isEmpty()) {
+				System.out.println("Talk Time exist. Do update");
+				TsrTalkTimeDetail detail = talkDetails.get(0);
 				
+				TsrTalkTime time = detail.getTsrTalkTime();
+				time.setTotalTalk(talkTime);
+				time = KpiService.getInstance().updateTalkTime(time);
+				
+				detail.setTsrTalkTime(time);
+				detail = KpiService.getInstance().updateTalkTimeDetail(detail);
+			} else {
+				System.out.println("New Talk Time");
+				TsrTalkTime tsrTalkTime = new TsrTalkTime();
+				tsrTalkTime.setTotalTalk(talkTime);
+				
+				tsrTalkTime = KpiService.getInstance().addTalkTime(tsrTalkTime);
 				TsrTalkTimeDetail detail = new TsrTalkTimeDetail();
-				detail.setTsrInfo(tsrInfo);
-				detail.setTsrTalkTime(tsrTalkTime);
 				detail.setTalkDate(talkDate);
-				KpiService.getInstance().addTalkTimeDetail(detail);
+				detail.setTsrTalkTime(tsrTalkTime);
+				detail.setTsrInfo(tsrInfo);
+				
+				detail = KpiService.getInstance().addTalkTimeDetail(detail);
+				System.out.println("Add Talk Time finished");
 			}
-			
 			
 		} catch(Exception e) {
 			e.printStackTrace();

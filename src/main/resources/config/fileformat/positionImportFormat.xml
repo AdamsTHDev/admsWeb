@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="tsrImport">
+		
+		<DataSheet sheetName="" sheetIndex="0">
+
+			<DataRecord listSourceName="positionList" beginRow="2" endRow="10000">
+				<DataCell row="1" column="A" dataType="TEXT" fieldName="positionName" />
+				
+				<EndRecordCondition column="A" comparator="EQ" checkValue="END" />
+			</DataRecord>
+		</DataSheet>
+
+	</DataSet>
+</FileFormat>

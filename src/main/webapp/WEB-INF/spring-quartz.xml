@@ -53,7 +53,7 @@
 	<bean id="kpiTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean" >
 		<property name="jobDetail" ref="importKpiJob" />
 		<property name="startDelay" value="2000" />
-		<property name="repeatInterval" value="30000" />
+		<property name="repeatInterval" value="60000" />
 	</bean>
 	
 	<!-- Scheduler factory bean to glue together jobDetails and triggers to Configure Quartz Scheduler -->

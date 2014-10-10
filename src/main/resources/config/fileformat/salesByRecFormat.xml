@@ -9,6 +9,7 @@
 			<DataRecord listSourceName="salesByRecordList" beginRow="7" endRow="9999">
 			
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignCode" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="listLotName" />
 				<DataCell row="1" column="D" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="approveDate" />
 				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef"/>
 				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName"/>
