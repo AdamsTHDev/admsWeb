@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.adms.batch.bean.TsrTrackingBean;
 import com.adms.batch.enums.EFileFormat;
 import com.adms.batch.service.KpiService;
 import com.adms.domain.entities.TsrInfo;
@@ -16,25 +15,16 @@ import com.adms.imex.excelformat.DataHolder;
 import com.adms.imex.excelformat.ExcelFormat;
 import com.adms.utils.DateUtil;
 
-public class ImportTsrTracking {
-
-	private static ImportTsrTracking instance;
+public class ImportTsrTracking implements IExcelData {
 		
-	private List<TsrTrackingBean> tsrTrackingBeans;
-
-	public static ImportTsrTracking getInstance() {
-		if(instance == null) {
-			instance = new ImportTsrTracking();
-		}
-		return instance;
-	}
+	private List<Exception> exceptions = new ArrayList<Exception>();
 	
-	public void importFromInputStream(InputStream is) throws Exception {
+	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws Exception {
+		System.out.println("ImportTsrTracking processing..");
 //		InputStream fileFormat = URLClassLoader.getSystemResourceAsStream(EFileFormat.TSR_TRACKING.getValue());
 		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.TSR_TRACKING.getValue());
 		
 		ExcelFormat ef = new ExcelFormat(fileFormat);
-		boolean isData = false;
 		try {
 			DataHolder wbHolder = ef.readExcel(is);
 			List<String> sheetNames = wbHolder.getKeyList();
@@ -43,95 +33,69 @@ public class ImportTsrTracking {
 			}
 			
 			if(sheetNames.size() > 0 && sheetNames.size() == 3) {
-				isData = retriveData(wbHolder, sheetNames.get(2));
+				process(wbHolder, sheetNames.get(2));
 			} else {
-				isData = retriveData(wbHolder, sheetNames.get(0));
+				process(wbHolder, sheetNames.get(0));
 			}
 			
-			if(isData) {
-				System.out.println("To DB");
-				prepareDataToDB();
-			}
-			
-			fileFormat.close();
-			is.close();
 		} catch (Exception e) {
+			exceptionList.add(e);
 			e.printStackTrace();
+		} finally {
+//			fileFormat.close();
+			is.close();
 		}
+		exceptionList.addAll(exceptions);
 	}
 	
-	private boolean retriveData(DataHolder wbHolder, String sheetName) {
+	public boolean process(DataHolder wbHolder, String sheetName) throws Exception {
 		boolean result = false;
-		tsrTrackingBeans = getTsrTrackingBeans();
-		TsrTrackingBean tsrTrackingBean = null;
-
-		String period = wbHolder.get(sheetName).get("period").getStringValue().substring(0, 10);
-		List<DataHolder> datas = wbHolder.get(sheetName).getDataList("tsrTrackingList");
 		
-		if(datas != null && datas.size() > 0) result = true;
-		
-		for(DataHolder data : datas) {
-			tsrTrackingBean = new TsrTrackingBean();
-			tsrTrackingBean.setPeriod(period);
+		try {
+			String period = wbHolder.get(sheetName).get("period").getStringValue().trim().substring(0, 10);
+			List<DataHolder> datas = wbHolder.get(sheetName).getDataList("tsrTrackingList");
 			
-			String[] names = data.get("tsrName").getStringValue().split(" ");
+			if(null != datas && datas.size() > 0) result = true;
 			
-			String firstName = names[0];
-			String lastName = names[1];
+			System.out.println("TSR Tracking Size: " + datas.size());
+			for(DataHolder data : datas) {
+				try {
+					String name = data.get("tsrName").getStringValue();
+					BigDecimal talkTime = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
+					
+					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name);
+					if(null == tsrInfo)	throw new Exception("Not found TSR: " + name);
+					
+					addTalkTimeByTsr(tsrInfo, talkTime, DateUtil.convStringToDate(period));
+					
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
 			
-//			for(int n = 1; n < names.length; n++) {
-//				lastName.concat(names[n].concat(" "));
-//			}
-			
-			tsrTrackingBean.setFirstName(firstName);
-			tsrTrackingBean.setLastName(lastName);
-			BigDecimal val = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
-			tsrTrackingBean.setTalkTime(val);
-			
-			tsrTrackingBeans.add(tsrTrackingBean);
-			
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
+		
 		return result;
 	}
 	
-	private void prepareDataToDB() {
-		
-		for(TsrTrackingBean bean : getTsrTrackingBeans()) {
-			
-			try {
-				List<TsrInfo> tsrInfos = KpiService.getInstance().isTsrExist(bean.getFirstName(), bean.getLastName());
-				
-				if(tsrInfos != null && !tsrInfos.isEmpty()) {
-					addTalkTimeByTsr(tsrInfos.get(0), bean.getTalkTime(), DateUtil.convStringToDate(bean.getPeriod()));
-				} else {
-					System.out.println("Not found TSR: " + bean.getFirstName() + " " + bean.getLastName());
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-		}
-		
-	}
-	
-	public void addTalkTimeByTsr(TsrInfo tsrInfo, BigDecimal talkTime, Date talkDate) {
+	private void addTalkTimeByTsr(TsrInfo tsrInfo, BigDecimal talkTime, Date talkDate) throws Exception {
 		try {
-			System.out.println("Checking talk date for this tsr");
 			List<TsrTalkTimeDetail> talkDetails = KpiService.getInstance().isTalkDateExist(talkDate, tsrInfo);
 			
 			if(talkDetails != null && !talkDetails.isEmpty()) {
-				System.out.println("Talk Time exist. Do update");
 				TsrTalkTimeDetail detail = talkDetails.get(0);
 				
 				TsrTalkTime time = detail.getTsrTalkTime();
 				time.setTotalTalk(talkTime);
+//				System.out.println("Update Talk Time: " + time.toString());
 				time = KpiService.getInstance().updateTalkTime(time);
 				
 				detail.setTsrTalkTime(time);
 				detail = KpiService.getInstance().updateTalkTimeDetail(detail);
 			} else {
-				System.out.println("New Talk Time");
 				TsrTalkTime tsrTalkTime = new TsrTalkTime();
 				tsrTalkTime.setTotalTalk(talkTime);
 				
@@ -142,19 +106,12 @@ public class ImportTsrTracking {
 				detail.setTsrInfo(tsrInfo);
 				
 				detail = KpiService.getInstance().addTalkTimeDetail(detail);
-				System.out.println("Add Talk Time finished");
 			}
 			
 		} catch(Exception e) {
 			e.printStackTrace();
+			exceptions.add(e);
 		}
-	}
-	
-	public List<TsrTrackingBean> getTsrTrackingBeans() {
-		if(tsrTrackingBeans == null) {
-			tsrTrackingBeans = new ArrayList<TsrTrackingBean>();
-		}
-		return tsrTrackingBeans;
 	}
 	
 }

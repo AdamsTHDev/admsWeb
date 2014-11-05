@@ -5,9 +5,17 @@ public enum EFileFormat {
 	SALES_BY_RECORD("salesByRecord", "config/fileformat/salesByRecFormat.xml"),
 	QC_RECONFIRM("qcReconfirm", "config/fileformat/qcReconfirmFormat.xml"),
 	DAILY_PERFORMANCE("dailyPerformanceTracking", "config/fileformat/dailyPerformanceFormat.xml"),
+	
 	TSR_IMPORT("tsrImport", "config/fileformat/tsrImportFormat.xml"),
 	CAMPAIGN_KEY_CODE("campaignKeyCode", "config/fileformat/campaignKeyCodeFormat.xml"),
-	POSITION_IMPORT("positionImportFormat", "config/fileformat/positionImportFormat.xml");
+	POSITION_IMPORT("positionImportFormat", "config/fileformat/positionImportFormat.xml"),
+	KPI_SETUP_IMPORT("kpiSetupImport", "config/fileformat/kpiTargetSetupFormat.xml"),
+	
+	DAILY_PERFORMANCE_OTO("dailyPerformanceOTO", "config/fileformat/dailyPerformance121Format.xml"),
+	SALES_BY_RECORD_OTO("salesByRecordOTO", "config/fileformat/salesByRec121Format.xml"),
+	TSR_TRACKING_OTO("tsrTrackingOTO", "config/fileformat/tsrTracking121Format.xml"),
+	
+	SALES_BY_RECORD_MSIG("salesByRecordMSIG", "config/fileformat/salesByRecMSIGFormat.xml");
 	
 	private String code;
 	private String value;

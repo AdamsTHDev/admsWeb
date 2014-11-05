@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="kpiResult">
+		<DataSheet sheetName="" sheetIndex="0">
+
+			<DataRecord listSourceName="resultList" beginRow="2" endRow="9999">
+				
+				<DataCell row="1" column="A" dataType="TEXT" fieldName="campaignName"/>
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsmFullName" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="tsrCode" />
+				<DataCell row="1" column="D" dataType="TEXT" fieldName="tsrFullName" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="premium"/>
+				<DataCell row="1" column="F" dataType="TEXT" fieldName="attend"/>
+				<DataCell row="1" column="G" dataType="NUMBER" fieldName="totalaTalk"/>
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="firstConfirmSale" />
+				<DataCell row="1" column="I" dataType="TEXT" fieldName="totalSale" />
+		
+				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+				
+			</DataRecord>
+		</DataSheet>
+		
+	</DataSet>
+</FileFormat>

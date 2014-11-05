@@ -2,34 +2,62 @@ package com.adms.batch.job;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+import com.adms.web.utils.FileUtils;
 
 public class MoveFileManually {
 
 	public static void main(String[] args) {
 		System.out.println("START");
-//		POM_PA_CASH_BACK, Health Return Cash, HIP_DDOP, KBANK DDOP -PA Cash Back, KBANK DDOP -POM PA Cash Back, MTI-KBank
-		String targetCampaign = "MTI-KBank";
+
+		String[] targetCampaigns = new String[]{
+				"POM_PA_CASH_BACK"
+				, "Health Return Cash"
+				, "HIP_DDOP"
+				, "KBANK DDOP -PA Cash Back"
+				, "KBANK DDOP -POM PA Cash Back"
+				, "MTI-KBank"
+				, "MTLife Hip Broker"
+				, "MTLife POM 2nd Get"
+				, "MTLife POM PA"
+				, "MTLife WIN"
+				, "MSIG UOB"				
+				, "MSIG Happy Life BL"
+				, "FWD_TVD_Endowment 15_7" //FWD_TVD_Endowment 15_7_20140926
+		};
+		String[] fileNames = new String[]{
+				"DailyPerformanceTrackingReport"
+				, "SalesReportByRecords"
+				, "TsrTrackingReport"
+				, "Daily_Performance_Tracking_ByLot"
+				, "QC_Reconfirm"
+				, "Sales_Report_By_Records"
+				, "TSRTracking"
+		};
 		
-		String origPath = "D:/Test/upload/report of 201407/";
-		String targetPath = "D:/Test/upload/kpi/";
+		String origPath = "D:/Test/upload/report of 201409/";
+		String targetPath = "D:/Test/upload/kpi/201409/";
 		
 		String folderDate = "";
 		
 		File origDir = new File(origPath);
 		
-		
 		for(File dir : origDir.listFiles()) {
 			String fd = dir.getName();
 			folderDate = fd.substring(4, fd.length()) + fd.substring(2,4) + fd.substring(0, 2);
-			for(File campaignFolder : dir.listFiles(new FolderFilter(targetCampaign))) {
-
-				for(File xls : campaignFolder.listFiles(new XlsFilter("Daily_Performance_Tracking_ByLot.xls", "QC_Reconfirm.xls", "Sales_Report_By_Records.xls", "TSRTracking.xls"))) {
-					File targetFile = new File(targetPath + targetCampaign + "/" + folderDate + "/");
+			for(File campaignFolder : dir.listFiles(new FolderFilter(targetCampaigns))) {
+				String cf = campaignFolder.getName();
+				if(cf.contains("POM_PA_Cash_Back")) {
+					cf = cf.substring(0, cf.length() - 11);
+				} else if(cf.contains("MTLife")) {
+					cf = cf.substring(9, cf.length());
+				} else if(cf.contains("_MSIG Happy")) {
+					cf = cf.substring(9, cf.length());
+				} else {
+					cf = cf.substring(0, cf.length() - 9);
+				}
+				for(File xls : campaignFolder.listFiles(new XlsFilter(fileNames))) {
+					File targetFile = new File(targetPath + cf + "/" + folderDate + "/");
 					if(!targetFile.exists()) {
 						targetFile.mkdirs();
 					}
@@ -37,7 +65,9 @@ public class MoveFileManually {
 						File destFile = new File(targetFile.getAbsolutePath() + "/" + xls.getName());
 						if(!destFile.exists()) {
 							destFile.createNewFile();
-							copyFile(xls, destFile);
+							System.out.println("moving file: " + xls.getAbsolutePath());
+							System.out.println("to " + destFile.getAbsolutePath());
+							FileUtils.getInstance().copyFile(xls, destFile);
 						}
 					} catch(Exception e) {
 						e.printStackTrace();
@@ -48,39 +78,21 @@ public class MoveFileManually {
 		System.out.println("FINISH");
 	}
 	
-	private static void copyFile(File source, File dest) throws IOException {
-		InputStream is = null;
-		OutputStream os = null;
-		
-		try {
-			is = new FileInputStream(source);
-			os = new FileOutputStream(dest);
-			byte[] buff = new byte[1024];
-			int read;
-			while((read = is.read(buff)) > 0) {
-				os.write(buff, 0, read);
-			}
-		} catch(Exception e) {
-			throw e;
-		} finally {
-			os.close();
-			is.close();
-		}
-	}
-	
 	private static class FolderFilter implements FileFilter  {
 
-		private String folderName;
+		private String[] folderNames;
 		
-		public FolderFilter(String folderName) {
-			this.folderName = folderName;
+		public FolderFilter(String... folderNames) {
+			this.folderNames = folderNames;
 		}
 		
 		@Override
 		public boolean accept(File file) {
 			if(file.isDirectory()) {
-				if(file.getName().toLowerCase().contains(folderName.toLowerCase())) {
-					return true;
+				for(String folder : folderNames) {
+					if(file.getName().contains(folder)) {
+						return true;
+					}
 				}
 			}
 			return false;
@@ -99,7 +111,7 @@ public class MoveFileManually {
 		public boolean accept(File file) {
 			if(file.isFile()) {
 				for(String fileName : fileNames) {
-					if(file.getName().toLowerCase().contains(fileName.toLowerCase())) {
+					if(file.getName().toLowerCase().contains(fileName.toLowerCase()) && !file.getName().toLowerCase().contains("P'Sunan".toLowerCase())) {
 						return true;
 					}
 				}

@@ -10,7 +10,10 @@
 			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
 			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
 
-			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
+			<DataRecord listSourceName="dailyPerformanceList" beginRow="11" endRow="1000">
+			
+				<BeginRecordCondition column="A" comparator="EQ" checkValue="Date" />
+			
 				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
 				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
 				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />
@@ -24,35 +27,16 @@
 		</DataSheet>
 	
 		<DataSheet sheetName="" sheetIndex="1" skipWhenNull="TRUE">
-			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName"/>
-			<DataCell row="4" column="C" dataType="TEXT" fieldName="listLotName" />
-			<DataCell row="4" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
-			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
-			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
-			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
+<!-- 			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName"/> -->
+			<DataCell row="2" column="C" dataType="TEXT" fieldName="listLotName" />
+			<DataCell row="2" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
+			<DataCell row="3" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
+			<DataCell row="5" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
+			<DataCell row="5" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
 
-			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
-				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
-				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
-				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />
-				<DataCell row="1" column="D" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsed" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="0" fieldName="productionSale" />
+			<DataRecord listSourceName="dailyPerformanceList" beginRow="9" endRow="1000">
+				<BeginRecordCondition column="A" comparator="EQ" checkValue="Date" />
 				
-<!-- 				<DataCell row="1" column="N" dataType="NUMBER" dataFormat="0" fieldName="listConv" /> -->
-				
-				<EndRecordCondition column="A" comparator="EQ" checkValue="MTD" />
-			</DataRecord>
-		</DataSheet>
-	
-		<DataSheet sheetName="" sheetIndex="2" skipWhenNull="TRUE">
-			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName"/>
-			<DataCell row="4" column="C" dataType="TEXT" fieldName="listLotName" />
-			<DataCell row="4" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="fromDate"/>
-			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/>
-			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" />
-			<DataCell row="7" column="G" dataType="NUMBER" dataFormat="0" fieldName="newLeadRemaining" />
-
-			<DataRecord listSourceName="dailyPerformanceList" beginRow="12" endRow="1000">
 				<DataCell row="1" column="A" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="performanceDate" />
 				<DataCell row="1" column="B" dataType="NUMBER" dataFormat="0" fieldName="tsrNo" />
 				<DataCell row="1" column="C" dataType="NUMBER" dataFormat="0" fieldName="newLeadUsedPerTsr" />

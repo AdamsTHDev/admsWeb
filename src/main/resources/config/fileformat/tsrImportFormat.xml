@@ -1,61 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FileFormat fileName="" fileType="xls" locale="US">
 	<DataSet description="tsrImport">
-<!-- 		<DataSheet sheetName="" sheetIndex="0"> -->
-
-<!-- 			<DataRecord listSourceName="tsrInfoList" beginRow="2" endRow="10000"> -->
-<!-- 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" /> -->
-<!-- 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrCode" /> -->
-<!-- 				<DataCell row="1" column="C" dataType="TEXT" fieldName="site" /> -->
-<!-- 				<DataCell row="1" column="E" dataType="TEXT" fieldName="firstName" /> -->
-<!-- 				<DataCell row="1" column="F" dataType="TEXT" fieldName="lastName" /> -->
-<!-- 				<DataCell row="1" column="G" dataType="TEXT" fieldName="position" /> -->
-<!-- 				<DataCell row="1" column="H" dataType="TEXT" fieldName="campaign" /> -->
-<!-- 				<DataCell row="1" column="I" dataType="DATE" dataFormat="d-MMM-yy" fieldName="startDate" /> -->
-<!-- 				<DataCell row="1" column="J" dataType="DATE" dataFormat="d-MMM-yy" fieldName="resignDate" /> -->
-<!-- 				<DataCell row="1" column="K" dataType="TEXT" fieldName="salesVol" /> -->
-<!-- 				<DataCell row="1" column="L" dataType="TEXT" fieldName="status" /> -->
-<!-- 				<DataCell row="1" column="M" dataType="TEXT" fieldName="remark" /> -->
-				
-<!-- 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" /> -->
-<!-- 			</DataRecord> -->
-<!-- 		</DataSheet> -->
 
 		<DataSheet sheetName="" sheetIndex="0">
 
 			<DataRecord listSourceName="tsrInfoList" beginRow="2" endRow="10000">
 			
-				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrCode" />
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrCode" autoTrim="TRUE" />
 				
-				<DataCell row="1" column="D" dataType="TEXT" fieldName="empCode" />
-				<DataCell row="1" column="E" dataType="TEXT" fieldName="site" />
-				<DataCell row="1" column="F" dataType="TEXT" fieldName="accNo" />
-				<DataCell row="1" column="G" dataType="TEXT" fieldName="citizenCode" />
+				<DataCell row="1" column="D" dataType="TEXT" fieldName="empCode" autoTrim="TRUE" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="site" autoTrim="TRUE" />
+<!-- 				<DataCell row="1" column="F" dataType="TEXT" fieldName="accNo" /> -->
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="citizenCode" autoTrim="TRUE" />
 				<DataCell row="1" column="H" dataType="DATE" dataFormat="d-MMM-yy" fieldName="startDate" />
 <!-- 				<DataCell row="1" column="I" dataType="DATE" dataFormat="d-MMM-yy" fieldName="startDateMtb" /> -->
-				<DataCell row="1" column="J" dataType="TEXT" fieldName="campaignA" />
-				<DataCell row="1" column="K" dataType="TEXT" fieldName="campaignB" />
-				<DataCell row="1" column="L" dataType="TEXT" fieldName="position" />
-				<DataCell row="1" column="M" dataType="TEXT" fieldName="title" />
-				<DataCell row="1" column="N" dataType="TEXT" fieldName="firstName" />
-				<DataCell row="1" column="O" dataType="TEXT" fieldName="lastName" />
-				<DataCell row="1" column="P" dataType="TEXT" fieldName="nickName" />
-				<DataCell row="1" column="Q" dataType="TEXT" fieldName="firstNameEn" />
-				<DataCell row="1" column="R" dataType="TEXT" fieldName="lastNameEn" />
+				<DataCell row="1" column="J" dataType="TEXT" fieldName="campaignA" autoTrim="TRUE" />
+				<DataCell row="1" column="K" dataType="TEXT" fieldName="campaignB" autoTrim="TRUE" />
+				<DataCell row="1" column="L" dataType="TEXT" fieldName="position" autoTrim="TRUE" />
+				<DataCell row="1" column="M" dataType="TEXT" fieldName="title" autoTrim="TRUE" />
+				<DataCell row="1" column="N" dataType="TEXT" fieldName="firstName" autoTrim="TRUE" />
+				<DataCell row="1" column="O" dataType="TEXT" fieldName="lastName" autoTrim="TRUE" />
+				<DataCell row="1" column="P" dataType="TEXT" fieldName="nickName" autoTrim="TRUE" />
+<!-- 				<DataCell row="1" column="Q" dataType="TEXT" fieldName="firstNameEn" /> -->
+<!-- 				<DataCell row="1" column="R" dataType="TEXT" fieldName="lastNameEn" /> -->
 				<DataCell row="1" column="S" dataType="TEXT" fieldName="status" />
 				<DataCell row="1" column="T" dataType="DATE" dataFormat="d-MMM-yy" fieldName="lastDateOfWork" />
 <!-- 				<DataCell row="1" column="U" dataType="DATE" dataFormat="d-MMM-yy" fieldName="resignEffectiveDate" /> -->
-				<DataCell row="1" column="V" dataType="DATE" dataFormat="d-MMM-yy" fieldName="completeProbation" />
+<!-- 				<DataCell row="1" column="V" dataType="DATE" dataFormat="d-MMM-yy" fieldName="completeProbation" /> -->
 				<DataCell row="1" column="W" dataType="TEXT" fieldName="remark" />
 <!-- 				<DataCell row="1" column="X" dataType="DATE" dataFormat="d MMM yy" fieldName="birthDate" /> -->
-				<DataCell row="1" column="Y" dataType="TEXT" fieldName="highestGrad" />
-				<DataCell row="1" column="Z" dataType="TEXT" fieldName="addressOnIdCard" />
-				<DataCell row="1" column="AA" dataType="TEXT" fieldName="addressCurrent" />
-				<DataCell row="1" column="AB" dataType="TEXT" fieldName="mobileNo" />
-				<DataCell row="1" column="AC" dataType="TEXT" fieldName="suggestedBy" />
-				<DataCell row="1" column="AD" dataType="TEXT" fieldName="emergencyContact" />
-				<DataCell row="1" column="AE" dataType="TEXT" fieldName="emergencyCall" />
-				<DataCell row="1" column="AG" dataType="TEXT" fieldName="brokerLicense" />
+				<DataCell row="1" column="Y" dataType="TEXT" fieldName="highestGrad" autoTrim="TRUE" />
+				<DataCell row="1" column="Z" dataType="TEXT" fieldName="addressOnIdCard" autoTrim="TRUE" />
+				<DataCell row="1" column="AA" dataType="TEXT" fieldName="addressCurrent" autoTrim="TRUE" />
+				<DataCell row="1" column="AB" dataType="TEXT" fieldName="mobileNo" autoTrim="TRUE" />
+				<DataCell row="1" column="AC" dataType="TEXT" fieldName="suggestedBy" autoTrim="TRUE" />
+				<DataCell row="1" column="AD" dataType="TEXT" fieldName="emergencyContact" autoTrim="TRUE" />
+				<DataCell row="1" column="AE" dataType="TEXT" fieldName="emergencyCall" autoTrim="TRUE" />
+				<DataCell row="1" column="AF" dataType="TEXT" fieldName="brokerLicense" autoTrim="TRUE" />
 				
 				<EndRecordCondition column="B" comparator="BLANK" checkValue="" />
 			</DataRecord>

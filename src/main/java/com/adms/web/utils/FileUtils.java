@@ -3,6 +3,7 @@ package com.adms.web.utils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,5 +103,32 @@ public class FileUtils {
 		}
 		
 		downloadFile(fileName, contentType, bs);
+	}
+	
+	/**
+	 * <p>Copy file via stream</p>
+	 * 
+	 * @param source The file of source
+	 * @param dest The file of destination
+	 * @throws IOException
+	 */
+	public void copyFile(File source, File dest) throws IOException {
+		InputStream is = null;
+		OutputStream os = null;
+		
+		try {
+			is = new FileInputStream(source);
+			os = new FileOutputStream(dest);
+			byte[] buff = new byte[1024];
+			int read;
+			while((read = is.read(buff)) > 0) {
+				os.write(buff, 0, read);
+			}
+		} catch(Exception e) {
+			throw e;
+		} finally {
+			os.close();
+			is.close();
+		}
 	}
 }

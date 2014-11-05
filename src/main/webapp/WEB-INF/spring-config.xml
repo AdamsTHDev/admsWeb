@@ -46,7 +46,8 @@
 				<value>com.adms.domain.entities.FileBase</value>
 				<value>com.adms.domain.entities.ImportFile</value>
 				<value>com.adms.domain.entities.ImportFileHistory</value>
-				<value>com.adms.domain.entities.KpiCategory</value>
+				<value>com.adms.domain.entities.KpiBean</value>
+				<value>com.adms.domain.entities.KpiCategorySetup</value>
 				<value>com.adms.domain.entities.PaymentChannel</value>
 				<value>com.adms.domain.entities.PaymentDetail</value>
 				<value>com.adms.domain.entities.PaymentMode</value>
@@ -56,7 +57,9 @@
 				<value>com.adms.domain.entities.QaStatus</value>
 				<value>com.adms.domain.entities.SalesRecord</value>
 				<value>com.adms.domain.entities.SalesStatus</value>
+				<value>com.adms.domain.entities.TsrCodeReplacer</value>
 				<value>com.adms.domain.entities.TsrContract</value>
+				<value>com.adms.domain.entities.TsrHierarchical</value>
 				<value>com.adms.domain.entities.TsrInfo</value>
 				<value>com.adms.domain.entities.TsrKpi</value>
 				<value>com.adms.domain.entities.TsrLevel</value>
@@ -71,7 +74,7 @@
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect</prop>
-				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
 			</props>
 		</property>
 	</bean>

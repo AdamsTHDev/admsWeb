@@ -10,5 +10,4 @@ public class ExampleJob {
 	public void printCurrentDate() {
 		System.out.println("Now: " + Calendar.getInstance().getTime());
 	}
-	
 }

@@ -1,62 +1,111 @@
 package com.adms.batch.job;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.adms.batch.enums.EFileFormat;
 import com.adms.batch.service.KpiService;
 import com.adms.domain.entities.CampaignKeyCode;
 import com.adms.domain.entities.Customer;
 import com.adms.domain.entities.PolicyInfo;
+import com.adms.domain.entities.PolicyStatus;
 import com.adms.domain.entities.ProductType;
+import com.adms.domain.entities.QaStatus;
 import com.adms.domain.entities.SalesRecord;
+import com.adms.domain.entities.TsrCodeReplacer;
+import com.adms.domain.entities.TsrHierarchical;
 import com.adms.domain.entities.TsrInfo;
 import com.adms.imex.excelformat.DataHolder;
 import com.adms.imex.excelformat.ExcelFormat;
 
-public class SalesByRecord {
+public class SalesByRecord implements IExcelData {
 	
-	private static SalesByRecord instance;
+	protected List<Exception> exs = new ArrayList<Exception>();
 	
-	public static SalesByRecord getInstance() {
-		if(instance == null) {
-			instance = new SalesByRecord();
-		}
-		return instance;
+	private static KpiService kpiService() throws Exception {
+		return KpiService.getInstance();
 	}
 	
-	public void importFromInpuStream(InputStream is) {
+	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws IOException {
+		System.out.println("SalesByRecord");
 		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.SALES_BY_RECORD.getValue());
 		
 		ExcelFormat ef = new ExcelFormat(fileFormat);
-		boolean isData = false;
 		
 		try {
 			DataHolder wbHolder = ef.readExcel(is);
 			List<String> sheetNames = wbHolder.getKeyList();
-
-			if(sheetNames.size() == 0) {
-				return;
-			}
-			
-			isData = process(wbHolder, sheetNames.get(0));
-			
-			if(isData) {
-				prepareDataToDB();
-			}
-			
-			fileFormat.close();
-			is.close();
+			process(wbHolder, sheetNames.get(0));
 			
 		} catch (Exception e) {
+			exceptionList.add(e);
 			e.printStackTrace();
+		} finally {
+			fileFormat.close();
+			is.close();
+		}
+		exceptionList.addAll(exs);
+	}
+	
+	private void checkReplaceTsrCode(String tsrNameOnSale, TsrInfo tsr, String keyCode) {
+		try {
+			
+			String a = kpiService().removeTitle(tsr.getFullName()).replaceAll(" ", "");
+			a = a.length() <= 6 ? a : a.substring(a.length() / 2 - 3, a.length() / 2 + 3);
+			
+			String b = kpiService().removeTitle(tsrNameOnSale).replaceAll(" ", "");
+			b = b.length() <= 6 ? b : b.substring(b.length() / 2 - 3, b.length() / 2 + 3);
+			
+			if(!a.equalsIgnoreCase(b)) {
+//				System.out.println("Found dif: " + tsr.getFullName() + " | and: " + tsrNameOnSale);
+				List<TsrCodeReplacer> list = kpiService().getTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+				if(null == list || list.isEmpty()) {
+					kpiService().addTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+				}
+			}
+			
+//			if(!b.replaceAll(" ", "").equalsIgnoreCase(tsr.getFullName().replaceAll(" ", ""))) {
+//				
+//				System.out.println("Found Diff: " + b.replaceAll(" ", "") + " | and: " + tsr.getFullName().replaceAll(" ", ""));
+//				List<TsrCodeReplacer> list = kpiService().getTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+//				if(null == list || list.isEmpty()) {
+//					kpiService().addTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+//				}
+//			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			exs.add(e);
 		}
 	}
 	
-	private boolean process(DataHolder wbHolder, String sheetName) throws Exception {
-		boolean result = false;
+	private void checkSup(TsrInfo tsrInfo, String tmrCode, String campaignCode) {
+		try {
+			if(!StringUtils.isBlank(tmrCode) && !StringUtils.isBlank(campaignCode)) {
+
+//				<!-- check upline campaign -->
+				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), tmrCode, campaignCode);
+				if(null == h) {
+					h = kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode));
+				} else {
+					/*
+					 * do nothing...
+					 */
+				}
+				
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			exs.add(e);
+		}
+	}
+	
+	public void process(DataHolder wbHolder, String sheetName) throws Exception {
 		DataHolder sheetHolder = wbHolder.get(sheetName);
 		
 //		String reportName = sheetHolder.get("reportName").getStringValue();
@@ -64,99 +113,149 @@ public class SalesByRecord {
 //		String period = sheetHolder.get("period").getStringValue();
 		
 		List<DataHolder> dataList = sheetHolder.getDataList("salesByRecordList");
-		if(dataList != null && !dataList.isEmpty()) result = true;
+		
+		System.out.println("Sales By Rec size: " + dataList.size());
 		
 		for(DataHolder data : dataList) {
+			try {
+				TsrInfo tsr = null;
+				String tsrCode = data.get("tsrCode").getStringValue();
+				String tsrName = kpiService().removeTitle(data.get("tsrName").getStringValue());
+				
+//				<!-- Getting TSR_INFO -->
+				if(StringUtils.isBlank(tsrCode)) {
+					tsr = kpiService().getTsrInfoByName(tsrName.trim());
+				} else {
+					tsr = kpiService().getTsrInfoInMap(tsrCode);
+					if(null == tsr) {
+						tsr = kpiService().getTsrInfoByName(tsrName.trim());
+					}
+				}
+				
+//				<!-- Check if null, throw Exception() -->
+				if(null == tsr) throw new Exception("Not Found TSR: " + "code |" + data.get("tsrCode").getStringValue() + "|");
+				
+//				<!-- Check is Replace TSR CODE -->
+				String listLotName = data.get("listLotName").getStringValue();
+				listLotName = kpiService().getKeyCodeFromCampaignListLot(listLotName);
+				checkReplaceTsrCode(tsrName, tsr, listLotName);
+				
+//				<!-- get campaign keycode -->
+				CampaignKeyCode keyCode =  kpiService().getCampaignKeyCode(listLotName);
+				if(keyCode == null) {
+					throw new Exception("Key Code not found: " + listLotName);
+				}
+				
+//				<!-- Check TMR(Sup) -->
+				String tmrCode = data.get("tmrCode").getStringValue();
+				checkSup(tsr, tmrCode, keyCode.getCampaign().getCode());
+				
+//				if(!StringUtils.isBlank(tmrCode)) {
+//					if(tsr.getUpline() == null) {
+//						tsr.setUpline(kpiService().getTsrInfoInMap(tmrCode));
+//						tsr = kpiService().updateTsrInfo(tsr);
+//					} else if(!tsr.getUpline().getTsrCode().equals(tmrCode)) {
+//						System.out.println("=== update tmrFromXls: " + tmrCode + " | db: " + tsr.getUpline().getTsrCode());
+//						tsr.setUpline(kpiService().getTsrInfoInMap(tmrCode));
+//						tsr = kpiService().updateTsrInfo(tsr);
+//					}
+//				}
+				
+//				if((tsr.getUpline() != null && !tsr.getUpline().getTsrCode().equalsIgnoreCase(data.get("tmrCode").getStringValue())) 
+//						|| (tsr.getUpline() == null && !StringUtils.isBlank(data.get("tmrCode").getStringValue()))) {
+//					tsr.setUpline(kpiService().getTsrInfoInMap(data.get("tmrCode").getStringValue()));
+//					tsr = kpiService().updateTsrInfo(tsr);
+//				}
+				
+//				<!-- getting customer -->
+				String customerName = data.get("customerName").getStringValue();
+				Customer customer = kpiService().getCustomerByName(customerName);
+				
+//				<!-- Add new customer if customer is null -->
+				if(customer == null) {
+					customer = new Customer();
+					customer.setFullName(customerName);
+					customer = kpiService().addCustomer(customer);
+				}
+				
+//				<!-- getting product type -->
+				ProductType productType = kpiService().getProductTypeByValue(data.get("product").getStringValue());
+				
+//				<!-- Data -->
+				Date approveDate = (Date) data.get("approveDate").getValue();
+				BigDecimal premium = new BigDecimal(data.get("premium").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
+				BigDecimal afyp = new BigDecimal(data.get("afyp").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
+				BigDecimal protectAmt = new BigDecimal(data.get("protectAmount").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
+				Date saleDate = (Date) data.get("saleDate").getValue();
+				String qaStatus = data.get("qaStatus").getStringValue();
+				
+				
+				String xRef = data.get("xRef").getStringValue();
+				if(StringUtils.isBlank(xRef)) {
+					throw new Exception("XRef on this record is null | saleDate: " + saleDate + " | keyCode: " + listLotName);
+				}
+				PolicyInfo policy = kpiService().getPolicyInfoByXRef(xRef);
+				if(policy != null) {
+					policy.setCustomer(customer);
+					policy.setCampaignKeyCode(keyCode);
+					policy.setProductType(productType);
+					policy.setAfyp(afyp);
+					policy.setPremium(premium);
+					policy.setProtectAmt(protectAmt);
+					policy = kpiService().updatePolicyInfo(policy);
+				} else {
+					policy = new PolicyInfo();
+					policy.setxRef(xRef);
+					policy.setCustomer(customer);
+					policy.setCampaignKeyCode(keyCode);
+					policy.setProductType(productType);
+					policy.setAfyp(afyp);
+					policy.setPremium(premium);
+					policy.setProtectAmt(protectAmt);
+					policy = kpiService().addPolicyInfo(policy);
+				}
 
-			TsrInfo tsr = KpiService.getInstance().getTsrInfo(data.get("tsrCode").getStringValue());
-			tsr.setUpline(KpiService.getInstance().getTsrInfo(data.get("tmrCode").getStringValue()));
-			tsr = KpiService.getInstance().updateTsrInfo(tsr);
-			
-//			QaStatus qaStatus = KpiService.getInstance().getQaStatusByValue(data.get("qaStatus").getStringValue());
-			
-			Customer customer = KpiService.getInstance().addOrUpdateCustomer(data.get("customerName").getStringValue());
-			ProductType productType = KpiService.getInstance().getProductTypeByValue(data.get("product").getStringValue());
-			Date approveDate = (Date) data.get("approveDate").getValue();
-			BigDecimal premium = new BigDecimal(data.get("premium").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
-			BigDecimal afyp = new BigDecimal(data.get("afyp").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
-			BigDecimal protectAmt = new BigDecimal(data.get("protectAmount").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
-			Date saleDate = (Date) data.get("saleDate").getValue();
-			
-			String listLotName = data.get("listLotName").getStringValue();
-			listLotName = listLotName.substring(listLotName.indexOf("(") + 1, listLotName.indexOf(")"));
-
-			String xRef = data.get("xRef").getStringValue();
-			
-			CampaignKeyCode campaignKeyCode =  KpiService.getInstance().getCampaignKeyCode(listLotName);
-			
-			PolicyInfo policy = KpiService.getInstance().getPolicyInfoByXRef(xRef);
-			if(policy != null) {
-				policy.setCustomer(customer);
-				policy.setCampaignKeyCode(campaignKeyCode);
-				policy.setProductType(productType);
-				policy.setAfyp(afyp);
-				policy.setPremium(premium);
-				policy.setProtectAmt(protectAmt);
-				policy.setApproveDate(approveDate);
-				policy = KpiService.getInstance().updatePolicyInfo(policy);
-			} else {
-				policy = new PolicyInfo();
-				policy.setxRef(xRef);
-				policy.setCustomer(customer);
-				policy.setCampaignKeyCode(campaignKeyCode);
-				policy.setProductType(productType);
-				policy.setAfyp(afyp);
-				policy.setPremium(premium);
-				policy.setProtectAmt(protectAmt);
-				policy.setApproveDate(approveDate);
-				policy = KpiService.getInstance().addPolicyInfo(policy);
-			}
-			
-			SalesRecord saleRec = KpiService.getInstance().isSalesRecordExist(saleDate, tsr, policy);
-			
-			if(saleRec != null) {
-				saleRec.setSaleDate(saleDate);
-				saleRec.setTsrInfo(tsr);
-				saleRec.setPolicyInfo(policy);
-				saleRec.setCampaignKeycode(campaignKeyCode);
-				saleRec = KpiService.getInstance().updateSalesRecord(saleRec);
-			} else {
-				saleRec = new SalesRecord();
-				saleRec.setSaleDate(saleDate);
-				saleRec.setTsrInfo(tsr);
-				saleRec.setPolicyInfo(policy);
-				saleRec.setCampaignKeycode(campaignKeyCode);
-				saleRec = KpiService.getInstance().addSalesRecord(saleRec);
+				QaStatus qa = kpiService().getQaStatusInMap(qaStatus);
+				if(null == qa) {
+					throw new Exception("Not Found QaStatus: " + qaStatus);
+				}
+				PolicyStatus policyStatus = kpiService().getPolicyStatus(saleDate, xRef, qa.getQaValue());
+				
+				if(policyStatus == null) {
+//					System.out.println("Add Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
+					policyStatus = new PolicyStatus();
+					policyStatus.setPolicyInfo(policy);
+					policyStatus.setSaleDate(saleDate);
+					policyStatus.setQaStatus(qa);
+					policyStatus.setQcDate(approveDate);
+					policyStatus.setRemark(data.get("remark").getStringValue());
+					policyStatus = kpiService().addPolicyStatus(policyStatus);
+				} else {
+//					System.out.println("Existed Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
+				}
+				
+				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, tsr, policy);
+				
+				if(saleRec != null) {
+					saleRec.setSaleDate(saleDate);
+					saleRec.setTsrInfo(tsr);
+					saleRec.setPolicyInfo(policy);
+					saleRec.setCampaignKeycode(keyCode);
+					saleRec = kpiService().updateSalesRecord(saleRec);
+				} else {
+					saleRec = new SalesRecord();
+					saleRec.setSaleDate(saleDate);
+					saleRec.setTsrInfo(tsr);
+					saleRec.setPolicyInfo(policy);
+					saleRec.setCampaignKeycode(keyCode);
+					saleRec = kpiService().addSalesRecord(saleRec);
+				}
+			} catch(Exception e) { 
+				e.printStackTrace();
+				exs.add(e);
 			}
 			
 		}
-		
-		/*
-		 * <DataRecord listSourceName="salesByRecordList" beginRow="7" endRow="9999">
-			
-				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignCode" />
-				<DataCell row="1" column="C" dataType="TEXT" fieldName="listLotName" />
-				<DataCell row="1" column="D" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="approveDate" />
-				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef"/>
-				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName"/>
-				<DataCell row="1" column="H" dataType="TEXT" fieldName="product"/>
-				<DataCell row="1" column="I" dataType="NUMBER" dataFormat="#,##0.00" fieldName="premium" />
-				<DataCell row="1" column="J" dataType="NUMBER" dataFormat="#,##0.00" fieldName="afyp" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="#,##0.00" fieldName="protectAmount" />
-				<DataCell row="1" column="L" dataType="TEXT" fieldName="paymentChannel" />
-				<DataCell row="1" column="M" dataType="TEXT" fieldName="paymentMode" /> 
-				<DataCell row="1" column="N" dataType="TEXT" fieldName="qaStatus" />
-				<DataCell row="1" column="P" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="saleDate" />
-				<DataCell row="1" column="Q" dataType="TEXT" fieldName="tsrCode" />
-				<DataCell row="1" column="R" dataType="TEXT" fieldName="tsrName" />
-				<DataCell row="1" column="S" dataType="TEXT" fieldName="tmrCode" />
-				<DataCell row="1" column="T" dataType="TEXT" fieldName="tmrName" />
-		 */
-		
-		return result;
-	}
-	
-	private void prepareDataToDB() {
 		
 	}
 
