@@ -19,7 +19,7 @@ import com.adms.web.utils.FileUtils;
 public class ModifyExcel {
 
 	public static void main(String[] args) {
-		String path = "D:/Test/upload/kpi/201409/";
+		String path = "D:/Test/upload/kpi/201410/";
 		System.out.println("Start");
 		try {
 			File dir = new File(path);

@@ -12,24 +12,24 @@
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignCode" autoTrim="TRUE" />
 				<DataCell row="1" column="C" dataType="TEXT" fieldName="listLotName" autoTrim="TRUE" />
 				<DataCell row="1" column="D" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="approveDate" />
-				<DataCell row="1" column="F" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
-				<DataCell row="1" column="H" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
 				<DataCell row="1" column="I" dataType="TEXT" fieldName="product" autoTrim="TRUE" />
-				<DataCell row="1" column="J" dataType="NUMBER" dataFormat="#,##0.00" fieldName="premium" />
-				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="#,##0.00" fieldName="afyp" />
-				<DataCell row="1" column="L" dataType="NUMBER" dataFormat="#,##0.00" fieldName="protectAmount" />
-				<DataCell row="1" column="M" dataType="TEXT" fieldName="paymentChannel" autoTrim="TRUE" />
-				<DataCell row="1" column="N" dataType="TEXT" fieldName="paymentMode" autoTrim="TRUE" /> 
-				<DataCell row="1" column="O" dataType="TEXT" fieldName="qaStatus" autoTrim="TRUE" />
-				<DataCell row="1" column="P" dataType="TEXT" fieldName="qaReason" autoTrim="TRUE" />
-				<DataCell row="1" column="Q" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="saleDate" />
-				<DataCell row="1" column="R" dataType="TEXT" fieldName="tsrCode" autoTrim="TRUE" />
-				<DataCell row="1" column="S" dataType="TEXT" fieldName="tsrName" autoTrim="TRUE" />
+				<DataCell row="1" column="I" dataType="NUMBER" dataFormat="#,##0.00" fieldName="premium" />
+				<DataCell row="1" column="J" dataType="NUMBER" dataFormat="#,##0.00" fieldName="afyp" />
+				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="#,##0.00" fieldName="protectAmount" />
+				<DataCell row="1" column="L" dataType="TEXT" fieldName="paymentChannel" autoTrim="TRUE" />
+				<DataCell row="1" column="M" dataType="TEXT" fieldName="paymentMode" autoTrim="TRUE" /> 
+				<DataCell row="1" column="N" dataType="TEXT" fieldName="qaStatus" autoTrim="TRUE" />
+				<DataCell row="1" column="O" dataType="TEXT" fieldName="qaReason" autoTrim="TRUE" />
+				<DataCell row="1" column="P" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="saleDate" />
+				<DataCell row="1" column="Q" dataType="TEXT" fieldName="tsrCode" autoTrim="TRUE" />
+				<DataCell row="1" column="R" dataType="TEXT" fieldName="tsrName" autoTrim="TRUE" />
 				
-				<DataCell row="1" column="T" dataType="TEXT" fieldName="tmrCode" autoTrim="TRUE" />
-				<DataCell row="1" column="U" dataType="TEXT" fieldName="tmrName" autoTrim="TRUE" />
+				<DataCell row="1" column="S" dataType="TEXT" fieldName="tmrCode" autoTrim="TRUE" />
+				<DataCell row="1" column="T" dataType="TEXT" fieldName="tmrName" autoTrim="TRUE" />
 				
-				<DataCell row="1" column="V" dataType="TEXT" fieldName="remark" autoTrim="TRUE" />
+				<DataCell row="1" column="U" dataType="TEXT" fieldName="remark" autoTrim="TRUE" />
 		
 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
 				

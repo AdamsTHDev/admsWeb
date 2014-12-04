@@ -16,4 +16,8 @@ public class NavBean extends BaseBean {
 	public String navToCustomer() {
 		return "customer/customer?faces-redirect=true";
 	}
+	
+	public String navToPolicyService() {
+		return "policyServicing/policyservice?faces-redirect=true";
+	}
 }

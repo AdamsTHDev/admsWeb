@@ -1,0 +1,185 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/mainTemplate.xhtml">
+
+	<ui:define name="head">
+		<f:loadBundle var="msg" basename="com.adms.msg.policyservice.policyServiceMsg"/>
+		<title>#{msg['txt.header']}</title>
+	</ui:define>
+	
+	<ui:define name="content">
+	<style>
+	* {
+		font-family: sans-serif !important; font-size:14px;
+	}
+	.header {
+		font-size: 25px !important; font:bold;
+	}
+	.adamsLogo {
+		background-image: url("../../resources/image/ADAMS_logo.png"); width:281px; height:90px;");
+	}
+	.tableNoBorder tr{
+		border: none !important; border-style: none !important;
+	}
+	.tableNoBorder td{
+		border: none !important; border-style: none !important;
+	}
+	
+	</style>
+		<h:form id="frmMain" enctype="multipart/form-data">
+			<h:panelGroup id="headerPanel">
+				<div id="head" style="position: relative; text-align:left; height:95px;">
+					<p:panelGrid style="width:100%;" styleClass="tableNoBorder">
+						<p:row>
+							<p:column style="width:285px;">
+								<div class="adamsLogo" style="display: inline-table;"></div>
+							</p:column>
+							<p:column style="text-align:center; margin-left:-30px;">
+								<p:outputLabel value="#{msg['txt.header']}" styleClass="header" style="position:absolute;left:0;right:0;margin:auto;"/>
+							</p:column>
+							<p:column style="vertical-align: bottom; text-align: right; width:100px">
+								<h:selectOneMenu value="#{language.localeCode}" onchange="submit()" valueChangeListener="#{language.countryLocaleCodeChanged}">
+									<f:selectItems value="#{language.countriesInMap}"></f:selectItems>
+								</h:selectOneMenu>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+				</div>
+			</h:panelGroup>
+			
+			<p:panel id="panelData" header="#{msg['table.1.header']}" style="margin-top:10px;">
+				<p:panelGrid columns="6" styleClass="tableNoBorder" style="width:99%;">
+				
+					<p:outputLabel value="#{msg['table.1.1.1']}" for="campaignCode"/>
+					<p:inputText id="campaignCode"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.1']}" for="insuredName"/>
+					<p:inputText id="insuredName"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.1']}" for="policyIssueDate"/>
+					<p:inputText id="policyIssueDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.2']}" for="policyNo"/>
+					<p:inputText id="policyNo"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.2']}" for="plaseOfBirth"/>
+					<p:inputText id="plaseOfBirth"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.2']}" for="premiumPTD"/>
+					<p:inputText id="premiumPTD"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.3']}" for="inceptionDate"/>
+					<p:inputText id="inceptionDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.3']}" for="gender"/>
+					<p:inputText id="gender"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.3']}" for="premiumDueDate"/>
+					<p:inputText id="premiumDueDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.4']}" for="planCode"/>
+					<p:inputText id="planCode"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:outputLabel value="#{msg['table.1.3.4']}" for="paymentType"/>
+					<p:inputText id="paymentType"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.5']}" for="fileOwnerCode"/>
+					<p:inputText id="fileOwnerCode"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.5']}" for="insuredBirthDate"/>
+					<p:inputText id="insuredBirthDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.5']}" for="policyIdInsured"/>
+					<p:inputText id="policyIdInsured"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.6']}" for="status"/>
+					<p:inputText id="status"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.6']}" for="address"/>
+					<p:inputText id="address"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:outputLabel value="#{msg['table.1.1.7']}" for="statusChangeDate"/>
+					<p:inputText id="statusChangeDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.7']}" for="city"/>
+					<p:inputText id="city"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:outputLabel value="#{msg['table.1.1.8']}" for="tmAgentCode"/>
+					<p:inputText id="tmAgentCode"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.8']}" for="zipCode"/>
+					<p:inputText id="zipCode"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:outputLabel value="#{msg['table.1.1.9']}" for="premiumInsured"/>
+					<p:inputText id="premiumInsured"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.9']}" for="emailId"/>
+					<p:inputText id="emailId"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.9']}" for="policyDispatchDate"/>
+					<p:inputText id="policyDispatchDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.10']}" for="annualPremium"/>
+					<p:inputText id="annualPremium"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.10']}" for="emailId"/>
+					<p:inputText id="mobileNo"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.10']}" for="policyReceivedDate"/>
+					<p:inputText id="policyReceivedDate"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.11']}" for="latestBillingStatus"/>
+					<p:inputText id="latestBillingStatus"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.11']}" for="homeNo"/>
+					<p:inputText id="homeNo"/>
+					
+					<p:outputLabel value="#{msg['table.1.3.11']}" for="remark"/>
+					<p:inputText id="remark"/>
+					
+					<p:outputLabel value="#{msg['table.1.1.12']}" for="createDateNo"/>
+					<p:inputText id="createDateNo"/>
+					
+					<p:outputLabel value="#{msg['table.1.2.12']}" for="officeNo"/>
+					<p:inputText id="officeNo"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:outputLabel value="#{msg['table.1.1.13']}" for="bankNameCardHolder"/>
+					<p:inputText id="bankNameCardHolder"/>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+					<p:blockUI><!-- blank --></p:blockUI>
+					<p:blockUI><!-- blank --></p:blockUI>
+					
+				</p:panelGrid>
+			</p:panel>
+			<h:panelGroup id="panelAction">
+				<p:commandButton id="searchBtn" value="#{msg['btn.start.search']}"/>
+				<p:commandButton id="addCaseBtn" value="#{msg['btn.add.new.case']}"/>
+				<p:commandButton id="viewBillHistBtn" value="#{msg['btn.view.billing.history']}"/>
+			</h:panelGroup>
+			
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

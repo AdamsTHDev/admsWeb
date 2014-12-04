@@ -18,6 +18,9 @@ import com.adms.bo.campaignlead.CampaignLeadBo;
 import com.adms.bo.customer.CustomerBo;
 import com.adms.bo.kpibean.KpiBeanBo;
 import com.adms.bo.kpicategory.KpiCategorySetupBo;
+import com.adms.bo.kpieoc.KpiEocBo;
+import com.adms.bo.kpiresult.KpiResultBo;
+import com.adms.bo.kpiretention.KpiRetentionBo;
 import com.adms.bo.kpiscorerate.KpiScoreRateBo;
 import com.adms.bo.policyinfo.PolicyInfoBo;
 import com.adms.bo.policystatus.PolicyStatusBo;
@@ -40,6 +43,9 @@ import com.adms.domain.entities.CampaignLead;
 import com.adms.domain.entities.Customer;
 import com.adms.domain.entities.KpiBean;
 import com.adms.domain.entities.KpiCategorySetup;
+import com.adms.domain.entities.KpiEoc;
+import com.adms.domain.entities.KpiResult;
+import com.adms.domain.entities.KpiRetention;
 import com.adms.domain.entities.KpiScoreRate;
 import com.adms.domain.entities.PolicyInfo;
 import com.adms.domain.entities.PolicyStatus;
@@ -59,23 +65,6 @@ import com.adms.domain.entities.TsrTalkTimeDetail;
 
 public class KpiService {
 
-	private final String USER_LOGIN = "System Admin";
-	
-	private Map<String, QaStatus> qaMap;
-	private Map<String, TsrInfo> tsrMap;
-	private Map<String, Campaign> campaignMap;
-
-	private static KpiService instance;
-	
-	private final List<String> TITLES = Arrays.asList(new String[]{"นาย", "น.ส.", "นาง", "ว่าที่", "นส."});
-
-	public KpiService() {
-		System.out.println("New Kpi Service");
-		prepareQaStatus();
-		prepareTsrInfo();
-		prepareCampaignCode();
-	}
-	
 	public static KpiService getInstance() {
 		if(instance == null) {
 			instance = new KpiService();
@@ -83,153 +72,24 @@ public class KpiService {
 		return instance;
 	}
 	
-	private void prepareQaStatus() {
-		System.out.println("Prepare QA Status to Map");
-		try {
-			qaMap = new HashMap<String, QaStatus>();
-			for(QaStatus s : this.getQaStatusAll()) {
-				qaMap.put(s.getQaValue(), s);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public QaStatus getQaStatusInMap(String qaValue) {
-		if(qaMap != null) {
-			return qaMap.get(qaValue);
-		}
-		return null;
-	}
-	
-	private void prepareTsrInfo() {
-		System.out.println("Prepare Tsr Info to Map");
-		try {
-			tsrMap = new HashMap<String, TsrInfo>();
-			for(TsrInfo t : this.getTsrInfoAll()) {
-				tsrMap.put(t.getTsrCode(), t);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public TsrInfo getTsrInfoInMap(String tsrCode) {
-		if(tsrMap != null) {
-			return tsrMap.get(tsrCode);
-		}
-		return null;
-	}
-	
-	private void prepareCampaignCode() {
-		System.out.println("Prepare Camapign to Map");
-		try {
-			campaignMap = new HashMap<>();
-			for(Campaign t : getCampaign(new Campaign())) {
-				campaignMap.put(t.getCode(), t);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public Campaign getCampaignInMap(String campaignCode) {
-		if(campaignMap != null) {
-			return campaignMap.get(campaignCode);
-		}
-		return null;
-	}
-	
-	public TsrInfo addOrUpdateTsrInfo(TsrInfo tsrInfo) throws Exception {
-		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
-		
-		if(!StringUtils.isBlank(tsrInfo.getTsrCode())) {
-			TsrInfo isExist = new TsrInfo();
-			isExist.setTsrCode(tsrInfo.getTsrCode());
-			
-			List<TsrInfo> exists = tsrInfoBo.findTsrInfo(isExist);
-			if(exists != null && !exists.isEmpty()) {
-				tsrInfo.setId(exists.get(0).getId());
-				
-				tsrInfo.setCreateBy(exists.get(0).getCreateBy());
-				tsrInfo.setCreateDate(exists.get(0).getCreateDate());
-				return updateTsrInfo(tsrInfo);
-			}
-		}
-		return addTsrInfo(tsrInfo);
-	}
-	
-	public TsrInfo addOrUpdateTsrInfo(String firstName, String lastName) throws Exception {
-		TsrInfo tsrInfo = new TsrInfo();
-		tsrInfo.setFirstName(firstName);
-		tsrInfo.setLastName(lastName);
-		return addOrUpdateTsrInfo(tsrInfo);
-	}
-	
-	public TsrInfo addTsrInfo(TsrInfo tsrInfo) throws Exception {
-		TsrInfoBo bo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
-		TsrInfo result = bo.addTsrInfo(tsrInfo, USER_LOGIN);
-		if(null != result) {
-			prepareTsrInfo();
-		}
-		return result;
-	}
-	
-	public TsrContract addTsrContract(TsrContract tsrContract) throws Exception {
-		TsrContractBo tsrContractBo = (TsrContractBo) AppConfig.getInstance().getBean("tsrContractBo");
-		return tsrContractBo.addTsrContract(tsrContract, USER_LOGIN);
-	}
-	
-	public TsrPosition addTsrPosition(TsrPosition tsrPosition) throws Exception {
-		TsrPositionBo bo = (TsrPositionBo) AppConfig.getInstance().getBean("tsrPositionBo");
-		return bo.addTsrPosition(tsrPosition, USER_LOGIN);
-	}
-	
-	public TsrCodeReplacer addTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
-		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
-		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
-		return addTsrCodeReplacer(t);
-	}
-	
-	public TsrCodeReplacer addTsrCodeReplacer(TsrCodeReplacer tsrCodeReplacer) throws Exception {
-		TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
-		return bo.addTsrCodeReplacer(tsrCodeReplacer, USER_LOGIN);
-	}
-	
-	public TsrHierarchical addTsrHierarchical(TsrInfo tsrInfo, TsrInfo tmrInfo, Campaign campaign) throws Exception {
-		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
-		TsrHierarchical t = new TsrHierarchical();
-		t.setTsrInfo(tsrInfo);
-		t.setUplineInfo(tmrInfo);
-		t.setCampaign(campaign);
-		return bo.addTsrHierarchical(t, USER_LOGIN);
-	}
-	
-	public TsrTalkTime addTalkTime(TsrTalkTime tsrTalkTime) throws Exception {
-		TsrTalkTimeBo tsrTalkTimeBo = (TsrTalkTimeBo) AppConfig.getInstance().getBean("tsrTalkTimeBo");
-		
-		return tsrTalkTimeBo.addTsrTalkTime(tsrTalkTime, USER_LOGIN);
-	}
+	private final String USER_LOGIN = "System Admin";
+	private Map<String, QaStatus> qaMap;
+	private Map<String, TsrInfo> tsrMap;
 
-	public TsrTalkTimeDetail addTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
-		return bo.addTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
-	}
+	private Map<String, Campaign> campaignMap;
 	
-	public PolicyInfo addPolicyInfo(PolicyInfo policyInfo) throws Exception {
-		if(policyInfo != null) {
-			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
-			return bo.addPolicyInfo(policyInfo, USER_LOGIN);
-		}
-		return null;
-	}
+	List<KpiScoreRate> kpiScoreRates;
 	
-	public PolicyStatus addPolicyStatus(PolicyStatus policyStatus) throws Exception {
-		if(policyStatus != null) {
-			PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
-			return bo.addPolicyStatus(policyStatus, USER_LOGIN);
-		}
-		return policyStatus;
+	private static KpiService instance;
+
+	private final List<String> TITLES = Arrays.asList(new String[]{"นาย", "น.ส.", "นาง", "ว่าที่", "นส."});
+	
+	public KpiService() {
+		System.out.println("New Kpi Service");
+		prepareQaStatus();
+		prepareTsrInfo();
+		prepareCampaignCode();
+		prepareKpiScoreRate();
 	}
 	
 	public Campaign addCampaign(Campaign campaign) throws Exception {
@@ -264,6 +124,127 @@ public class KpiService {
 		return null;
 	}
 	
+	public KpiCategorySetup addKpiCategorySetup(KpiCategorySetup kpiCategorySetup) {
+		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+		try {
+			return bo.addKpiCategory(kpiCategorySetup, USER_LOGIN);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public KpiCategorySetup updateKpiCategorySetup(KpiCategorySetup kpiCategorySetup) {
+		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+		try {
+			return bo.updateKpiCategory(kpiCategorySetup, USER_LOGIN);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public KpiScoreRate addKpiScoreRate() {
+		try {
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public KpiScoreRate addKpiScoreRate(KpiScoreRate kpiScoreRate) {
+		try {
+			KpiScoreRateBo bo = (KpiScoreRateBo) AppConfig.getInstance().getBean("kpiScoreRateBo");
+			return bo.addKpiScoreRate(kpiScoreRate, USER_LOGIN);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public KpiResult addOrUpdateKpiResult(KpiBean kpiBean, String yearMonth) {
+		if(kpiBean != null) {
+			try {
+				KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+				KpiResult k = findKpiResultByDateAndCampaign(yearMonth, kpiBean.getCampaignCode(), kpiBean.getTsrCode());
+				if(k != null) {
+					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
+					k.setCountTalkDate(kpiBean.getCountTalkDate());
+					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
+					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
+					k.setAllSale(kpiBean.getCountAll().intValue());
+					k.setSuccessEoc(kpiBean.getSuccessEoc());
+					k.setAllEoc(kpiBean.getAllEoc());
+					return bo.updateKpiResult(k, USER_LOGIN);
+				} else {
+					k = new KpiResult();
+					k.setTsrInfo(this.getTsrInfoInMap(kpiBean.getTsrCode()));
+					k.setTsmInfo(this.getTsrInfoInMap(kpiBean.getTsmCode()));
+					k.setDsmInfo(this.getTsrInfoInMap(kpiBean.getDsmCode()));
+					k.setCampaign(this.getCampaignInMap(kpiBean.getCampaignCode()));
+					
+					k.setYearMonth(yearMonth);
+					
+					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
+					k.setCountTalkDate(kpiBean.getCountTalkDate());
+					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
+					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
+					k.setAllSale(kpiBean.getCountAll().intValue());
+					k.setSuccessEoc(kpiBean.getSuccessEoc());
+					k.setAllEoc(kpiBean.getAllEoc());
+					return bo.addKpiResult(k, USER_LOGIN);
+				}
+				
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public TsrInfo addOrUpdateTsrInfo(String firstName, String lastName) throws Exception {
+		TsrInfo tsrInfo = new TsrInfo();
+		tsrInfo.setFirstName(firstName);
+		tsrInfo.setLastName(lastName);
+		return addOrUpdateTsrInfo(tsrInfo);
+	}
+	
+	public TsrInfo addOrUpdateTsrInfo(TsrInfo tsrInfo) throws Exception {
+		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
+		
+		if(!StringUtils.isBlank(tsrInfo.getTsrCode())) {
+			TsrInfo isExist = new TsrInfo();
+			isExist.setTsrCode(tsrInfo.getTsrCode());
+			
+			List<TsrInfo> exists = tsrInfoBo.findTsrInfo(isExist);
+			if(exists != null && !exists.isEmpty()) {
+				tsrInfo.setId(exists.get(0).getId());
+				
+				tsrInfo.setCreateBy(exists.get(0).getCreateBy());
+				tsrInfo.setCreateDate(exists.get(0).getCreateDate());
+				return updateTsrInfo(tsrInfo);
+			}
+		}
+		return addTsrInfo(tsrInfo);
+	}
+	
+	public PolicyInfo addPolicyInfo(PolicyInfo policyInfo) throws Exception {
+		if(policyInfo != null) {
+			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
+			return bo.addPolicyInfo(policyInfo, USER_LOGIN);
+		}
+		return null;
+	}
+	
+	public PolicyStatus addPolicyStatus(PolicyStatus policyStatus) throws Exception {
+		if(policyStatus != null) {
+			PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
+			return bo.addPolicyStatus(policyStatus, USER_LOGIN);
+		}
+		return policyStatus;
+	}
+	
 	public SalesRecord addSalesRecord(SalesRecord salesRecord) throws Exception {
 		if(salesRecord != null) {
 			SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
@@ -272,78 +253,496 @@ public class KpiService {
 		return null;
 	}
 	
-	public PolicyInfo updatePolicyInfo(PolicyInfo policyInfo) throws Exception {
-		if(policyInfo != null) {
-			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
-			return bo.updatePolicyInfo(policyInfo, USER_LOGIN);
-		}
-		return null;
-	}
-	
-	public PolicyStatus updatePolicyStatus(PolicyStatus policyStatus) throws Exception {
-		if(policyStatus != null) {
-			PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
-			return bo.updatePolicyStatus(policyStatus, USER_LOGIN);
-		}
-		return null;
-	}
-
-	public TsrContract updateTsrContract(TsrContract tsrContract) throws Exception {
-		TsrContractBo tsrContractBo = (TsrContractBo) AppConfig.getInstance().getBean("tsrContractBo");
-		return tsrContractBo.updateTsrContract(tsrContract, USER_LOGIN);
-	}
-
-	public TsrTalkTime updateTalkTime(TsrTalkTime tsrTalkTime) throws Exception {
+	public TsrTalkTime addTalkTime(TsrTalkTime tsrTalkTime) throws Exception {
 		TsrTalkTimeBo tsrTalkTimeBo = (TsrTalkTimeBo) AppConfig.getInstance().getBean("tsrTalkTimeBo");
-		return tsrTalkTimeBo.updateTsrTalkTime(tsrTalkTime, USER_LOGIN);
-	}
-
-	public TsrTalkTimeDetail updateTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
-		return bo.updateTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
+		
+		return tsrTalkTimeBo.addTsrTalkTime(tsrTalkTime, USER_LOGIN);
 	}
 	
-	public TsrInfo updateTsrInfo(TsrInfo tsrInfo) throws Exception {
+	public TsrTalkTimeDetail addTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
+		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
+		return bo.addTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
+	}
+
+	public TsrCodeReplacer addTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
+		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
+		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
+		return addTsrCodeReplacer(t);
+	}
+	
+	public TsrCodeReplacer addTsrCodeReplacer(TsrCodeReplacer tsrCodeReplacer) throws Exception {
+		TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
+		return bo.addTsrCodeReplacer(tsrCodeReplacer, USER_LOGIN);
+	}
+	
+	public TsrContract addTsrContract(TsrContract tsrContract) throws Exception {
+		TsrContractBo tsrContractBo = (TsrContractBo) AppConfig.getInstance().getBean("tsrContractBo");
+		return tsrContractBo.addTsrContract(tsrContract, USER_LOGIN);
+	}
+	
+	public TsrHierarchical addTsrHierarchical(TsrInfo tsrInfo, TsrInfo tmrInfo, Campaign campaign, Date startDate, Date endDate) throws Exception {
+		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
+		TsrHierarchical t = new TsrHierarchical();
+		t.setTsrInfo(tsrInfo);
+		t.setUplineInfo(tmrInfo);
+		t.setCampaign(campaign);
+		t.setStartDate(startDate);
+		if(endDate != null) {
+			t.setEndDate(endDate);
+		}
+		return bo.addTsrHierarchical(t, USER_LOGIN);
+	}
+	
+	public TsrInfo addTsrInfo(TsrInfo tsrInfo) throws Exception {
 		TsrInfoBo bo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
-		TsrInfo t = bo.updateTsrInfo(tsrInfo, USER_LOGIN);
-		if(tsrInfo != null) {
+		TsrInfo result = bo.addTsrInfo(tsrInfo, USER_LOGIN);
+		if(null != result) {
 			prepareTsrInfo();
 		}
-		return t;
+		return result;
 	}
 	
-	public SalesRecord updateSalesRecord(SalesRecord salesRecord) throws Exception {
-		if(salesRecord != null) {
-			SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
-			return bo.updateSalesRecord(salesRecord, USER_LOGIN);
+	public TsrPosition addTsrPosition(TsrPosition tsrPosition) throws Exception {
+		TsrPositionBo bo = (TsrPositionBo) AppConfig.getInstance().getBean("tsrPositionBo");
+		return bo.addTsrPosition(tsrPosition, USER_LOGIN);
+	}
+	
+	public KpiEoc addUpdateKpiEoc(String keyCode, String tsrCode, String countSuccess, String countAllEoc) {
+		KpiEocBo bo = (KpiEocBo) AppConfig.getInstance().getBean("kpiEocBo");
+		try {
+			String hql = " from KpiEoc d "
+						+ " where 1 = 1"
+						+ " and d.campaignKeyCode.keyCode = ? "
+						+ " and d.tsrInfo.tsrCode = ? ";
+			bo.findByHql(hql, keyCode, tsrCode);
+			
+			List<KpiEoc> kpiEocs = bo.findByHql(hql, keyCode, tsrCode);
+			if(null == kpiEocs || kpiEocs.isEmpty()) {
+				return bo.addKpiEoc(new KpiEoc(getCampaignKeyCode(keyCode), getTsrInfoInMap(tsrCode), Integer.parseInt(countSuccess), Integer.parseInt(countAllEoc)), USER_LOGIN);
+			} else if(kpiEocs.size() == 1) {
+				KpiEoc kpiEoc = kpiEocs.get(0);
+				kpiEoc.setCountSuccess(Integer.parseInt(countSuccess));
+				kpiEoc.setCountAllEoc(Integer.parseInt(countAllEoc));
+				return bo.updateKpiEoc(kpiEoc, USER_LOGIN);
+			} else if(kpiEocs.size() > 1) {
+				throw new Exception("Found Kpi EOC more than 1 -> keyCode: " + keyCode + " | tsrCode: " + tsrCode);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public List<KpiCategorySetup> findKpiCategorySetup(Date effectiveDate, Date endDate, String campaignCode, String tsrLevel, String tsrCode) {
+		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+		try {
+			List<Object> objs = new ArrayList<Object>();
+			String hql = " from KpiCategorySetup d "
+						+ " where d.effectiveDate = ? "
+						+ " and d.endDate = ? ";
+			objs.add(effectiveDate);
+			objs.add(endDate);
+			
+			if(!StringUtils.isBlank(tsrLevel)) {
+				hql += " and d.tsrLevel = ?";
+				objs.add(tsrLevel);
+			}
+			if(!StringUtils.isBlank(campaignCode)) {
+				hql += " and d.campaign.code = ? ";
+				objs.add(campaignCode);
+			}
+			if(!StringUtils.isBlank(tsrCode)) {
+				hql += " and d.personal.tsrCode = ?";
+				objs.add(tsrCode);
+			}
+			
+			List<KpiCategorySetup> list = bo.findByHql(hql, objs.toArray());
+			if(list != null && !list.isEmpty()) {
+				return list;
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public Campaign updateCampaign(Campaign campaign) throws Exception {
-		if(campaign != null) {
-			CampaignBo bo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
-			return bo.updateCampaign(campaign, USER_LOGIN);
+	public KpiResult findKpiResultByDateAndCampaign(String yearMonth, String campaignCode, String tsrCode) {
+		try {
+			KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+			
+			String hql = " from KpiResult d "
+						+ " where 1 = 1"
+						+ " and d.yearMonth = ? "
+						+ " and d.campaign.code = ? "
+						+ " and d.tsrInfo.tsrCode = ? ";
+			
+			List<KpiResult> list = bo.findByHql(hql, yearMonth, campaignCode, tsrCode);
+			if(null != list && !list.isEmpty() && list.size() == 1) {
+				return list.get(0);
+			} else if(null != list && !list.isEmpty()) {
+				System.out.println("Size more than 1");
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public CampaignKeyCode updateCampaignKeyCode(CampaignKeyCode campaignKeyCode) throws Exception {
-		if(campaignKeyCode != null) {
-			CampaignKeyCodeBo bo = (CampaignKeyCodeBo) AppConfig.getInstance().getBean("campaignKeyCodeBo");
-			return bo.updateCampaignKeyCode(campaignKeyCode, USER_LOGIN);
-		}
-		return null;
+	public List<Campaign> getCampaign(Campaign example) throws Exception {
+		CampaignBo campaignBo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
+		return campaignBo.findCampaign(example);
 	}
-	
-	public CampaignLead updateCampaignLead(CampaignLead campaignLead) throws Exception {
-		if(campaignLead != null) {
-			CampaignLeadBo bo = (CampaignLeadBo) AppConfig.getInstance().getBean("campaignLeadBo");
-			return bo.updateCampaignLead(campaignLead, USER_LOGIN);
+
+	public Campaign getCampaignByCode(String code) throws Exception {
+		Campaign ex = new Campaign();
+		ex.setCode(code);
+		List<Campaign> list = getCampaign(ex);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
 		}
 		return null;
 	}
 
+	public Campaign getCampaignByName(String name) throws Exception {
+		Campaign ex = new Campaign();
+		ex.setFullName(name);
+		List<Campaign> list = getCampaign(ex);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
+		}
+		return null;
+	}
+
+	public Campaign getCampaignInMap(String campaignCode) {
+		if(campaignMap != null) {
+			return campaignMap.get(campaignCode);
+		}
+		return null;
+	}
+	
+	public List<KpiScoreRate> getKpiScoreRateAll() {
+		return kpiScoreRates;
+	}
+	
+	public CampaignKeyCode getCampaignKeyCode(CampaignKeyCode example) throws Exception {
+		CampaignKeyCodeBo bo = (CampaignKeyCodeBo) AppConfig.getInstance().getBean("campaignKeyCodeBo");
+		List<CampaignKeyCode> list = bo.findCampaignKeycode(example);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
+		}
+		return null;
+	}
+	
+	public CampaignKeyCode getCampaignKeyCode(String keyCode) throws Exception {
+		CampaignKeyCode ex = new CampaignKeyCode();
+		ex.setKeyCode(keyCode);
+		return getCampaignKeyCode(ex);
+	}
+	
+	public Customer getCustomerByName(String name) throws Exception {
+		if(name != null) {
+
+			String hql = "from Customer d "
+					+ "where replace(replace(FULL_NAME, ' ', ''), ' ', '') like ?";
+			
+			CustomerBo bo = (CustomerBo) AppConfig.getInstance().getBean("customerBo");
+			
+			String param = "%" + name.replaceAll(" ", "") + "%";
+			List<Customer> list = bo.findByHql(hql, param);
+			
+			if(null != list && !list.isEmpty()) {
+				return list.get(0);
+			}
+		}
+		
+		return null;
+	}
+	
+	public String getKeyCodeFromCampaignListLot(String val) {
+		String result = "";
+		if(!StringUtils.isBlank(val)) {
+			int count = 0;
+			
+//			<!-- Check -->
+			for(int i = 0; i < val.length(); i++) {
+				if(val.charAt(i) == '(') {
+					count++;
+				}
+			}
+			
+//			<!-- process -->
+			if(count == 1) {
+				return val.substring(val.indexOf("(") + 1, val.indexOf(")")).trim();
+			} else if(count == 2) {
+				return val.substring(val.indexOf("(", val.indexOf("(") + 1) + 1, val.length() - 1).trim();
+			} else {
+				System.err.println("Cannot find Keycode");
+			}
+		}
+		return result;
+	}
+	
+	public List<KpiBean> getKpi(String yyyyMM) {
+		KpiBeanBo bo = (KpiBeanBo) AppConfig.getInstance().getBean("kpiBeanBo");
+		try {
+			return bo.getKpi(yyyyMM);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<KpiRetention> findKpiRetentionByYearMonth(String yyyyMM) {
+		KpiRetentionBo bo = (KpiRetentionBo) AppConfig.getInstance().getBean("kpiRetentionBo");
+		try {
+			return bo.getKpiRetentionByYearMonth(yyyyMM);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public List<KpiResult> getKpiResults(String yearMonth) {
+		KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+		try {
+			String hql = " from KpiResult d"
+						+ " order by d.campaign, d.dsmInfo.tsrCode, d.tsmInfo.tsrCode, d.tsrInfo.tsrCode";
+			List<KpiResult> list = bo.findByHql(hql);
+			if(null != list && !list.isEmpty()) {
+				return list;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<KpiCategorySetup> getKpiCategorySetups(KpiCategorySetup example) {
+		try {
+			KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+			List<KpiCategorySetup> list = bo.findKpiCategory(example);
+			if(null != list && !list.isEmpty()) {
+				return list;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<KpiCategorySetup> getKpiCategorySetups(String tsrLevel, String campaignCode, String tsrCode, String processYearMonth) {
+		try {
+			KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+			List<Object> objs = new ArrayList<>();
+			
+			String hql = " from KpiCategorySetup d "
+					+ " where 1 = 1 ";
+			
+			if(!StringUtils.isBlank(tsrLevel)) {
+				hql += " and d.tsrLevel = ? ";
+				objs.add(tsrLevel);
+			}
+			
+			if(!StringUtils.isBlank(campaignCode)) {
+				hql += " and d.campaign.code = ? ";
+				objs.add(campaignCode);
+			}
+			
+			if(!StringUtils.isBlank(tsrCode)) {
+				hql += " and d.personal.tsrCode = ? ";
+				objs.add(tsrCode);
+			}
+			
+			if(!StringUtils.isBlank("")) {
+				hql += "and CONVERT(nvarchar(6), k.EFFECTIVE_DATE, 112) <= ? ";
+				objs.add(processYearMonth);
+				hql += "and CONVERT(nvarchar(6), k.END_DATE, 112) >= ? ";
+				objs.add(processYearMonth);
+			}
+			
+			hql += " order by d.id ";
+			
+			List<KpiCategorySetup> list = bo.findByHql(hql, objs.toArray());
+			if(null != list && !list.isEmpty()) {
+				return list;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public List<KpiScoreRate> getKpiScoreRate(KpiScoreRate kpiScoreRate) {
+		KpiScoreRateBo bo = (KpiScoreRateBo) AppConfig.getInstance().getBean("kpiScoreRateBo");
+		try {
+			List<KpiScoreRate> list = bo.findKpiScoreRate(kpiScoreRate);
+			if(list != null && !list.isEmpty()) {
+				return list;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private String getMid3Letter(String v) throws Exception {
+		return v.length() < 3 ? v : v.substring(v.length() / 2 - 1, v.length() / 2 + 2);
+	}
+	
+	public PolicyInfo getPolicyInfoByCustomerName(String name) throws Exception {
+		if(name != null) {
+			
+			String hql = " from PolicyInfo d "
+					+ " where replace(replace(d.customer.fullName, ' ', ''), ' ', '') like ? ";
+			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
+			String param = "%" + name.replaceAll("  ", "").replaceAll(" ", "").trim() + "%";
+			
+			List<PolicyInfo> list = bo.findByHql(hql, param);
+			if(null != list && !list.isEmpty()) {
+				if(list.size() == 1) {
+					return list.get(0);
+				} else {
+					throw new Exception("Found Policy more than one> name: " + name 
+							+ " | param: " + param + " | policy: " + Arrays.toString(list.toArray()));
+				}
+			} else {
+				throw new Exception("Policy not found: " + name + " | param: " + param + " | with hql: " + hql);
+			}
+		} else {
+			throw new Exception("Name is null");
+		}
+		
+	}
+
+	public PolicyInfo getPolicyInfoByXRef(String xRef) throws Exception {
+		PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
+		PolicyInfo ex = new PolicyInfo();
+		ex.setxRef(xRef);
+		List<PolicyInfo> list = bo.findPolicyInfo(ex);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
+		}
+		return null;
+	}
+	
+//	public TsrInfo getTsrInfoByNameAdvanceMode(String fullName, String keyCode) {
+//		
+//		return null;
+//	}
+	
+	public PolicyStatus getPolicyStatus(Date saleDate, String xRef, String qaStatus) throws Exception {
+		PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
+		String hql = " from PolicyStatus d "
+				+ " where d.saleDate = ? "
+				+ " and d.policyInfo.xRef = ? "
+				+ " and d.qaStatus.qaValue = ? ";
+		List<PolicyStatus> list = bo.findByHql(hql, saleDate, xRef.trim(), qaStatus.trim());
+		if(null != list && !list.isEmpty()) {
+			if(list.size() == 1) {
+				return list.get(0);
+			} else {
+				throw new Exception("Found duplicate policy status: " + saleDate + " | " + xRef + " | " + qaStatus);
+			}
+		}
+		return null;
+	}
+	
+	public ProductType getProductTypeByValue(String value) throws Exception {
+		ProductTypeBo bo = (ProductTypeBo) AppConfig.getInstance().getBean("productTypeBo");
+		ProductType ex = new ProductType();
+		ex.setValue(value);
+		List<ProductType> list = bo.findProductType(ex);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
+		}
+		return null;
+	}
+	
+	public QaStatus getQaStatus(QaStatus example) throws Exception {
+		QaStatusBo bo = (QaStatusBo) AppConfig.getInstance().getBean("qaStatusBo");
+		List<QaStatus> list = bo.findQaStatus(example);
+		if(list != null && !list.isEmpty()) {
+			return list.get(0);
+		} else if(list != null && list.size() > 1) {
+			throw new Exception("Found QA Status more than 1: " + example.toString());
+		} else {
+			throw new Exception("QA Status not found");
+		}
+	}
+	
+	public QaStatus getQaStatus(String value) throws Exception {
+		QaStatus q = new QaStatus();
+		q.setQaValue(value);
+		return getQaStatus(q);
+	}
+	
+	public List<QaStatus> getQaStatusAll() throws Exception {
+		QaStatusBo bo = (QaStatusBo) AppConfig.getInstance().getBean("qaStatusBo");
+		return bo.findQaStatusAll();
+	}
+	
+	public QaStatus getQaStatusInMap(String qaValue) {
+		if(qaMap != null) {
+			return qaMap.get(qaValue);
+		}
+		return null;
+	}
+	
+	public List<SalesRecord> getSalesRecordByDate(String mDate) throws Exception {
+		SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
+		String hql = " from SalesRecord d "
+					+ " where CONVERT(nvarchar(6), d.saleDate, 112) = ?";
+		
+		return bo.findByHQL(hql, mDate);
+	}
+	
+	public List<TsrCodeReplacer> getTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
+		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
+		if(null == ck) throw new Exception("Campaign not found by key code: " + keyCode);
+		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
+		return getTsrCodeReplacer(t);
+	}
+	
+	public List<TsrCodeReplacer> getTsrCodeReplacer(TsrCodeReplacer tsrCodeReplacer) throws Exception {
+		TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
+		return bo.findTsrCodeReplacer(tsrCodeReplacer);
+	}
+	
+	public TsrHierarchical getTsrHierarchical(String tsrCode, String tmrCode, String campaignCode, Date date) throws Exception {
+		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
+		List<Object> vals = new ArrayList<>();
+		String hql = " from TsrHierarchical d "
+				+ " where 1 = 1";
+				
+				if(!StringUtils.isBlank(tsrCode)) {
+					hql += " and d.tsrInfo.tsrCode = ? ";
+					vals.add(tsrCode);
+				}
+				
+				if(!StringUtils.isBlank(tmrCode)) {
+					hql += " and d.uplineInfo.tsrCode = ? ";
+					vals.add(tmrCode);
+				}
+				
+				if(!StringUtils.isBlank(campaignCode)) {
+					hql += " and d.campaign.code = ? ";
+					vals.add(campaignCode);
+				}
+				
+				if(date != null) {
+					hql += " and (d.startDate <= ? and (d.endDate is null or d.endDate >= ? ))";
+					vals.add(date);
+					vals.add(date);
+				}
+		
+		List<TsrHierarchical> list = bo.findByHql(hql, vals.toArray());
+		if(null != list && !list.isEmpty() && list.size() == 1) {
+			return list.get(0);
+		}
+		return null;
+	}
+	
 	public TsrInfo getTsrInfo(String tsrCode) throws Exception {
 		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
 		TsrInfo ex = new TsrInfo();
@@ -353,10 +752,6 @@ public class KpiService {
 			return list.get(0);
 		}
 		return null;
-	}
-	
-	private String getMid3Letter(String v) throws Exception {
-		return v.length() < 3 ? v : v.substring(v.length() / 2 - 1, v.length() / 2 + 2);
 	}
 	
 	public TsrInfo getTsrInfo(String first, String last) throws Exception {
@@ -407,7 +802,12 @@ public class KpiService {
 		}
 		return null;
 	}
-
+	
+	public List<TsrInfo> getTsrInfoAll() throws Exception {
+		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
+		return tsrInfoBo.findTsrInfoAll();
+	}
+	
 	public TsrInfo getTsrInfoByName(String fullName) throws Exception {
 		if(null != fullName) {
 			TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
@@ -418,14 +818,15 @@ public class KpiService {
 			if(null != list && !list.isEmpty() && list.size() == 1) {
 				return list.get(0);
 			} else if(null != list && !list.isEmpty() && list.size() > 1) {
-				for(TsrInfo tsr : list) {
-					for(TsrContract c : tsr.getTsrContracts()) {
-						if(c.getTsrStatus().getParam().equalsIgnoreCase("A")) {
-							return tsr;
-						}
-					}
-				}
-				throw new Exception("Cannot get TsrInfo: " + fullName);
+//				for(TsrInfo tsr : list) {
+//					for(TsrContract c : tsr.getTsrContracts()) {
+//						if(c.getTsrStatus().getParam().equalsIgnoreCase("A")) {
+//							return tsr;
+//						}
+//					}
+//				}
+//				throw new Exception("Cannot get TsrInfo or already resign: " + fullName);
+				return list.get(1);
 			} else {
 				param = param.length() <= 6 ? null : param.substring(param.length() / 2 - 3, param.length() / 2 + 3);
 				return getTsrInfoByName(param);
@@ -434,65 +835,35 @@ public class KpiService {
 		return null;
 	}
 	
-	public TsrInfo getTsrInfoByNameAdvanceMode(String fullName) throws Exception {
+	public TsrInfo getTsrInfoByNameAdvanceMode(String fullName, String keyCode) throws Exception {
 		TsrInfo tsrInfo = null;
 		String unTitle = this.removeTitle(fullName).replaceAll("  ", " ");
+		List<TsrCodeReplacer> rs = null;
 		
-//		<!-- find in replacer -->
-		TsrCodeReplacer tcr = new TsrCodeReplacer();
-		tcr.setOwnerFullName(unTitle);
-		List<TsrCodeReplacer> rs = KpiService.getInstance().getTsrCodeReplacer(tcr);
-		
-		if(null != rs && !rs.isEmpty()) {
-			tsrInfo = KpiService.getInstance().getTsrInfo(rs.get(0).getTsrCode());
-		}
-		
-		if(null == tsrInfo)	tsrInfo = this.getTsrInfoByName(fullName);
-		
-//		<!-- if null, try to find by first and last name -->
-		if(null == tsrInfo) {
-			String[] splitName = new String[3];
-			splitName = unTitle.split(" ");
+		try {
+			String hql = " from TsrCodeReplacer d"
+					+ " where 1 = 1 "
+					+ " and d.ownerFullName = ? "
+					+ " and d.campaignId = ? ";
+			TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
+			rs = bo.findByHql(hql, unTitle, getCampaignKeyCode(keyCode).getCampaign().getId());
 			
-			String firstName = "";
-			String lastName = "";
-			
-			firstName = splitName[0];
-			if(splitName.length == 3) {
-				lastName = splitName[1] + splitName[2];						
+			if(null != rs && !rs.isEmpty()) {
+				tsrInfo = KpiService.getInstance().getTsrInfoInMap(rs.get(0).getTsrCode());
 			} else {
-				lastName = splitName[1];
+				tsrInfo = this.getTsrInfoByName(fullName);
 			}
-			tsrInfo = KpiService.getInstance().getTsrInfo(firstName, lastName);
 			
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		
 		return tsrInfo;
 	}
-	
-	public List<TsrInfo> getTsrInfoAll() throws Exception {
-		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
-		return tsrInfoBo.findTsrInfoAll();
-	}
-	
-	public TsrSite getTsrSite(String siteName) throws Exception {
-		TsrSiteBo tsrSiteBo = (TsrSiteBo) AppConfig.getInstance().getBean("tsrSiteBo");
-		TsrSite ex = new TsrSite();
-		ex.setSiteName(siteName);
-		List<TsrSite> list = tsrSiteBo.findTsrSite(ex);
-		if(list != null && list.size() > 0) {
-			return list.get(0);
-		}
-		return null;
-	}
-	
-	public TsrStatus getTsrStatus(String status) throws Exception {
-		TsrStatusBo tsrStatusBo = (TsrStatusBo) AppConfig.getInstance().getBean("tsrStatusBo");
-		TsrStatus ex = new TsrStatus();
-		ex.setParam(status);
-		List<TsrStatus> list = tsrStatusBo.findTsrStatus(ex);
-		if(list != null && list.size() > 0) {
-			return list.get(0);
+
+	public TsrInfo getTsrInfoInMap(String tsrCode) {
+		if(tsrMap != null) {
+			return tsrMap.get(tsrCode);
 		}
 		return null;
 	}
@@ -521,197 +892,66 @@ public class KpiService {
 		return null;
 	}
 	
-	public List<TsrCodeReplacer> getTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
-		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
-		if(null == ck) throw new Exception("Campaign not found by key code: " + keyCode);
-		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
-		return getTsrCodeReplacer(t);
-	}
-	
-	public List<TsrCodeReplacer> getTsrCodeReplacer(TsrCodeReplacer tsrCodeReplacer) throws Exception {
-		TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
-		return bo.findTsrCodeReplacer(tsrCodeReplacer);
-	}
-	
-	public TsrHierarchical getTsrHierarchical(String tsrCode, String tmrCode, String campaignCode) throws Exception {
-		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
-		String hql = " from TsrHierarchical d "
-				+ " where d.tsrInfo.tsrCode = ? "
-				+ " and d.uplineInfo.tsrCode = ? "
-				+ " and d.campaign.code = ? ";
-		List<TsrHierarchical> list = bo.findByHql(hql, tsrCode, tmrCode, campaignCode);
-		if(null != list && !list.isEmpty() && list.size() == 1) {
+	public TsrSite getTsrSite(String siteName) throws Exception {
+		TsrSiteBo tsrSiteBo = (TsrSiteBo) AppConfig.getInstance().getBean("tsrSiteBo");
+		TsrSite ex = new TsrSite();
+		ex.setSiteName(siteName);
+		List<TsrSite> list = tsrSiteBo.findTsrSite(ex);
+		if(list != null && list.size() > 0) {
 			return list.get(0);
 		}
 		return null;
 	}
 	
-	public Campaign getCampaignByName(String name) throws Exception {
-		Campaign ex = new Campaign();
-		ex.setFullName(name);
-		List<Campaign> list = getCampaign(ex);
-		if(list != null && !list.isEmpty()) {
+	public TsrStatus getTsrStatus(String status) throws Exception {
+		TsrStatusBo tsrStatusBo = (TsrStatusBo) AppConfig.getInstance().getBean("tsrStatusBo");
+		TsrStatus ex = new TsrStatus();
+		ex.setParam(status);
+		List<TsrStatus> list = tsrStatusBo.findTsrStatus(ex);
+		if(list != null && list.size() > 0) {
 			return list.get(0);
 		}
 		return null;
 	}
 	
-	public Campaign getCampaignByCode(String code) throws Exception {
-		Campaign ex = new Campaign();
-		ex.setCode(code);
-		List<Campaign> list = getCampaign(ex);
-		if(list != null && !list.isEmpty()) {
-			return list.get(0);
-		}
-		return null;
-	}
-	
-	public List<Campaign> getCampaign(Campaign example) throws Exception {
-		CampaignBo campaignBo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
-		return campaignBo.findCampaign(example);
-	}
-	
-	public CampaignKeyCode getCampaignKeyCode(CampaignKeyCode example) throws Exception {
-		CampaignKeyCodeBo bo = (CampaignKeyCodeBo) AppConfig.getInstance().getBean("campaignKeyCodeBo");
-		List<CampaignKeyCode> list = bo.findCampaignKeycode(example);
-		if(list != null && !list.isEmpty()) {
-			return list.get(0);
-		}
-		return null;
-	}
-	
-	public CampaignKeyCode getCampaignKeyCode(String keyCode) throws Exception {
-		CampaignKeyCode ex = new CampaignKeyCode();
-		ex.setKeyCode(keyCode);
-		return getCampaignKeyCode(ex);
-	}
-
-	public Customer getCustomerByName(String name) throws Exception {
-		if(name != null) {
-
-			String hql = "from Customer d "
-					+ "where replace(replace(FULL_NAME, ' ', ''), ' ', '') like ?";
-			
-			CustomerBo bo = (CustomerBo) AppConfig.getInstance().getBean("customerBo");
-			
-			String param = "%" + name.replaceAll(" ", "") + "%";
-			List<Customer> list = bo.findByHql(hql, param);
-			
-			if(null != list && !list.isEmpty()) {
-				return list.get(0);
-			}
-		}
-		
-		return null;
-	}
-	
-	public PolicyInfo getPolicyInfoByCustomerName(String name) throws Exception {
-		if(name != null) {
-			
-			String hql = " from PolicyInfo d "
-					+ " where replace(replace(d.customer.fullName, ' ', ''), ' ', '') like ? ";
-			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
-			String param = "%" + name.replaceAll("  ", "").replaceAll(" ", "").trim() + "%";
-			
-			List<PolicyInfo> list = bo.findByHql(hql, param);
-			if(null != list && !list.isEmpty()) {
-				if(list.size() == 1) {
-					return list.get(0);
-				} else {
-					throw new Exception("Found Policy more than one: " + Arrays.toString(list.toArray()));
-				}
-			} else {
-				
-				
-				throw new Exception("Policy not found: " + name + " | param: " + param + " | with hql: " + hql);
-			}
-		} else {
-			throw new Exception("Name is null");
-		}
-		
-	}
-	
-	public ProductType getProductTypeByValue(String value) throws Exception {
-		ProductTypeBo bo = (ProductTypeBo) AppConfig.getInstance().getBean("productTypeBo");
-		ProductType ex = new ProductType();
-		ex.setValue(value);
-		List<ProductType> list = bo.findProductType(ex);
-		if(list != null && !list.isEmpty()) {
-			return list.get(0);
-		}
-		return null;
-	}
-	
-	public PolicyInfo getPolicyInfoByXRef(String xRef) throws Exception {
-		PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
-		PolicyInfo ex = new PolicyInfo();
-		ex.setxRef(xRef);
-		List<PolicyInfo> list = bo.findPolicyInfo(ex);
-		if(list != null && !list.isEmpty()) {
-			return list.get(0);
-		}
-		return null;
-	}
-	
-	public PolicyStatus getPolicyStatus(Date saleDate, String xRef, String qaStatus) throws Exception {
+	public boolean isAlreadyQc(Date qcDate, String xRef) throws Exception {
+		boolean result = false;
 		PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
 		String hql = " from PolicyStatus d "
-				+ " where d.saleDate = ? "
-				+ " and d.policyInfo.xRef = ? "
-				+ " and d.qaStatus.qaValue = ? ";
-		List<PolicyStatus> list = bo.findByHql(hql, saleDate, xRef.trim(), qaStatus.trim());
+				+ " where d.qcDate = ? "
+				+ " and d.policyInfo.xRef = ? ";
+		List<PolicyStatus> list = bo.findByHql(hql, qcDate, xRef);
 		if(null != list && !list.isEmpty()) {
-			if(list.size() == 1) {
-				return list.get(0);
-			} else {
-				throw new Exception("Found duplicate policy status: " + saleDate + " | " + xRef + " | " + qaStatus);
-			}
+			result = true;
+		}
+		return result;
+	}
+	
+	public Campaign isCampaignExist(Campaign example) throws Exception {
+		CampaignBo bo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
+		List<Campaign> list = bo.findCampaign(example);
+		if(null != list && !list.isEmpty()) {
+			return list.get(0);
 		}
 		return null;
 	}
 	
-	public QaStatus getQaStatus(String value) throws Exception {
-		QaStatus q = new QaStatus();
-		q.setQaValue(value);
-		return getQaStatus(q);
+	public Campaign isCampaignExist(String campaignCode) throws Exception {
+		Campaign ex = new Campaign();
+		ex.setCode(campaignCode);
+		return isCampaignExist(ex);
 	}
 	
-	public QaStatus getQaStatus(QaStatus example) throws Exception {
-		QaStatusBo bo = (QaStatusBo) AppConfig.getInstance().getBean("qaStatusBo");
-		List<QaStatus> list = bo.findQaStatus(example);
-		if(list != null && !list.isEmpty()) {
+	public CampaignLead isCampaignLeadExist(Date performanceDate, String keyCode) throws Exception {
+		CampaignLeadBo bo = (CampaignLeadBo) AppConfig.getInstance().getBean("campaignLeadBo");
+		String hql = "from CampaignLead d"
+				+ " where d.performanceDate = ?"
+				+ " and d.campaignKeyCode.keyCode = ?";
+		List<CampaignLead> list = bo.findByHQL(hql, performanceDate, keyCode);
+		if(null != list && !list.isEmpty()) {
 			return list.get(0);
-		} else if(list != null && list.size() > 1) {
-			throw new Exception("Found QA Status more than 1: " + example.toString());
-		} else {
-			throw new Exception("QA Status not found");
 		}
-	}
-	
-	public List<QaStatus> getQaStatusAll() throws Exception {
-		QaStatusBo bo = (QaStatusBo) AppConfig.getInstance().getBean("qaStatusBo");
-		return bo.findQaStatusAll();
-	}
-	
-	public List<SalesRecord> getSalesRecordByDate(String mDate) throws Exception {
-		SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
-		String hql = " from SalesRecord d "
-					+ " where CONVERT(nvarchar(6), d.saleDate, 112) = ?";
-		
-		return bo.findByHQL(hql, mDate);
-	}
-	
-	public List<TsrTalkTimeDetail> isTalkDateExist(Date talkDate, TsrInfo tsrInfo) throws Exception {
-		TsrTalkTimeDetail detail = new TsrTalkTimeDetail();
-		detail.setTalkDate(talkDate);
-		
-		Example talkTimeExample = Example.create(detail);
-		Example tsrInfoExample = Example.create(tsrInfo);
-		DetachedCriteria criteria = DetachedCriteria.forClass(TsrTalkTimeDetail.class)
-				.add(talkTimeExample).createCriteria("tsrInfo").add(tsrInfoExample);
-		
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
-		return bo.findByCriteria(criteria);
+		return null;
 	}
 	
 	public SalesRecord isSalesRecordExist(Date saleDate, TsrInfo tsrInfo, PolicyInfo policyInfo) throws Exception {
@@ -747,44 +987,59 @@ public class KpiService {
 		return null;
 	}
 	
-	public Campaign isCampaignExist(String campaignCode) throws Exception {
-		Campaign ex = new Campaign();
-		ex.setCode(campaignCode);
-		return isCampaignExist(ex);
+	public List<TsrTalkTimeDetail> isTalkDateExist(Date talkDate, TsrInfo tsrInfo, String keyCode) throws Exception {
+		TsrTalkTimeDetail detail = new TsrTalkTimeDetail();
+		detail.setTalkDate(talkDate);
+		detail.setKeyCode(keyCode);
+		
+		Example talkTimeExample = Example.create(detail);
+		Example tsrInfoExample = Example.create(tsrInfo);
+		DetachedCriteria criteria = DetachedCriteria.forClass(TsrTalkTimeDetail.class)
+				.add(talkTimeExample).createCriteria("tsrInfo").add(tsrInfoExample);
+		
+		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
+		return bo.findByCriteria(criteria);
 	}
 	
-	public Campaign isCampaignExist(Campaign example) throws Exception {
-		CampaignBo bo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
-		List<Campaign> list = bo.findCampaign(example);
-		if(null != list && !list.isEmpty()) {
-			return list.get(0);
+	private void prepareCampaignCode() {
+		try {
+			campaignMap = new HashMap<>();
+			for(Campaign t : getCampaign(new Campaign())) {
+				campaignMap.put(t.getCode(), t);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-		return null;
 	}
 	
-	public CampaignLead isCampaignLeadExist(Date performanceDate, String keyCode) throws Exception {
-		CampaignLeadBo bo = (CampaignLeadBo) AppConfig.getInstance().getBean("campaignLeadBo");
-		String hql = "from CampaignLead d"
-				+ " where d.performanceDate = ?"
-				+ " and d.campaignKeyCode.keyCode = ?";
-		List<CampaignLead> list = bo.findByHQL(hql, performanceDate, keyCode);
-		if(null != list && !list.isEmpty()) {
-			return list.get(0);
+	private void prepareKpiScoreRate() {
+		try {
+			kpiScoreRates = getKpiScoreRate(new KpiScoreRate());
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-		return null;
 	}
 	
-	public boolean isAlreadyQc(Date qcDate, String xRef) throws Exception {
-		boolean result = false;
-		PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
-		String hql = " from PolicyStatus d "
-				+ " where d.qcDate = ? "
-				+ " and d.policyInfo.xRef = ? ";
-		List<PolicyStatus> list = bo.findByHql(hql, qcDate, xRef);
-		if(null != list && !list.isEmpty()) {
-			result = true;
+	private void prepareQaStatus() {
+		try {
+			qaMap = new HashMap<String, QaStatus>();
+			for(QaStatus s : this.getQaStatusAll()) {
+				qaMap.put(s.getQaValue(), s);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		return result;
+	}
+	
+	private void prepareTsrInfo() {
+		try {
+			tsrMap = new HashMap<String, TsrInfo>();
+			for(TsrInfo t : this.getTsrInfoAll()) {
+				tsrMap.put(t.getTsrCode(), t);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String removeTitle(String val) {
@@ -796,91 +1051,80 @@ public class KpiService {
 		return val;
 	}
 	
-	public String getKeyCodeFromCampaignListLot(String val) {
-		String result = "";
-		if(!StringUtils.isBlank(val)) {
-			int count = 0;
-			
-//			<!-- Check -->
-			for(int i = 0; i < val.length(); i++) {
-				if(val.charAt(i) == '(') {
-					count++;
-				}
-			}
-			
-//			<!-- process -->
-			if(count == 1) {
-				return val.substring(val.indexOf("(") + 1, val.indexOf(")")).trim();
-			} else if(count == 2) {
-				return val.substring(val.indexOf("(", val.indexOf("(") + 1) + 1, val.length() - 1).trim();
-			} else {
-				System.err.println("Cannot find Keycode");
-			}
-		}
-		return result;
-	}
-	
-	public List<KpiBean> getKpi(String yyyyMM) {
-		KpiBeanBo bo = (KpiBeanBo) AppConfig.getInstance().getBean("kpiBeanBo");
-		try {
-			return bo.getKpi(yyyyMM);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public Campaign updateCampaign(Campaign campaign) throws Exception {
+		if(campaign != null) {
+			CampaignBo bo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
+			return bo.updateCampaign(campaign, USER_LOGIN);
 		}
 		return null;
 	}
 	
-	public KpiCategorySetup addKpiCategorySetup(KpiCategorySetup kpiCategorySetup) {
-		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
-		try {
-			return bo.addKpiCategory(kpiCategorySetup, USER_LOGIN);
-		} catch(Exception e) {
-			e.printStackTrace();
+	public CampaignKeyCode updateCampaignKeyCode(CampaignKeyCode campaignKeyCode) throws Exception {
+		if(campaignKeyCode != null) {
+			CampaignKeyCodeBo bo = (CampaignKeyCodeBo) AppConfig.getInstance().getBean("campaignKeyCodeBo");
+			return bo.updateCampaignKeyCode(campaignKeyCode, USER_LOGIN);
 		}
 		return null;
 	}
 	
-	public KpiScoreRate addKpiScoreRate(KpiScoreRate kpiScoreRate) {
-		try {
-			KpiScoreRateBo bo = (KpiScoreRateBo) AppConfig.getInstance().getBean("kpiScoreRateBo");
-			return bo.addKpiScoreRate(kpiScoreRate, USER_LOGIN);
-		} catch(Exception e) {
-			e.printStackTrace();
+	public CampaignLead updateCampaignLead(CampaignLead campaignLead) throws Exception {
+		if(campaignLead != null) {
+			CampaignLeadBo bo = (CampaignLeadBo) AppConfig.getInstance().getBean("campaignLeadBo");
+			return bo.updateCampaignLead(campaignLead, USER_LOGIN);
 		}
 		return null;
 	}
 	
-	public List<KpiCategorySetup> findKpiCategorySetup(Date effectiveDate, Date endDate, String campaignCode, String tsrLevel, String tsrCode) {
-		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
-		try {
-			List<Object> objs = new ArrayList<Object>();
-			String hql = " from KpiCategorySetup d "
-						+ " where d.effectiveDate = ? "
-						+ " and d.endDate = ? ";
-			objs.add(effectiveDate);
-			objs.add(endDate);
-			
-			if(!StringUtils.isBlank(tsrLevel)) {
-				hql += " and d.tsrLevel = ?";
-				objs.add(tsrLevel);
-			}
-			if(!StringUtils.isBlank(campaignCode)) {
-				hql += " and d.campaign.code = ? ";
-				objs.add(campaignCode);
-			}
-			if(!StringUtils.isBlank(tsrCode)) {
-				hql += " and d.personal.tsrCode = ?";
-				objs.add(tsrCode);
-			}
-			
-			List<KpiCategorySetup> list = bo.findByHql(hql, objs.toArray());
-			if(list != null && !list.isEmpty()) {
-				return list;
-			}
-			
-		} catch(Exception e) {
-			e.printStackTrace();
+	public PolicyInfo updatePolicyInfo(PolicyInfo policyInfo) throws Exception {
+		if(policyInfo != null) {
+			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
+			return bo.updatePolicyInfo(policyInfo, USER_LOGIN);
 		}
 		return null;
+	}
+	
+	public PolicyStatus updatePolicyStatus(PolicyStatus policyStatus) throws Exception {
+		if(policyStatus != null) {
+			PolicyStatusBo bo = (PolicyStatusBo) AppConfig.getInstance().getBean("policyStatusBo");
+			return bo.updatePolicyStatus(policyStatus, USER_LOGIN);
+		}
+		return null;
+	}
+	
+	public SalesRecord updateSalesRecord(SalesRecord salesRecord) throws Exception {
+		if(salesRecord != null) {
+			SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
+			return bo.updateSalesRecord(salesRecord, USER_LOGIN);
+		}
+		return null;
+	}
+	
+	public TsrTalkTime updateTalkTime(TsrTalkTime tsrTalkTime) throws Exception {
+		TsrTalkTimeBo tsrTalkTimeBo = (TsrTalkTimeBo) AppConfig.getInstance().getBean("tsrTalkTimeBo");
+		return tsrTalkTimeBo.updateTsrTalkTime(tsrTalkTime, USER_LOGIN);
+	}
+	
+	public TsrTalkTimeDetail updateTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
+		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
+		return bo.updateTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
+	}
+	
+	public TsrContract updateTsrContract(TsrContract tsrContract) throws Exception {
+		TsrContractBo tsrContractBo = (TsrContractBo) AppConfig.getInstance().getBean("tsrContractBo");
+		return tsrContractBo.updateTsrContract(tsrContract, USER_LOGIN);
+	}
+	
+	public TsrInfo updateTsrInfo(TsrInfo tsrInfo) throws Exception {
+		TsrInfoBo bo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
+		TsrInfo t = bo.updateTsrInfo(tsrInfo, USER_LOGIN);
+		if(tsrInfo != null) {
+			prepareTsrInfo();
+		}
+		return t;
+	}
+	
+	public TsrHierarchical updateTsrHierarchical(TsrHierarchical tsrHierarchical) throws Exception {
+		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
+		return bo.updateTsrHierarchical(tsrHierarchical, USER_LOGIN);
 	}
 }

@@ -34,12 +34,17 @@
     <param-name>FIXED_LOCAL_TIMEZONE</param-name>
     <param-value>GMT+07:00</param-value>
   </context-param>
+  
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
   
   <listener>
     <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
+  
+  <listener>
+  	<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
   </listener>
   
   <filter>

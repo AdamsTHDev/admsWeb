@@ -2,6 +2,7 @@ package com.adms.batch.job;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,12 +32,12 @@ public class ImportTsrTracking implements IExcelData {
 			if(sheetNames.size() == 0) {
 				return;
 			}
-			
-			if(sheetNames.size() > 0 && sheetNames.size() == 3) {
-				process(wbHolder, sheetNames.get(2));
-			} else {
-				process(wbHolder, sheetNames.get(0));
+		
+			for(String sheetName : sheetNames) {
+				process(wbHolder, sheetName);
 			}
+			
+			
 			
 		} catch (Exception e) {
 			exceptionList.add(e);
@@ -52,8 +53,14 @@ public class ImportTsrTracking implements IExcelData {
 		boolean result = false;
 		
 		try {
+			
 			String period = wbHolder.get(sheetName).get("period").getStringValue().trim().substring(0, 10);
 			List<DataHolder> datas = wbHolder.get(sheetName).getDataList("tsrTrackingList");
+			String listLotName = wbHolder.get(sheetName).get("listLotName").getStringValue();
+			if(listLotName.contains(",")) {
+				return false;
+			}
+			String keyCode = KpiService.getInstance().getKeyCodeFromCampaignListLot(listLotName);
 			
 			if(null != datas && datas.size() > 0) result = true;
 			
@@ -63,10 +70,13 @@ public class ImportTsrTracking implements IExcelData {
 					String name = data.get("tsrName").getStringValue();
 					BigDecimal talkTime = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
 					
-					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name);
-					if(null == tsrInfo)	throw new Exception("Not found TSR: " + name);
+					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name, keyCode);
+					if(null == tsrInfo)	{ 
+						System.out.println("name: " + name);
+						throw new Exception("Not found TSR: " + name + " | keyCode: " + keyCode);
+					}
 					
-					addTalkTimeByTsr(tsrInfo, talkTime, DateUtil.convStringToDate(period));
+					addTalkTimeByTsr(tsrInfo, talkTime, DateUtil.convStringToDate(period), keyCode);
 					
 				} catch(Exception e) {
 					e.printStackTrace();
@@ -81,9 +91,9 @@ public class ImportTsrTracking implements IExcelData {
 		return result;
 	}
 	
-	private void addTalkTimeByTsr(TsrInfo tsrInfo, BigDecimal talkTime, Date talkDate) throws Exception {
+	private void addTalkTimeByTsr(TsrInfo tsrInfo, BigDecimal talkTime, Date talkDate, String keyCode) throws Exception {
 		try {
-			List<TsrTalkTimeDetail> talkDetails = KpiService.getInstance().isTalkDateExist(talkDate, tsrInfo);
+			List<TsrTalkTimeDetail> talkDetails = KpiService.getInstance().isTalkDateExist(talkDate, tsrInfo, keyCode);
 			
 			if(talkDetails != null && !talkDetails.isEmpty()) {
 				TsrTalkTimeDetail detail = talkDetails.get(0);
@@ -104,6 +114,8 @@ public class ImportTsrTracking implements IExcelData {
 				detail.setTalkDate(talkDate);
 				detail.setTsrTalkTime(tsrTalkTime);
 				detail.setTsrInfo(tsrInfo);
+				
+				detail.setKeyCode(keyCode);
 				
 				detail = KpiService.getInstance().addTalkTimeDetail(detail);
 			}

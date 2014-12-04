@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -57,10 +58,10 @@ public class SalesByRecord implements IExcelData {
 		try {
 			
 			String a = kpiService().removeTitle(tsr.getFullName()).replaceAll(" ", "");
-			a = a.length() <= 6 ? a : a.substring(a.length() / 2 - 3, a.length() / 2 + 3);
+//			a = a.length() <= 6 ? a : a.substring(a.length() / 2 - 3, a.length() / 2 + 3);
 			
 			String b = kpiService().removeTitle(tsrNameOnSale).replaceAll(" ", "");
-			b = b.length() <= 6 ? b : b.substring(b.length() / 2 - 3, b.length() / 2 + 3);
+//			b = b.length() <= 6 ? b : b.substring(b.length() / 2 - 3, b.length() / 2 + 3);
 			
 			if(!a.equalsIgnoreCase(b)) {
 //				System.out.println("Found dif: " + tsr.getFullName() + " | and: " + tsrNameOnSale);
@@ -70,32 +71,35 @@ public class SalesByRecord implements IExcelData {
 				}
 			}
 			
-//			if(!b.replaceAll(" ", "").equalsIgnoreCase(tsr.getFullName().replaceAll(" ", ""))) {
-//				
-//				System.out.println("Found Diff: " + b.replaceAll(" ", "") + " | and: " + tsr.getFullName().replaceAll(" ", ""));
-//				List<TsrCodeReplacer> list = kpiService().getTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
-//				if(null == list || list.isEmpty()) {
-//					kpiService().addTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
-//				}
-//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			exs.add(e);
 		}
 	}
 	
-	private void checkSup(TsrInfo tsrInfo, String tmrCode, String campaignCode) {
+	private void checkSup(TsrInfo tsrInfo, String tmrCode, String campaignCode, Date saleDate) {
 		try {
 			if(!StringUtils.isBlank(tmrCode) && !StringUtils.isBlank(campaignCode)) {
 
 //				<!-- check upline campaign -->
-				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), tmrCode, campaignCode);
+				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, campaignCode, saleDate);
 				if(null == h) {
-					h = kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode));
+					h = kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode), saleDate, null);
 				} else {
-					/*
-					 * do nothing...
-					 */
+					if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
+						
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(saleDate);
+						calendar.add(Calendar.DATE, -1);
+						Date beforeDate = calendar.getTime();
+						
+						h.setEndDate(beforeDate);
+						kpiService().updateTsrHierarchical(h);
+						
+//						<!-- add new hierarchical -->
+						kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode), saleDate, null);
+						
+					}
 				}
 				
 			}
@@ -108,10 +112,6 @@ public class SalesByRecord implements IExcelData {
 	public void process(DataHolder wbHolder, String sheetName) throws Exception {
 		DataHolder sheetHolder = wbHolder.get(sheetName);
 		
-//		String reportName = sheetHolder.get("reportName").getStringValue();
-//		String campaignName = sheetHolder.get("campaignName").getStringValue();
-//		String period = sheetHolder.get("period").getStringValue();
-		
 		List<DataHolder> dataList = sheetHolder.getDataList("salesByRecordList");
 		
 		System.out.println("Sales By Rec size: " + dataList.size());
@@ -120,7 +120,7 @@ public class SalesByRecord implements IExcelData {
 			try {
 				TsrInfo tsr = null;
 				String tsrCode = data.get("tsrCode").getStringValue();
-				String tsrName = kpiService().removeTitle(data.get("tsrName").getStringValue());
+				String tsrName = kpiService().removeTitle(data.get("tsrName").getStringValue()).replaceAll("  ", " ");
 				
 //				<!-- Getting TSR_INFO -->
 				if(StringUtils.isBlank(tsrCode)) {
@@ -147,25 +147,9 @@ public class SalesByRecord implements IExcelData {
 				}
 				
 //				<!-- Check TMR(Sup) -->
+				Date saleDate = (Date) data.get("saleDate").getValue();
 				String tmrCode = data.get("tmrCode").getStringValue();
-				checkSup(tsr, tmrCode, keyCode.getCampaign().getCode());
-				
-//				if(!StringUtils.isBlank(tmrCode)) {
-//					if(tsr.getUpline() == null) {
-//						tsr.setUpline(kpiService().getTsrInfoInMap(tmrCode));
-//						tsr = kpiService().updateTsrInfo(tsr);
-//					} else if(!tsr.getUpline().getTsrCode().equals(tmrCode)) {
-//						System.out.println("=== update tmrFromXls: " + tmrCode + " | db: " + tsr.getUpline().getTsrCode());
-//						tsr.setUpline(kpiService().getTsrInfoInMap(tmrCode));
-//						tsr = kpiService().updateTsrInfo(tsr);
-//					}
-//				}
-				
-//				if((tsr.getUpline() != null && !tsr.getUpline().getTsrCode().equalsIgnoreCase(data.get("tmrCode").getStringValue())) 
-//						|| (tsr.getUpline() == null && !StringUtils.isBlank(data.get("tmrCode").getStringValue()))) {
-//					tsr.setUpline(kpiService().getTsrInfoInMap(data.get("tmrCode").getStringValue()));
-//					tsr = kpiService().updateTsrInfo(tsr);
-//				}
+				checkSup(tsr, tmrCode, keyCode.getCampaign().getCode(), saleDate);
 				
 //				<!-- getting customer -->
 				String customerName = data.get("customerName").getStringValue();
@@ -186,7 +170,6 @@ public class SalesByRecord implements IExcelData {
 				BigDecimal premium = new BigDecimal(data.get("premium").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
 				BigDecimal afyp = new BigDecimal(data.get("afyp").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
 				BigDecimal protectAmt = new BigDecimal(data.get("protectAmount").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
-				Date saleDate = (Date) data.get("saleDate").getValue();
 				String qaStatus = data.get("qaStatus").getStringValue();
 				
 				

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="tsrTrackingData">
+		<DataSheet sheetName="" sheetIndex="0">
+
+			<DataRecord listSourceName="qcReconfirmList" beginRow="15" endRow="100">
+			
+				<BeginRecordCondition column="A" comparator="EQ" checkValue="Campaign" />
+				
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="listLot" autoTrim="TRUE" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
+				<DataCell row="1" column="D" dataType="DATE" dataFormat="MM/dd/yy hh:mm:ss a" fieldName="saleDate" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
+				<DataCell row="1" column="F" dataType="TEXT" fieldName="tsrCode" autoTrim="TRUE" />
+				<DataCell row="1" column="G" dataType="TEXT" fieldName="tsrName" autoTrim="TRUE" />
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="managerName" autoTrim="TRUE" />
+				<DataCell row="1" column="I" dataType="DATE" dataFormat="MM/dd/yy hh:mm:ss a" fieldName="qcDate" />
+				<DataCell row="1" column="J" dataType="TEXT" fieldName="qcCode" autoTrim="TRUE" />
+				<DataCell row="1" column="M" dataType="TEXT" fieldName="tsrStatus" autoTrim="TRUE" />
+				<DataCell row="1" column="N" dataType="TEXT" fieldName="qcStatus" autoTrim="TRUE" />
+				<DataCell row="1" column="O" dataType="TEXT" fieldName="reason" autoTrim="TRUE" />
+				<DataCell row="1" column="P" dataType="TEXT" fieldName="remark" autoTrim="TRUE" />
+				<DataCell row="1" column="Q" dataType="TEXT" fieldName="currentReason" autoTrim="TRUE" />
+				<DataCell row="1" column="R" dataType="TEXT" fieldName="currentRemark" autoTrim="TRUE" />
+								
+				
+<!-- 			<DataCell row="5" column="J" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="toDate"/> -->
+<!-- 			<DataCell row="7" column="C" dataType="NUMBER" dataFormat="0" fieldName="leadsLoad" /> -->
+				
+				<EndRecordCondition column="G" comparator="BLANK" checkValue="" />
+			</DataRecord>
+		</DataSheet>
+		
+	</DataSet>
+</FileFormat>

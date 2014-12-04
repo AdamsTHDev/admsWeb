@@ -10,20 +10,24 @@ public class MoveFileManually {
 	public static void main(String[] args) {
 		System.out.println("START");
 
+		String monthYear = "201409";
+		
 		String[] targetCampaigns = new String[]{
-				"POM_PA_CASH_BACK"
-				, "Health Return Cash"
-				, "HIP_DDOP"
-				, "KBANK DDOP -PA Cash Back"
-				, "KBANK DDOP -POM PA Cash Back"
-				, "MTI-KBank"
-				, "MTLife Hip Broker"
-				, "MTLife POM 2nd Get"
-				, "MTLife POM PA"
-				, "MTLife WIN"
-				, "MSIG UOB"				
-				, "MSIG Happy Life BL"
-				, "FWD_TVD_Endowment 15_7" //FWD_TVD_Endowment 15_7_20140926
+//				"POM_PA_Cash_Back"
+//				, "Health Return Cash"
+//				, "HIP_DDOP"
+//				, "KBANK DDOP -PA Cash Back"
+//				, "KBANK DDOP -POM PA Cash Back"
+//				, "MTI-KBank"
+//				, "MTLife Hip Broker"
+//				, "MTLife POM 2nd Get"
+//				, "MTLife POM PA"
+//				, "MTLife WIN"
+//				, "MSIG UOB"				
+//				, "MSIG Happy Life BL"
+//				, "FWD_TVD_Endowment 15_7"
+//				"POM_PA_Cash_Back",
+				"MSIG Enjoy Life (POM)"
 		};
 		String[] fileNames = new String[]{
 				"DailyPerformanceTrackingReport"
@@ -35,8 +39,8 @@ public class MoveFileManually {
 				, "TSRTracking"
 		};
 		
-		String origPath = "D:/Test/upload/report of 201409/";
-		String targetPath = "D:/Test/upload/kpi/201409/";
+		String origPath = "D:/Test/upload/Daily reprot from zip/report of " + monthYear + "/";
+		String targetPath = "D:/Test/upload/kpi/" + monthYear + "/";
 		
 		String folderDate = "";
 		
@@ -44,14 +48,19 @@ public class MoveFileManually {
 		
 		for(File dir : origDir.listFiles()) {
 			String fd = dir.getName();
-			folderDate = fd.substring(4, fd.length()) + fd.substring(2,4) + fd.substring(0, 2);
+			if(fd.startsWith(monthYear)) {
+				folderDate = fd;
+			} else {
+				folderDate = fd.substring(4, fd.length()) + fd.substring(2,4) + fd.substring(0, 2);
+			}
+			
 			for(File campaignFolder : dir.listFiles(new FolderFilter(targetCampaigns))) {
 				String cf = campaignFolder.getName();
 				if(cf.contains("POM_PA_Cash_Back")) {
 					cf = cf.substring(0, cf.length() - 11);
 				} else if(cf.contains("MTLife")) {
 					cf = cf.substring(9, cf.length());
-				} else if(cf.contains("_MSIG Happy")) {
+				} else if(cf.contains("_MSIG ")) {
 					cf = cf.substring(9, cf.length());
 				} else {
 					cf = cf.substring(0, cf.length() - 9);
@@ -65,8 +74,8 @@ public class MoveFileManually {
 						File destFile = new File(targetFile.getAbsolutePath() + "/" + xls.getName());
 						if(!destFile.exists()) {
 							destFile.createNewFile();
-							System.out.println("moving file: " + xls.getAbsolutePath());
-							System.out.println("to " + destFile.getAbsolutePath());
+//							System.out.println("moving file: " + xls.getAbsolutePath());
+//							System.out.println("to " + destFile.getAbsolutePath());
 							FileUtils.getInstance().copyFile(xls, destFile);
 						}
 					} catch(Exception e) {

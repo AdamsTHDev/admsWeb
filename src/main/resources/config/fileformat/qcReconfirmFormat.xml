@@ -3,7 +3,7 @@
 	<DataSet description="tsrTrackingData">
 		<DataSheet sheetName="" sheetIndex="0">
 
-			<DataRecord listSourceName="qcReconfirmList" beginRow="16" endRow="100">
+			<DataRecord listSourceName="qcReconfirmList" beginRow="15" endRow="100">
 			
 				<BeginRecordCondition column="A" comparator="EQ" checkValue="Campaign" />
 			

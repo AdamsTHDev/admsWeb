@@ -21,7 +21,8 @@ public class QcReConfirm implements IExcelData {
 		System.out.println("QcReConfirm");
 		
 		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
-		
+//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
+//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/fileformat/qcReconfirmFormat_MSIGHappyLife.xml");
 		ExcelFormat ef = new ExcelFormat(fileFormat);
 		
 		try {
@@ -49,21 +50,6 @@ public class QcReConfirm implements IExcelData {
 	private boolean process(DataHolder wbHolder, String sheetName) throws Exception {
 		boolean result = false;
 		
-		/*
-		 * <DataRecord listSourceName="qcReconfirmList" beginRow="16" endRow="100">
-		 * 		<DataCell row="1" column="E" dataType="DATE" fieldName="saleDate" />
-				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName" />
-				<DataCell row="1" column="H" dataType="TEXT" fieldName="tsrName" />
-				<DataCell row="1" column="J" dataType="DATE" dataFormat="d/M/yyyy hh:mm:ss" fieldName="qcDate" />
-				<DataCell row="1" column="K" dataType="TEXT" fieldName="qcCode" />
-				<DataCell row="1" column="N" dataType="TEXT" fieldName="tsrStatus" />
-				<DataCell row="1" column="O" dataType="TEXT" fieldName="qcStatus" />
-				<DataCell row="1" column="P" dataType="TEXT" fieldName="reason" />
-				<DataCell row="1" column="Q" dataType="TEXT" fieldName="remark" />
-				<DataCell row="1" column="R" dataType="TEXT" fieldName="currentReason" />
-				<DataCell row="1" column="S" dataType="TEXT" fieldName="currentRemark" />
-		 */
-		
 		DataHolder sheet = wbHolder.get(sheetName);
 		
 		List<DataHolder> datas = sheet.getDataList("qcReconfirmList");
@@ -71,10 +57,7 @@ public class QcReConfirm implements IExcelData {
 		for(DataHolder data : datas) {
 			
 			String customerName = data.get("customerName").getStringValue();
-//			customerName = removeTitleAndSpace(customerName);
 			
-//			String tsrName = data.get("tsrName").getStringValue();
-//			tsrName = removeTitleAndSpace(tsrName);
 			Date saleDate = (Date) data.get("saleDate").getValue();
 			Date qcDate = (Date) data.get("qcDate").getValue();
 			String qcCode = data.get("qcCode").getStringValue();

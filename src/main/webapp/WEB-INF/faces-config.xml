@@ -10,6 +10,9 @@
 	</application>
 
 	<application>
+		<locale-config>
+			<default-locale>th</default-locale>
+		</locale-config>
 		<resource-bundle>
 			<base-name>com.adms.msg.globalMsg</base-name>
 			<var>globalMsg</var>

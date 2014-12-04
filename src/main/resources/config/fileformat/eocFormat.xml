@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileFormat fileName="" fileType="xls" locale="US">
+	<DataSet description="eoc">
+		<DataSheet sheetName="" sheetIndex="0">
+
+			<DataRecord listSourceName="eocList" beginRow="2" endRow="9999">
+				
+				<DataCell row="1" column="A" dataType="TEXT" fieldName="keyCode"/>
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrCode" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="countSuccess" />
+				<DataCell row="1" column="D" dataType="TEXT" fieldName="countAllEoc" />
+		
+				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+				
+			</DataRecord>
+		</DataSheet>
+		
+	</DataSet>
+</FileFormat>

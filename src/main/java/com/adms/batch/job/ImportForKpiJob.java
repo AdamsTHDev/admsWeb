@@ -19,7 +19,6 @@ import com.adms.batch.service.KpiService;
 import com.adms.domain.entities.Campaign;
 import com.adms.domain.entities.CampaignKeyCode;
 import com.adms.domain.entities.KpiCategorySetup;
-import com.adms.domain.entities.KpiScoreRate;
 import com.adms.domain.entities.TsrContract;
 import com.adms.domain.entities.TsrInfo;
 import com.adms.domain.entities.TsrPosition;
@@ -61,13 +60,13 @@ public class ImportForKpiJob {
 		System.out.println("=======================================================================");
 		System.out.println("START Import Batch - " + start);
 		System.out.println("=======================================================================");
-//		<!-- for import tsr -->
-//		importTsr();
-//		importCampaignKeyCode();
-//		importPosition();
-//		test();
-//		importKpiTargetSetup();
 		try {
+//			importTsr();
+//			importCampaignKeyCode();
+//			importPosition();
+//			importKpiTargetSetup();
+//			importEoc();
+			
 			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -91,9 +90,24 @@ public class ImportForKpiJob {
 		
 		File path = new File(dir);
 		
-		for(File fd : path.listFiles()) {
+		for(File fd : path.listFiles(
+//				new FileFilterByName(
+//						"MTLife Hip Broker"
+//						)
+				)) {
 			if(fd.isDirectory()) {
-				for(File byDate: fd.listFiles()) {
+				for(File byDate: fd.listFiles(
+//						new FileFilterByName(
+//						"20141021",
+//						"20141022",
+//						"20141024",
+//						"20141027",
+//						"20141028",
+//						"20141029",
+//						"20141030",
+//						"20141031"
+//						)
+						)) {
 					System.out.println("=========================================================");
 					System.out.println("folder: " + fd.getName() + " >>> " + byDate.getName());
 					List<File> excels = Arrays.asList(byDate.listFiles(new ExcelFileFilter()));
@@ -102,14 +116,18 @@ public class ImportForKpiJob {
 					//process sales report by record
 					for(File excel : excels) {
 						if(excel.getName().contains("Sales_Report_By_Records") || excel.getName().contains("SalesReportByRecords")) {
+							FileInputStream fis = null;
 							try {
+								fis = new FileInputStream(excel);
 								IExcelData xd = factory(excel.getName());
 								Date start = Calendar.getInstance().getTime();
-								xd.importFromInputStream(new FileInputStream(excel), exceptionList);
+								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
 								System.out.println("Import Sales Report by Records processing time: " + getProcessTime(start, end));
 							} catch(Exception e) {
 								e.printStackTrace();
+							} finally {
+								try { fis.close(); } catch (IOException e) {}
 							}
 						}
 					}
@@ -117,14 +135,18 @@ public class ImportForKpiJob {
 					//process tsr tracking
 					for(File excel : excels) {
 						if(excel.getName().contains("TSRTracking") || excel.getName().contains("TsrTrackingReport")) {
+							FileInputStream fis = null;
 							try {
+								fis = new FileInputStream(excel);
 								IExcelData xd = factory(excel.getName());
 								Date start = Calendar.getInstance().getTime();
-								xd.importFromInputStream(new FileInputStream(excel), exceptionList);
+								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
 								System.out.println("Import TsrTracking processing time: " + getProcessTime(start, end));
 							} catch(Exception e) {
 								e.printStackTrace();
+							} finally {
+								try { fis.close(); } catch (IOException e) {}
 							}
 						}
 					}
@@ -132,14 +154,18 @@ public class ImportForKpiJob {
 					//process daily perfomance
 					for(File excel : excels) {
 						if(excel.getName().contains("Daily_Performance_Tracking_ByLot") || excel.getName().contains("DailyPerformanceTrackingReport")) {
+							FileInputStream fis = null;
 							try {
+								fis = new FileInputStream(excel);
 								IExcelData xd = factory(excel.getName());
 								Date start = Calendar.getInstance().getTime();
-								xd.importFromInputStream(new FileInputStream(excel), exceptionList);
+								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
 								System.out.println("Import Daily Performance Tracking processing time: " + getProcessTime(start, end));
 							} catch(Exception e) {
 								e.printStackTrace();
+							} finally {
+								try { fis.close(); } catch (IOException e) {}
 							}
 						}
 					}
@@ -147,14 +173,18 @@ public class ImportForKpiJob {
 					//process qc reconfirm
 					for(File excel : excels) {
 						if(excel.getName().contains("QC_Reconfirm")) {
+							FileInputStream fis = null;
 							try {
+								fis = new FileInputStream(excel);
 								IExcelData xd = factory(excel.getName());
 								Date start = Calendar.getInstance().getTime();
-								xd.importFromInputStream(new FileInputStream(excel), exceptionList);
+								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
 								System.out.println("Import Qc Reconfirm processing time: " + getProcessTime(start, end));
 							} catch(Exception e) {
 								e.printStackTrace();
+							} finally {
+								try { fis.close(); } catch (IOException e) {}
 							}
 						}
 					}
@@ -179,6 +209,8 @@ public class ImportForKpiJob {
 			return new ImportTsrTracking();
 		} else if(excelName.contains("Daily_Performance_Tracking")) {
 			return new DailyPerformanceTracking();
+		} else if(excelName.contains("Sales_Report_By_Records_Pending")) {
+			return new SalesByRecordMSIGUOB();
 		} else if(excelName.contains("Sales_Report_By_Records")) {
 			return new SalesByRecord();
 		} else if(excelName.contains("QC_Reconfirm")) {
@@ -283,6 +315,7 @@ public class ImportForKpiJob {
 				
 				service.addTsrContract(tsrContract);
 				
+				System.out.println("COMPLETE Added: " + tsrInfo.toString());
 			}
 			
 			fileFormat.close();
@@ -454,6 +487,20 @@ public class ImportForKpiJob {
 		}
 	}
 	
+	private void getGradeCondition(DataHolder data) {
+		String rateA = data.get("rateA").getStringValue();
+		String rateB = data.get("rateB").getStringValue();
+		String rateC = data.get("rateC").getStringValue();
+		String rateD = data.get("rateD").getStringValue();
+		String rateE = data.get("rateE").getStringValue();
+		
+		String criRateA = data.get("criRateA").getStringValue();
+		String criRateB = data.get("criRateB").getStringValue();
+		String criRateC = data.get("criRateC").getStringValue();
+		String criRateD = data.get("criRateD").getStringValue();
+		String criRateE = data.get("criRateE").getStringValue();
+	}
+	
 	private void importKpiTargetSetup() {
 		String dir = "D:/Test/upload/KpiTarget/20140901";
 		final String DSM = "DSM";
@@ -462,7 +509,7 @@ public class ImportForKpiJob {
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_SETUP_IMPORT.getValue()));
 			File fdir = new File(dir);
-			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201409-2"))) {
+			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201409-3"))) {
 				DataHolder wb = ef.readExcel(new FileInputStream(xls));
 				
 				for(String sheetName : wb.getKeyList()) {
@@ -473,73 +520,76 @@ public class ImportForKpiJob {
 						Date effectiveDate = (Date) sheet.get("effectiveDate").getValue();
 						Date endDate = (Date) sheet.get("endDate").getValue();
 						
-//						String rateA = sheet.get("rateA").getStringValue();
-//						String rateB = sheet.get("rateB").getStringValue();
-//						String rateC = sheet.get("rateC").getStringValue();
-//						String rateD = sheet.get("rateD").getStringValue();
-//						String rateE = sheet.get("rateE").getStringValue();
-//						
-//						String criRateA = sheet.get("criRateA").getStringValue();
-//						String criRateB = sheet.get("criRateB").getStringValue();
-//						String criRateC = sheet.get("criRateC").getStringValue();
-//						String criRateD = sheet.get("criRateD").getStringValue();
-//						String criRateE = sheet.get("criRateE").getStringValue();
-						
 						if(sheetName.equalsIgnoreCase(DSM)) {
-						System.out.println("+++ DSM +++");
+							System.out.println("+++ DSM +++");
 							for(DataHolder data : sheet.getDataList("dsmTargetList")) {
 								
 								String dsmCode = data.get("dsmCode").getStringValue();
-								String dsmName = data.get("dsmName").getStringValue();
-//								
-//								BigDecimal targetCat1 = data.get("targetCat1").getDecimalValue();
-//								BigDecimal weightCat1 = data.get("weightCat1").getDecimalValue();
-//								
-//								BigDecimal targetCat2 = data.get("targetCat2").getDecimalValue();
-//								BigDecimal weightCat2 = data.get("weightCat2").getDecimalValue();
-//								
-//								BigDecimal targetCat3 = data.get("targetCat3").getDecimalValue();
-//								BigDecimal weightCat3 = data.get("weightCat3").getDecimalValue();
-	//
-//								BigDecimal targetCat4 = data.get("targetCat4").getDecimalValue();
-//								BigDecimal weightCat4 = data.get("weightCat4").getDecimalValue();
-								
-//								BigDecimal totalWeight = data.get("totalWeight").getDecimalValue();
+//								String dsmName = data.get("dsmName").getStringValue();
 								
 								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, null, DSM, dsmCode);
 								
-								if(kpiSetups == null) {
-									TsrInfo dsmInfo = KpiService.getInstance().getTsrInfoInMap(dsmCode);
-									if(dsmInfo == null) throw new Exception("Dsm not found: " + dsmCode);
+								TsrInfo dsmInfo = KpiService.getInstance().getTsrInfoInMap(dsmCode);
+								if(dsmInfo == null) throw new Exception("Dsm not found: " + dsmCode);
+								
+								for(int i = 1; i <= 4; i++) {
+									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
-									for(int i = 1; i <= 4; i++) {
-										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-										
-										kpiSetup.setTsrLevel(DSM);
-										kpiSetup.setPersonal(dsmInfo);
-										
-										kpiSetup.setEffectiveDate(effectiveDate);
-										kpiSetup.setEndDate(endDate);
-										
-										String category = sheet.get("cat" + i).getStringValue();
-										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-										
-//										System.out.println("cat: " + category);
-//										System.out.println("target: " + targetCat);
-//										System.out.println("weight: " + weightCat);
-										
-										kpiSetup.setCategory(category);
-										kpiSetup.setTarget(targetCat);
-										kpiSetup.setWeight(weightCat);
-										
+									kpiSetup.setTsrLevel(DSM);
+									kpiSetup.setPersonal(dsmInfo);
+									
+									kpiSetup.setEffectiveDate(effectiveDate);
+									kpiSetup.setEndDate(endDate);
+									
+									String category = sheet.get("cat" + i).getStringValue();
+									BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+									BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+									
+//									System.out.println("cat: " + category);
+//									System.out.println("target: " + targetCat);
+//									System.out.println("weight: " + weightCat);
+									
+									kpiSetup.setCategory(category);
+									kpiSetup.setTarget(targetCat);
+									kpiSetup.setWeight(weightCat);
+									if(kpiSetups == null) {
 										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+									} else {
+										kpiSetup.setId(kpiSetups.get(0).getId());
+										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
-								} else {
-									/**
-									 * don't know what to do yet.
-									 */
 								}
+								
+//								if(kpiSetups == null) {
+//									TsrInfo dsmInfo = KpiService.getInstance().getTsrInfoInMap(dsmCode);
+//									if(dsmInfo == null) throw new Exception("Dsm not found: " + dsmCode);
+//									
+//									for(int i = 1; i <= 4; i++) {
+//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
+//										
+//										kpiSetup.setTsrLevel(DSM);
+//										kpiSetup.setPersonal(dsmInfo);
+//										
+//										kpiSetup.setEffectiveDate(effectiveDate);
+//										kpiSetup.setEndDate(endDate);
+//										
+//										String category = sheet.get("cat" + i).getStringValue();
+//										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+//										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+//										
+////										System.out.println("cat: " + category);
+////										System.out.println("target: " + targetCat);
+////										System.out.println("weight: " + weightCat);
+//										
+//										kpiSetup.setCategory(category);
+//										kpiSetup.setTarget(targetCat);
+//										kpiSetup.setWeight(weightCat);
+//										
+//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+//									}
+//								} else {
+//									
+//								}
 								
 							}
 							
@@ -553,34 +603,67 @@ public class ImportForKpiJob {
 								String supCode = data.get("supCode").getStringValue();
 								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, SUP, supCode);
 								
-								if(kpiSetups == null) {
-									TsrInfo supInfo = KpiService.getInstance().getTsrInfoInMap(supCode);
-									if(supInfo == null) throw new Exception("SUP not found: " + supCode);
+
+								TsrInfo supInfo = KpiService.getInstance().getTsrInfoInMap(supCode);
+								if(supInfo == null) throw new Exception("SUP not found: " + supCode);
+								
+								Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
+								if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
+								
+								for(int i = 1; i <= 5; i++) {
+									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
-									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
-									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
+									kpiSetup.setCampaign(campaign);
+									kpiSetup.setTsrLevel(SUP);
+									kpiSetup.setPersonal(supInfo);
 									
-									for(int i = 1; i <= 5; i++) {
-										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-										
-										kpiSetup.setCampaign(campaign);
-										kpiSetup.setTsrLevel(SUP);
-										kpiSetup.setPersonal(supInfo);
-										
-										kpiSetup.setEffectiveDate(effectiveDate);
-										kpiSetup.setEndDate(endDate);
-										
-										String category = sheet.get("cat" + i).getStringValue();
-										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-										
-										kpiSetup.setCategory(category);
-										kpiSetup.setTarget(targetCat);
-										kpiSetup.setWeight(weightCat);
-										
+									kpiSetup.setEffectiveDate(effectiveDate);
+									kpiSetup.setEndDate(endDate);
+									
+									String category = sheet.get("cat" + i).getStringValue();
+									BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+									BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+									
+									kpiSetup.setCategory(category);
+									kpiSetup.setTarget(targetCat);
+									kpiSetup.setWeight(weightCat);
+									
+									if(kpiSetups == null) {
 										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+									} else {
+										kpiSetup.setId(kpiSetups.get(0).getId());
+										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
 								}
+								
+//								if(kpiSetups == null) {
+//									TsrInfo supInfo = KpiService.getInstance().getTsrInfoInMap(supCode);
+//									if(supInfo == null) throw new Exception("SUP not found: " + supCode);
+//									
+//									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
+//									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
+//									
+//									for(int i = 1; i <= 5; i++) {
+//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
+//										
+//										kpiSetup.setCampaign(campaign);
+//										kpiSetup.setTsrLevel(SUP);
+//										kpiSetup.setPersonal(supInfo);
+//										
+//										kpiSetup.setEffectiveDate(effectiveDate);
+//										kpiSetup.setEndDate(endDate);
+//										
+//										String category = sheet.get("cat" + i).getStringValue();
+//										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+//										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
+//										
+//										kpiSetup.setCategory(category);
+//										kpiSetup.setTarget(targetCat);
+//										kpiSetup.setWeight(weightCat);
+//										
+//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+//									}
+//								}
 							}
 //							<!-- end Sup List -->
 							
@@ -588,30 +671,55 @@ public class ImportForKpiJob {
 							System.out.println("+++ TSR +++");
 							for(DataHolder data : sheet.getDataList("tsrTargetList")) {
 								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, TSR, null);
+
+								Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
+								if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
 								
-								if(kpiSetups == null) {
+								for(int i = 1; i <= 4; i++) {
+									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
-									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
-									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
+									kpiSetup.setCampaign(campaign);
+									kpiSetup.setTsrLevel(TSR);
 									
-									for(int i = 1; i <= 4; i++) {
-										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-										
-										kpiSetup.setCampaign(campaign);
-										kpiSetup.setTsrLevel(TSR);
-										
-										kpiSetup.setEffectiveDate(effectiveDate);
-										kpiSetup.setEndDate(endDate);
-										
-										DataHolder tsrCat = sheet.getDataList("tsrCat").get(0);
-										
-										kpiSetup.setCategory(tsrCat.get("tsrCat" + i).getStringValue());
-										kpiSetup.setTarget(data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
-										kpiSetup.setWeight(data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
-										
+									kpiSetup.setEffectiveDate(effectiveDate);
+									kpiSetup.setEndDate(endDate);
+									
+									DataHolder tsrCat = sheet.getDataList("tsrCat").get(0);
+									
+									kpiSetup.setCategory(tsrCat.get("tsrCat" + i).getStringValue());
+									kpiSetup.setTarget(data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
+									kpiSetup.setWeight(data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
+									
+									if(kpiSetups == null) {
 										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+									} else {
+										kpiSetup.setId(kpiSetups.get(0).getId());
+										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
 								}
+								
+//								if(kpiSetups == null) {
+//									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
+//									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
+//									
+//									for(int i = 1; i <= 4; i++) {
+//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
+//										
+//										kpiSetup.setCampaign(campaign);
+//										kpiSetup.setTsrLevel(TSR);
+//										
+//										kpiSetup.setEffectiveDate(effectiveDate);
+//										kpiSetup.setEndDate(endDate);
+//										
+//										DataHolder tsrCat = sheet.getDataList("tsrCat").get(0);
+//										
+//										kpiSetup.setCategory(tsrCat.get("tsrCat" + i).getStringValue());
+//										kpiSetup.setTarget(data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
+//										kpiSetup.setWeight(data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
+//										
+//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+//									}
+//								}
 							}
 //							<!-- end Tsr List -->
 						}
@@ -625,6 +733,32 @@ public class ImportForKpiJob {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void importEoc() {
+		String dir = "D:/Test/upload/EOC/EOC_20141106.xlsx";
+		try {
+			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_EOC_IMPORT.getValue()));
+			File file = new File(dir);
+			
+			if(!file.isFile()) return;
+			
+			DataHolder wb = ef.readExcel(new FileInputStream(file));
+			DataHolder sheet = wb.get(wb.getKeyList().get(0));
+			
+			for(DataHolder data : sheet.getDataList("eocList")) {
+				String keyCode = data.get("keyCode").getStringValue();
+				String tsrCode = data.get("tsrCode").getStringValue();
+				String countSuccess = data.get("countSuccess").getStringValue();
+				String countAllEoc = data.get("countAllEoc").getStringValue();
+				
+				KpiService.getInstance().addUpdateKpiEoc(keyCode, tsrCode, countSuccess, countAllEoc);
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }

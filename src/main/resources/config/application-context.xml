@@ -48,6 +48,10 @@
 				<value>com.adms.domain.entities.ImportFileHistory</value>
 				<value>com.adms.domain.entities.KpiBean</value>
 				<value>com.adms.domain.entities.KpiCategorySetup</value>
+				<value>com.adms.domain.entities.KpiEoc</value>
+				<value>com.adms.domain.entities.KpiResult</value>
+				<value>com.adms.domain.entities.KpiRetention</value>
+				<value>com.adms.domain.entities.KpiScoreRate</value>
 				<value>com.adms.domain.entities.PaymentChannel</value>
 				<value>com.adms.domain.entities.PaymentDetail</value>
 				<value>com.adms.domain.entities.PaymentMode</value>
