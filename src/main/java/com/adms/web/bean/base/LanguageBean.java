@@ -16,7 +16,7 @@ public class LanguageBean implements Serializable {
 
 	private static final long serialVersionUID = 1482050801277636503L;
 	
-	private String localeCode;
+	private String localeCode = "th";
 	
 	private static Map<String, String> countries;
 	
@@ -44,8 +44,12 @@ public class LanguageBean implements Serializable {
 		for (Map.Entry<String, String> entry : countries.entrySet()) {
 			if(entry.getValue().toString().equals(newLocaleValue)){
 				this.localeCode = newLocaleValue;
-				FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(this.localeCode));
+				setFacesContextLocale(this.localeCode);
 			}
 		}
+	}
+	
+	public void setFacesContextLocale(String localeCode) {
+		FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(this.localeCode));
 	}
 }

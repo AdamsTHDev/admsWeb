@@ -280,12 +280,12 @@ public class KpiService {
 		return tsrContractBo.addTsrContract(tsrContract, USER_LOGIN);
 	}
 	
-	public TsrHierarchical addTsrHierarchical(TsrInfo tsrInfo, TsrInfo tmrInfo, Campaign campaign, Date startDate, Date endDate) throws Exception {
+	public TsrHierarchical addTsrHierarchical(TsrInfo tsrInfo, TsrInfo tmrInfo, CampaignKeyCode campaignKeyCode, Date startDate, Date endDate) throws Exception {
 		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
 		TsrHierarchical t = new TsrHierarchical();
 		t.setTsrInfo(tsrInfo);
 		t.setUplineInfo(tmrInfo);
-		t.setCampaign(campaign);
+		t.setCampaignKeyCode(campaignKeyCode);
 		t.setStartDate(startDate);
 		if(endDate != null) {
 			t.setEndDate(endDate);
@@ -709,7 +709,7 @@ public class KpiService {
 		return bo.findTsrCodeReplacer(tsrCodeReplacer);
 	}
 	
-	public TsrHierarchical getTsrHierarchical(String tsrCode, String tmrCode, String campaignCode, Date date) throws Exception {
+	public TsrHierarchical getTsrHierarchical(String tsrCode, String tmrCode, String keyCode, Date date) throws Exception {
 		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
 		List<Object> vals = new ArrayList<>();
 		String hql = " from TsrHierarchical d "
@@ -725,9 +725,9 @@ public class KpiService {
 					vals.add(tmrCode);
 				}
 				
-				if(!StringUtils.isBlank(campaignCode)) {
-					hql += " and d.campaign.code = ? ";
-					vals.add(campaignCode);
+				if(!StringUtils.isBlank(keyCode)) {
+					hql += " and d.campaignKeyCode.keyCode = ? ";
+					vals.add(keyCode);
 				}
 				
 				if(date != null) {
@@ -739,6 +739,8 @@ public class KpiService {
 		List<TsrHierarchical> list = bo.findByHql(hql, vals.toArray());
 		if(null != list && !list.isEmpty() && list.size() == 1) {
 			return list.get(0);
+		} else if(null != list && list.size() > 1) {
+			throw new Exception("FOUND TSR Hierarchical more than 1: tsrCode: " + tsrCode + " | tmrCode: " + tmrCode + " | keyCode: " + keyCode + " | date: " + date);
 		}
 		return null;
 	}

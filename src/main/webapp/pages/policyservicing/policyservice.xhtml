@@ -12,9 +12,6 @@
 	
 	<ui:define name="content">
 	<style>
-	* {
-		font-family: sans-serif !important; font-size:14px;
-	}
 	.header {
 		font-size: 25px !important; font:bold;
 	}
@@ -172,12 +169,16 @@
 					
 				</p:panelGrid>
 			</p:panel>
+			
+		</h:form>
+	
+		<h:form id="frmBtn">
 			<h:panelGroup id="panelAction">
 				<p:commandButton id="searchBtn" value="#{msg['btn.start.search']}"/>
-				<p:commandButton id="addCaseBtn" value="#{msg['btn.add.new.case']}"/>
+				<p:commandButton id="addCaseBtn" value="#{msg['btn.add.new.case']}" 
+								icon="ui-icon-circle-plus" actionListener="#{policyServiceView.callAddModalDialog}"/>
 				<p:commandButton id="viewBillHistBtn" value="#{msg['btn.view.billing.history']}"/>
 			</h:panelGroup>
-			
 		</h:form>
 		
 	</ui:define>

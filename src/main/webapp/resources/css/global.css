@@ -28,3 +28,9 @@
 .right {
 	text-align: right;
 }
+
+
+* {
+	font-family: sans-serif !important;
+	font-size:15px;
+}

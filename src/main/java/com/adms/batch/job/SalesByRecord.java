@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -77,29 +76,17 @@ public class SalesByRecord implements IExcelData {
 		}
 	}
 	
-	private void checkSup(TsrInfo tsrInfo, String tmrCode, String campaignCode, Date saleDate) {
+	private void checkSup(TsrInfo tsrInfo, String tmrCode, CampaignKeyCode keyCode, Date saleDate) {
 		try {
-			if(!StringUtils.isBlank(tmrCode) && !StringUtils.isBlank(campaignCode)) {
+			if(!StringUtils.isBlank(tmrCode) && null != keyCode) {
 
 //				<!-- check upline campaign -->
-				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, campaignCode, saleDate);
+				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, keyCode.getKeyCode(), null);
 				if(null == h) {
-					h = kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode), saleDate, null);
-				} else {
-					if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
-						
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(saleDate);
-						calendar.add(Calendar.DATE, -1);
-						Date beforeDate = calendar.getTime();
-						
-						h.setEndDate(beforeDate);
-						kpiService().updateTsrHierarchical(h);
-						
-//						<!-- add new hierarchical -->
-						kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), kpiService().getCampaignInMap(campaignCode), saleDate, null);
-						
-					}
+					kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), keyCode, saleDate, null);
+				} else if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
+					h.setUplineInfo(kpiService().getTsrInfoInMap(tmrCode));
+					kpiService().updateTsrHierarchical(h);
 				}
 				
 			}
@@ -149,7 +136,7 @@ public class SalesByRecord implements IExcelData {
 //				<!-- Check TMR(Sup) -->
 				Date saleDate = (Date) data.get("saleDate").getValue();
 				String tmrCode = data.get("tmrCode").getStringValue();
-				checkSup(tsr, tmrCode, keyCode.getCampaign().getCode(), saleDate);
+				checkSup(tsr, tmrCode, keyCode, saleDate);
 				
 //				<!-- getting customer -->
 				String customerName = data.get("customerName").getStringValue();
@@ -222,6 +209,7 @@ public class SalesByRecord implements IExcelData {
 				if(saleRec != null) {
 					saleRec.setSaleDate(saleDate);
 					saleRec.setTsrInfo(tsr);
+					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().updateSalesRecord(saleRec);
@@ -229,6 +217,7 @@ public class SalesByRecord implements IExcelData {
 					saleRec = new SalesRecord();
 					saleRec.setSaleDate(saleDate);
 					saleRec.setTsrInfo(tsr);
+					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().addSalesRecord(saleRec);

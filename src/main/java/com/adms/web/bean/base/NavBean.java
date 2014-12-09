@@ -18,6 +18,6 @@ public class NavBean extends BaseBean {
 	}
 	
 	public String navToPolicyService() {
-		return "policyServicing/policyservice?faces-redirect=true";
+		return "policyservicing/policyservice?faces-redirect=true";
 	}
 }

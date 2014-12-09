@@ -1,0 +1,73 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<f:view locale="#{language.localeCode}">
+		<h:head>
+			<f:loadBundle var="msg" basename="com.adms.msg.policyservice.policyServiceMsg"/>
+			<title>#{msg['modal.header.text']}</title>
+		</h:head>
+	
+		<h:body>
+			<h:outputStylesheet library="css" name="global.css" />
+			<style>
+				.tableNoBorder tr{
+					border: none !important; border-style: none !important;
+				}
+				.tableNoBorder td{
+					border: none !important; border-style: none !important;
+				}
+				.btnWidth {width:95px;}
+			</style>
+			
+			<h:form id="frmAdd">
+				<p:panelGrid columns="4" styleClass="tableNoBorder">
+					<p:panelGrid columns="2">
+						<p:outputLabel value="#{msg['modal.add.call.date']}:"/>
+						<p:outputLabel value="#{currentDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" timeZone="#{PolicyServiceView.timeZone}"/>
+						</p:outputLabel>
+					</p:panelGrid>
+					<p:panelGrid columns="2">
+						<p:outputLabel value="#{msg['modal.add.call.time']}:"/>
+						<p:outputLabel value="#{currentDate}">
+							<f:convertDateTime pattern="HH:mm:ss" timeZone="#{PolicyServiceView.timeZone}"/>
+						</p:outputLabel>
+					</p:panelGrid>
+					<p:outputLabel value="#{msg['modal.add.in.2.0']}" for="fileOwner"/>
+					<p:inputText id="fileOwner" value=""/>
+					
+					<p:outputLabel value="#{msg['modal.add.in.1.1']}" for="insuredName"/>
+					<p:inputText id="insuredName" value="" />
+					<p:outputLabel value="#{msg['modal.add.in.2.1']}" for="mobileNo"/>
+					<p:inputText id="mobileNo" value="" />
+					
+					<p:outputLabel value="#{msg['modal.add.in.1.2']}" for="policyInceptionDate"/>
+					<p:inputText id="policyInceptionDate" value="" />
+					<p:outputLabel value="#{msg['modal.add.in.2.2']}" for="policyNo"/>
+					<p:inputText id="policyNo" value="" />
+					
+					<p:outputLabel value="#{msg['modal.add.in.1.3']}" for="birthDate"/>
+					<p:inputText id="birthDate" value="" />
+					<p:outputLabel value="#{msg['modal.add.in.2.3']}" for="policyId"/>
+					<p:inputText id="policyId" value="" />
+					
+					
+				</p:panelGrid>
+				
+				
+				<div style="position:absolute;bottom:3px;width:95%">
+					<p:separator style="width: 99%;"/>
+					<p:panelGrid columns="2" style="" styleClass="tableNoBorder">
+						<p:commandButton id="btnAdd" value="#{globalMsg['common.txt.btn.add']}" styleClass="btnWidth"/>
+						<p:commandButton id="btnClose" value="#{globalMsg['common.txt.btn.cancel']}" action="#{policyServiceView.closeAddModalDialog()}" process="@this" styleClass="btnWidth">
+							<p:resetInput target=":frmAdd" />
+						</p:commandButton>
+					</p:panelGrid>
+				</div>
+			</h:form>
+			
+		</h:body>
+	</f:view>
+</ui:composition>
