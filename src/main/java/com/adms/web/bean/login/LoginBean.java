@@ -14,6 +14,7 @@ public class LoginBean extends BaseBean {
 	private static final long serialVersionUID = 8499800092146667051L;
 	
 	private String username;
+	private String pwd;
 	private Date loginDate;
 	
 	public String login() {
@@ -40,6 +41,14 @@ public class LoginBean extends BaseBean {
 
 	public void setLoginDate(Date loginDate) {
 		this.loginDate = loginDate;
+	}
+
+	public String getPwd() {
+		return pwd;
+	}
+
+	public void setPwd(String pwd) {
+		this.pwd = pwd;
 	}
 	
 

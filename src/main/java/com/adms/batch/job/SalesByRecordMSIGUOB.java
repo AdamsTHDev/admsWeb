@@ -15,7 +15,7 @@ public class SalesByRecordMSIGUOB extends SalesByRecord {
 	
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws IOException {
 		System.out.println("SalesByRecord");
-		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.SALES_BY_RECORD_MSIG.getValue());
+		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.SALES_BY_RECORD.getValue());
 		
 		ExcelFormat ef = new ExcelFormat(fileFormat);
 		

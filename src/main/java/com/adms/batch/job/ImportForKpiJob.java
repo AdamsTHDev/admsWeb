@@ -64,10 +64,10 @@ public class ImportForKpiJob {
 //			importTsr();
 //			importCampaignKeyCode();
 //			importPosition();
-//			importKpiTargetSetup();
+			importKpiTargetSetup();
 //			importEoc();
 			
-			startBatch();
+//			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -91,9 +91,9 @@ public class ImportForKpiJob {
 		File path = new File(dir);
 		
 		for(File fd : path.listFiles(
-//				new FileFilterByName(
-//						"MTLife Hip Broker"
-//						)
+				new FileFilterByName(
+						"MSIG UOB"
+						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
@@ -502,14 +502,14 @@ public class ImportForKpiJob {
 	}
 	
 	private void importKpiTargetSetup() {
-		String dir = "D:/Test/upload/KpiTarget/20140901";
+		String dir = "D:/Test/upload/KpiTarget/20141001";
 		final String DSM = "DSM";
 		final String SUP = "SUP";
 		final String TSR = "TSR";
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_SETUP_IMPORT.getValue()));
 			File fdir = new File(dir);
-			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201409-3"))) {
+			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201410"))) {
 				DataHolder wb = ef.readExcel(new FileInputStream(xls));
 				
 				for(String sheetName : wb.getKeyList()) {

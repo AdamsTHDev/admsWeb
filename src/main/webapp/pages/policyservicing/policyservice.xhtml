@@ -174,7 +174,8 @@
 	
 		<h:form id="frmBtn">
 			<h:panelGroup id="panelAction">
-				<p:commandButton id="searchBtn" value="#{msg['btn.start.search']}"/>
+				<p:commandButton id="searchBtn" value="#{msg['btn.start.search']}"
+								icon="ui-icon-search" actionListener="#{policyServiceView.}"/>
 				<p:commandButton id="addCaseBtn" value="#{msg['btn.add.new.case']}" 
 								icon="ui-icon-circle-plus" actionListener="#{policyServiceView.callAddModalDialog}"/>
 				<p:commandButton id="viewBillHistBtn" value="#{msg['btn.view.billing.history']}"/>

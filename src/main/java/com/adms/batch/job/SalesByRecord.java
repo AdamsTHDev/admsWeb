@@ -162,7 +162,7 @@ public class SalesByRecord implements IExcelData {
 				
 				String xRef = data.get("xRef").getStringValue();
 				if(StringUtils.isBlank(xRef)) {
-					throw new Exception("XRef on this record is null | saleDate: " + saleDate + " | keyCode: " + listLotName);
+					throw new Exception("XRef on this record is null " + xRef + " | saleDate: " + saleDate + " | keyCode: " + listLotName);
 				}
 				PolicyInfo policy = kpiService().getPolicyInfoByXRef(xRef);
 				if(policy != null) {

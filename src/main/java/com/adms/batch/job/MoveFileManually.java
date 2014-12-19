@@ -27,7 +27,7 @@ public class MoveFileManually {
 //				, "MSIG Happy Life BL"
 //				, "FWD_TVD_Endowment 15_7"
 //				"POM_PA_Cash_Back",
-				"MSIG Enjoy Life (POM)"
+				"MSIG UOB"
 		};
 		String[] fileNames = new String[]{
 				"DailyPerformanceTrackingReport"

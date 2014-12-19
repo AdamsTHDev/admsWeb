@@ -6,12 +6,13 @@
 	<f:view locale="#{language.localeCode}">
 		<h:head>
 			<f:loadBundle var="msg" basename="com.adms.msg.policyservice.policyServiceMsg"/>
-			<title>#{msg['modal.header.text']}</title>
+			<title>#{msg['modal.add.header.text']}</title>
 		</h:head>
 	
 		<h:body>
 			<h:outputStylesheet library="css" name="global.css" />
 			<style>
+				* {font-size:13px !important;}
 				.tableNoBorder tr{
 					border: none !important; border-style: none !important;
 				}
@@ -19,52 +20,153 @@
 					border: none !important; border-style: none !important;
 				}
 				.btnWidth {width:95px;}
+				.removePadding td {padding: 0px !important;}
 			</style>
 			
 			<h:form id="frmAdd">
-				<p:panelGrid columns="4" styleClass="tableNoBorder">
-					<p:panelGrid columns="2">
-						<p:outputLabel value="#{msg['modal.add.call.date']}:"/>
-						<p:outputLabel value="#{currentDate}">
-							<f:convertDateTime pattern="dd/MM/yyyy" timeZone="#{PolicyServiceView.timeZone}"/>
-						</p:outputLabel>
+				<div style="positioin:relative;">
+					<p:panelGrid styleClass="tableNoBorder" style="width: 99%; position:relative;">
+						<p:row>
+							<p:column>
+								<p:panelGrid columns="2" styleClass="removePadding">
+									<p:outputLabel value="#{msg['modal.add.call.date']}: "/>
+									<p:outputLabel value="#{currentDate}">
+										<f:convertDateTime pattern="dd/MM/yyyy" timeZone="#{policyServiceView.timeZone}"/>
+									</p:outputLabel>
+								</p:panelGrid>	
+							</p:column>
+							<p:column>
+								<p:panelGrid columns="2" styleClass="removePadding">
+									<p:outputLabel value="#{msg['modal.add.call.time']}: "/>
+									<p:outputLabel value="#{currentDate}">
+										<f:convertDateTime pattern="HH:mm:ss" timeZone="#{policyServiceView.timeZone}"/>
+									</p:outputLabel>
+								</p:panelGrid>	
+							</p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.0']}" for="fileOwner"/></p:column>
+							<p:column><p:inputText id="fileOwner" value=""/></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.1']}" for="insuredName"/></p:column>
+							<p:column><p:inputText id="insuredName" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.1']}" for="mobileNo"/></p:column>
+							<p:column><p:inputText id="mobileNo" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.2']}" for="policyInceptionDate"/></p:column>
+							<p:column><p:inputText id="policyInceptionDate" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.2']}" for="policyNo"/></p:column>
+							<p:column><p:inputText id="policyNo" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.3']}" for="birthDate"/></p:column>
+							<p:column><p:inputText id="birthDate" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.3']}" for="policyId"/></p:column>
+							<p:column><p:inputText id="policyId" value="" /></p:column>
+						</p:row>
+						
+						<p:row><p:column colspan="4" style="padding: 0px;"><p:separator style="width:99%; cursor:default;"/></p:column></p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.4']}" for="channel"/></p:column>
+							<p:column><p:inputText id="channel" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.4']}" for="changedName"/></p:column>
+							<p:column><p:inputText id="changedName" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.5']}" for="callNature"/></p:column>
+							<p:column><p:inputText id="callNature" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.5']}" for="changedThaiId"/></p:column>
+							<p:column><p:inputText id="changedThaiId" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.6']}" for="callCategory"/></p:column>
+							<p:column><p:inputText id="callCategory" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.6']}" for="changedGender"/></p:column>
+							<p:column><p:inputText id="changedGender" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column rowspan="2"><p:outputLabel value="#{msg['modal.add.in.1.7']}" for="callSubcategory"/></p:column>
+							<p:column rowspan="2"><p:inputText id="callSubcategory" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.7']}" for="changedBirthDate"/></p:column>
+							<p:column><p:inputText id="changedBirthDate" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.8']}" for="changedMaritalStatus"/></p:column>
+							<p:column><p:inputText id="changedMaritalStatus" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.8']}" for="callResult"/></p:column>
+							<p:column><p:inputText id="callResult" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.9']}" for="changedMobileNo"/></p:column>
+							<p:column><p:inputText id="changedMobileNo" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.9']}" for="cancelReason"/></p:column>
+							<p:column><p:inputText id="cancelReason" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.10']}" for="changedHomeNo"/></p:column>
+							<p:column><p:inputText id="changedHomeNo" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.10']}" for="optOut"/></p:column>
+							<p:column><p:inputText id="optOut" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.11']}" for="changedOfficeNo"/></p:column>
+							<p:column><p:inputText id="changedOfficeNo" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.11']}" for="followUpUser"/></p:column>
+							<p:column><p:inputText id="followUpUser" value="" /></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.12']}" for="changedEmailId"/></p:column>
+							<p:column><p:inputText id="changedEmailId" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.1.12']}" for="caseDetails"/></p:column>
+							<p:column></p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.13']}" for="changedCity"/></p:column>
+							<p:column><p:inputText id="changedCity" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column colspan="2" rowspan="3" style="padding:0;vertical-align: top;">
+								<p:inputTextarea id="caseDetails" value="" style="width:100%;" ></p:inputTextarea>
+							</p:column>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.14']}" for="changedZipCode"/></p:column>
+							<p:column><p:inputText id="changedZipCode" value="" /></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.15']}" for="changedAddress"/></p:column>
+							<p:column><p:inputTextarea id="changedAddress" value="" style="width:100%;height:100%"/></p:column>
+						</p:row>
+						
+						<p:row>
+							<p:column><p:outputLabel value="#{msg['modal.add.in.2.16']}" for="rePrintPolicy"/></p:column>
+							<p:column><p:inputText id="rePrintPolicy" value=""/></p:column>
+						</p:row>
+						
 					</p:panelGrid>
-					<p:panelGrid columns="2">
-						<p:outputLabel value="#{msg['modal.add.call.time']}:"/>
-						<p:outputLabel value="#{currentDate}">
-							<f:convertDateTime pattern="HH:mm:ss" timeZone="#{PolicyServiceView.timeZone}"/>
-						</p:outputLabel>
-					</p:panelGrid>
-					<p:outputLabel value="#{msg['modal.add.in.2.0']}" for="fileOwner"/>
-					<p:inputText id="fileOwner" value=""/>
-					
-					<p:outputLabel value="#{msg['modal.add.in.1.1']}" for="insuredName"/>
-					<p:inputText id="insuredName" value="" />
-					<p:outputLabel value="#{msg['modal.add.in.2.1']}" for="mobileNo"/>
-					<p:inputText id="mobileNo" value="" />
-					
-					<p:outputLabel value="#{msg['modal.add.in.1.2']}" for="policyInceptionDate"/>
-					<p:inputText id="policyInceptionDate" value="" />
-					<p:outputLabel value="#{msg['modal.add.in.2.2']}" for="policyNo"/>
-					<p:inputText id="policyNo" value="" />
-					
-					<p:outputLabel value="#{msg['modal.add.in.1.3']}" for="birthDate"/>
-					<p:inputText id="birthDate" value="" />
-					<p:outputLabel value="#{msg['modal.add.in.2.3']}" for="policyId"/>
-					<p:inputText id="policyId" value="" />
-					
-					
-				</p:panelGrid>
 				
-				
-				<div style="position:absolute;bottom:3px;width:95%">
-					<p:separator style="width: 99%;"/>
-					<p:panelGrid columns="2" style="" styleClass="tableNoBorder">
-						<p:commandButton id="btnAdd" value="#{globalMsg['common.txt.btn.add']}" styleClass="btnWidth"/>
-						<p:commandButton id="btnClose" value="#{globalMsg['common.txt.btn.cancel']}" action="#{policyServiceView.closeAddModalDialog()}" process="@this" styleClass="btnWidth">
-							<p:resetInput target=":frmAdd" />
-						</p:commandButton>
-					</p:panelGrid>
+					<div style="">
+						<p:separator style="width: 99%; cursor:default;"/>
+						<p:panelGrid id="panelBtn" columns="2" style="" styleClass="tableNoBorder">
+							<p:commandButton id="btnAdd" value="#{globalMsg['common.txt.btn.add']}" styleClass="btnWidth"/>
+							<p:commandButton id="btnClose" value="#{globalMsg['common.txt.btn.cancel']}" action="#{policyServiceView.closeAddModalDialog()}" process="@this" styleClass="btnWidth">
+								<p:resetInput target=":frmAdd" />
+							</p:commandButton>
+						</p:panelGrid>
+					</div>
 				</div>
 			</h:form>
 			

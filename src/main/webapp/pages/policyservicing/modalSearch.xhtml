@@ -1,0 +1,55 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<f:view locale="#{language.localeCode}">
+		<h:head>
+			<f:loadBundle var="msg" basename="com.adms.msg.policyservice.policyServiceMsg"/>
+			<title>#{msg['modal.search.header.text']}</title>
+		</h:head>
+	
+		<h:body>
+			<h:outputStylesheet library="css" name="global.css" />
+			<style>
+				* {font-size:13px !important;}
+				.tableNoBorder tr{
+					border: none !important; border-style: none !important;
+				}
+				.tableNoBorder td{
+					border: none !important; border-style: none !important;
+				}
+				.btnWidth {width:95px;}
+				.removePadding td {padding: 0px !important;}
+			</style>
+			
+			<h:form id="frmSearch">
+				<p:panelGrid columns="2" styleClass="tableNoBorder">
+				
+					<p:outputLabel value="#{msg['modal.search.in.1.1']}" for="citizenId"/>
+					<p:inputText id="citizenId"></p:inputText>
+					
+					<p:outputLabel value="#{msg['modal.search.in.1.2']}" for="mobileNo"/>
+					<p:inputText id="mobileNo"></p:inputText>
+					
+					<p:outputLabel value="#{msg['modal.search.in.1.3']}" for="policyNo"/>
+					<p:inputText id="policyNo"></p:inputText>
+					
+					<p:outputLabel value="#{msg['modal.search.in.1.4']}" for="policyId"/>
+					<p:inputText id="policyId"></p:inputText>
+					
+					<p:outputLabel value="#{msg['modal.search.in.1.5']}" for="insuredName"/>
+					<p:inputText id="insuredName"></p:inputText>
+					
+					<p:outputLabel value="#{msg['modal.search.in.1.6']}" for="birthDate"/>
+					<p:inputText id="birthDate"></p:inputText>
+					
+				</p:panelGrid>
+				<p:separator style="width:99%;"/>
+				<p:commandButton id="btnReset" value="#{globalMsg['common.txt.btn.reset']"/>
+				<p:commandButton id="btnSearch" value="#{globalMsg['common.txt.btn.search']"/>
+			</h:form>
+			
+		</h:body>
+	</f:view>
+</ui:composition>

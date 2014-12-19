@@ -123,7 +123,9 @@ public class ExportKpiJob {
 			Sheet toSheet = null;
 			
 			for(KpiResult data : list) {
-				
+				if(data.getCampaign().getCode().equals("021DP1714L04")) {
+					continue;
+				}
 				if(!campaignCode.equals(data.getCampaign().getCode())) {
 					
 					if(toSheet != null && !StringUtils.isBlank(campaignCode)) {
@@ -779,14 +781,26 @@ public class ExportKpiJob {
 						copyRow(tempSheet, toSheet, groupRow, currentRow, positionCol, positionCol);
 					} else if(groupRow == 2) {
 						doColumn(tempSheet, toSheet, positionCol, groupRow, currentRow, kpiService().getTsrInfoInMap(tsmCode).getFullName());
+					} else if(groupRow == 4) {
+						copyRow(tempSheet, toSheet, groupRow - 1, currentRow, positionCol, positionCol);
 					}
-					doColumn(tempSheet, toSheet, campaignCodeCol, groupRow, currentRow, campaignCode);
-					doColumn(tempSheet, toSheet, campaignNameCol, groupRow, currentRow, kpiService().getCampaignInMap(campaignCode).getDisplayName());
+					
+					if(groupRow == 4) {
+						doColumn(tempSheet, toSheet, campaignCodeCol, groupRow - 1, currentRow, campaignCode);
+						doColumn(tempSheet, toSheet, campaignNameCol, groupRow - 1, currentRow, kpiService().getCampaignInMap(campaignCode).getDisplayName());
+					} else {
+						doColumn(tempSheet, toSheet, campaignCodeCol, groupRow, currentRow, campaignCode);
+						doColumn(tempSheet, toSheet, campaignNameCol, groupRow, currentRow, kpiService().getCampaignInMap(campaignCode).getDisplayName());
+					}
 					
 					if(tsmKpi.isGradeNull) {
 						doColumn(tempSheet, toSheet, gradeCol, groupRow, currentRow, NOT_AVILABLE);
 					} else {
-						doColumn(tempSheet, toSheet, gradeCol, groupRow, currentRow, calculateGrade(tsmKpi.totalScore * 100, false));
+						if(groupRow == 4) {
+							doColumn(tempSheet, toSheet, gradeCol, groupRow - 1, currentRow, calculateGrade(tsmKpi.totalScore * 100, false));
+						} else {
+							doColumn(tempSheet, toSheet, gradeCol, groupRow, currentRow, calculateGrade(tsmKpi.totalScore * 100, false));
+						}
 						sumGrade += tsmKpi.totalScore;
 						count++;
 					}

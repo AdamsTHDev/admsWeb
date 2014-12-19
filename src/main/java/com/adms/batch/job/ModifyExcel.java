@@ -19,11 +19,11 @@ import com.adms.web.utils.FileUtils;
 public class ModifyExcel {
 
 	public static void main(String[] args) {
-		String path = "D:/Test/upload/kpi/201410/";
+		String path = "D:/Test/upload/kpi/201409/";
 		System.out.println("Start");
 		try {
 			File dir = new File(path);
-			for(File dig : dir.listFiles()) {
+			for(File dig : dir.listFiles(new FileFilterByName("MSIG UOB"))) {
 				if(dig.isDirectory()) {
 					for(File d : dig.listFiles()) {
 						if(d.isDirectory()) {
