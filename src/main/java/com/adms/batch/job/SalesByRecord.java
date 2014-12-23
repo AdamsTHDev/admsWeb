@@ -1,5 +1,6 @@
 package com.adms.batch.job;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -30,6 +31,10 @@ public class SalesByRecord implements IExcelData {
 	
 	private static KpiService kpiService() throws Exception {
 		return KpiService.getInstance();
+	}
+	
+	public void importFromInputStream(File file, List<Exception> exceptionList) throws Exception {
+		
 	}
 	
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws IOException {
@@ -96,7 +101,7 @@ public class SalesByRecord implements IExcelData {
 		}
 	}
 	
-	public void process(DataHolder wbHolder, String sheetName) throws Exception {
+	protected void process(DataHolder wbHolder, String sheetName) throws Exception {
 		DataHolder sheetHolder = wbHolder.get(sheetName);
 		
 		List<DataHolder> dataList = sheetHolder.getDataList("salesByRecordList");

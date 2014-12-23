@@ -42,9 +42,9 @@ public class ExportKpiJob {
 	private final String TSM = "SUP";
 	private final String TSR = "TSR";
 	
-	private final int START_DSM_ROW = 1;
-	private final int START_TSM_ROW = 6;
-	private final int START_TSR_ROW = 12;
+	private final int START_DSM_ROW = -1;
+	private final int START_TSM_ROW = 1;
+	private final int START_TSR_ROW = 7;
 	
 	private final int POSITION_COL = 0;
 	private final int KPI_COL = 1;
@@ -59,16 +59,18 @@ public class ExportKpiJob {
 	private Map<String, Map<String, TsmActualKpi>> tsmActualMaps = new HashMap<>();
 	private List<KpiRetention> kpiRetentions;
 	
+	private List<KpiResult> kpiResults;
+	
 	private int currentRow = 0;
 	private String campaignCode = "";
 	private String dsmCode = "";
 	private String tsmCode = "";
 	private String tsrCode = "";
 	
-	private Cell dsmActualSaleCell;
-	private Cell dsmActualConfCell;
-	private Cell dsmActualRetenCell;
-	private Cell dsmActualAbcCell;
+//	private Cell dsmActualSaleCell;
+//	private Cell dsmActualConfCell;
+//	private Cell dsmActualRetenCell;
+//	private Cell dsmActualAbcCell;
 	
 	private Cell tsmActualTarpCell;
 	private Cell tsmActualTotalTarpCell;
@@ -92,7 +94,7 @@ public class ExportKpiJob {
 			String mDate = "201409";
 			try {
 				processYearMonth = new String(mDate);
-				processToDB(processYearMonth);
+//				processToDB(processYearMonth);
 				processData();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -113,8 +115,8 @@ public class ExportKpiJob {
 	}
 
 	private void processData() throws Exception {
-			List<KpiResult> list = kpiService().getKpiResults(processYearMonth);
-			if(null == list) throw new Exception("No data has been found: " + processYearMonth);
+			kpiResults = kpiService().getKpiResults(processYearMonth);
+			if(null == kpiResults) throw new Exception("No data has been found: " + processYearMonth);
 			
 			kpiRetentions = kpiService().findKpiRetentionByYearMonth(processYearMonth);
 			
@@ -122,17 +124,19 @@ public class ExportKpiJob {
 			Sheet tSheet = null;
 			Sheet toSheet = null;
 			
-			for(KpiResult data : list) {
+			for(KpiResult data : kpiResults) {
+				
 				if(data.getCampaign().getCode().equals("021DP1714L04")) {
 					continue;
 				}
+				
 				if(!campaignCode.equals(data.getCampaign().getCode())) {
 					
 					if(toSheet != null && !StringUtils.isBlank(campaignCode)) {
 						System.out.println("campaignCode: " + campaignCode);
 						setTSMActual();
 						doCalculate(toSheet, false);
-						doDsmGroup(toSheet);
+//						doDsmGroup(toSheet);
 						doWriteWorkbook(wb, kpiService().getCampaignInMap(campaignCode).getDisplayName());
 						wb = null;
 					}
@@ -143,6 +147,7 @@ public class ExportKpiJob {
 					if(wb == null) {
 						wb = getWbTemplate();
 					}
+					
 					tSheet = wb.getSheetAt(0);
 					toSheet = wb.createSheet(campaign.getDisplayName());
 					doHead(wb, campaign.getDisplayName());
@@ -166,12 +171,12 @@ public class ExportKpiJob {
 					dsmCode = data.getDsmInfo().getTsrCode();
 	
 	//				<!-- DSM have no campaignCode -->
-					List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(DSM, null, dsmCode, processYearMonth);
+//					List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(DSM, null, dsmCode, processYearMonth);
 					try {
-						if(kpiCats == null || kpiCats.isEmpty()) {
-							System.err.println("Not found KPIs Category-> dsmCode:" + dsmCode + " | campaignCode: " + campaignCode);
-							kpiCats = null;
-						}
+//						if(kpiCats == null || kpiCats.isEmpty()) {
+//							System.err.println("Not found KPIs Category-> dsmCode:" + dsmCode + " | campaignCode: " + campaignCode);
+//							kpiCats = null;
+//						}
 						
 						Map<String, DsmKpiByCampaign> campaignMap = null;
 						if(dsmActualMaps.get(dsmCode) == null) {
@@ -185,7 +190,8 @@ public class ExportKpiJob {
 							campaignMap.put(campaignCode, new DsmKpiByCampaign());
 						}
 						
-						generateRowData(tSheet, toSheet, kpiCats, dsmCode, DSM, data);
+//						generateRowData(tSheet, toSheet, kpiCats, dsmCode, DSM, data);
+						generateRowData(tSheet, toSheet, null, dsmCode, DSM, data);
 						
 					} catch(Exception e) {
 						e.printStackTrace();
@@ -246,7 +252,7 @@ public class ExportKpiJob {
 	//		<!-- for last campaign -->
 			setTSMActual();
 			doCalculate(toSheet, false);
-			doDsmGroup(toSheet);
+//			doDsmGroup(toSheet);
 			doWriteWorkbook(wb, kpiService().getCampaignInMap(campaignCode).getDisplayName());
 			wb.close();
 	//		<!-- end KPIs -->
@@ -429,45 +435,45 @@ public class ExportKpiJob {
 		Cell tempCell = tempSheet.getRow(tempRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 		Cell toCell = null;
 		switch(tempRowNum) {
+//		case 1 : 
+//			dsmActualSaleCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
+//			copyCellTypeAndStyle(tempCell, dsmActualSaleCell); 
+//			break;
+//		case 2 : 
+//			dsmActualConfCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
+//			copyCellTypeAndStyle(tempCell, dsmActualConfCell); 
+//			break;
+//		case 3 : 
+//			dsmActualRetenCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
+//			copyCellTypeAndStyle(tempCell, dsmActualRetenCell); 
+//			break;
+//		case 4 : 
+//			dsmActualAbcCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
+//			copyCellTypeAndStyle(tempCell, dsmActualAbcCell); 
+//			break;
 		case 1 : 
-			dsmActualSaleCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
-			copyCellTypeAndStyle(tempCell, dsmActualSaleCell); 
-			break;
-		case 2 : 
-			dsmActualConfCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
-			copyCellTypeAndStyle(tempCell, dsmActualConfCell); 
-			break;
-		case 3 : 
-			dsmActualRetenCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
-			copyCellTypeAndStyle(tempCell, dsmActualRetenCell); 
-			break;
-		case 4 : 
-			dsmActualAbcCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
-			copyCellTypeAndStyle(tempCell, dsmActualAbcCell); 
-			break;
-		case 6 : 
 			tsmActualTarpCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, tsmActualTarpCell); 
 			break;
-		case 7 : 
+		case 2 : 
 			tsmActualTotalTarpCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, tsmActualTotalTarpCell); 
 			break;
-		case 8 : 
+		case 3 : 
 			tsmActualListConvCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, tsmActualListConvCell); 
 			break;
-		case 9 : 
+		case 4 : 
 			tsmActualConfCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, tsmActualConfCell); 
 			break;
-		case 10 : 
+		case 5 : 
 			tsmActualRetenCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, tsmActualRetenCell); 
 			Double retention = getRetentionForTsm();
 			tsmActualRetenCell.setCellValue(retention);
 			break;
-		case 12 : 
+		case 7 : 
 			Double sale = kpi.getSumOfAfyp().doubleValue();
 			
 			if(dsmKpi != null) {
@@ -483,18 +489,18 @@ public class ExportKpiJob {
 			copyCellTypeAndStyle(tempCell, toCell);
 			toCell.setCellValue(sale);
 			break;
-		case 13 : 
+		case 8 : 
 			Double attend = kpi.getCountTalkDate() == null ? 0 : (kpi.getCountTalkDate().doubleValue() / WORK_DAYS);
 			toCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, toCell);
 			toCell.setCellValue(attend);
 			break;
-		case 14 : 
+		case 9 : 
 			toCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, toCell);
 			toCell.setCellValue(kpi.getTotalTalkHrs() == null ? 0D : (kpi.getTotalTalkHrs().doubleValue()));
 			break;
-		case 15 : 
+		case 10 : 
 			Double firstConf = kpi.getFirstConfirmSale().doubleValue() / kpi.getAllSale().doubleValue();
 			
 			if(dsmKpi != null) {
@@ -581,27 +587,27 @@ public class ExportKpiJob {
 	
 	private void doDsmGroup(Sheet toSheet) {
 //		<!-- do All for DSM -->
-		if(toSheet != null && dsmCode != null) {
-			DsmKpiByCampaign dsmKpiByCampaign = dsmActualMaps.get(dsmCode).get(campaignCode);
-			double firstConfirmSale = 0;
-			if(dsmKpiByCampaign.allSale != null && dsmKpiByCampaign.allSale > 0) {
-				firstConfirmSale = dsmKpiByCampaign.firstSale / dsmKpiByCampaign.allSale;
-			}
-			double abCat = Integer.valueOf(dsmKpiByCampaign.countOnlyAB).doubleValue() / Integer.valueOf(dsmKpiByCampaign.countAllForAB).doubleValue();
-			
-			dsmActualSaleCell.setCellValue(dsmKpiByCampaign.sales);
-			dsmActualConfCell.setCellValue(firstConfirmSale);
-			dsmActualAbcCell.setCellValue(abCat);
-			
-			Double retentionValue = 0D;
-			Double base = dsmKpiByCampaign.openHc + dsmKpiByCampaign.addDuringHc;
-			if(base != null && base != 0) {
-				retentionValue = dsmKpiByCampaign.endHc / base;
-			}
-			dsmActualRetenCell.setCellValue(retentionValue.doubleValue());
-			
-			doCalculate(toSheet, true);
-		}
+//		if(toSheet != null && dsmCode != null) {
+//			DsmKpiByCampaign dsmKpiByCampaign = dsmActualMaps.get(dsmCode).get(campaignCode);
+//			double firstConfirmSale = 0;
+//			if(dsmKpiByCampaign.allSale != null && dsmKpiByCampaign.allSale > 0) {
+//				firstConfirmSale = dsmKpiByCampaign.firstSale / dsmKpiByCampaign.allSale;
+//			}
+//			double abCat = Integer.valueOf(dsmKpiByCampaign.countOnlyAB).doubleValue() / Integer.valueOf(dsmKpiByCampaign.countAllForAB).doubleValue();
+//			
+//			dsmActualSaleCell.setCellValue(dsmKpiByCampaign.sales);
+//			dsmActualConfCell.setCellValue(firstConfirmSale);
+//			dsmActualAbcCell.setCellValue(abCat);
+//			
+//			Double retentionValue = 0D;
+//			Double base = dsmKpiByCampaign.openHc + dsmKpiByCampaign.addDuringHc;
+//			if(base != null && base != 0) {
+//				retentionValue = dsmKpiByCampaign.endHc / base;
+//			}
+//			dsmActualRetenCell.setCellValue(retentionValue.doubleValue());
+//			
+//			doCalculate(toSheet, true);
+//		}
 	}
 	
 	private void doDsmKpi() {
@@ -861,7 +867,7 @@ public class ExportKpiJob {
 	private void doWriteWorkbook(Workbook wb, String name) {
 		FileOutputStream fos = null;
 		FileInputStream fis = null;
-		String path = "D:/Test/export/";
+		String path = "D:/Test/export/" + processYearMonth + "/";
 		String fileName = name + "_" + processYearMonth + ".xlsx";
 		
 		try {
@@ -929,6 +935,10 @@ public class ExportKpiJob {
 			tempRow = 17;
 		}
 		
+		if(tempRow < 0) {
+			return;
+		}
+		
 		int endRow = kpiCats == null ? groupSize : kpiCats.size();
 		int i = 0;
 		Double weightSum = 0D;
@@ -990,7 +1000,7 @@ public class ExportKpiJob {
 			} else {
 //				<!-- total row -->
 //				<!-- Position Column (hidden tsrCode)>
-				if(level.equals(TSM) && tempRow == 11) {
+				if(level.equals(TSM) && tempRow == 6) {
 					doColumn(tempSheet, toSheet, POSITION_COL, tempRow, n, tsrCode);
 				}
 				

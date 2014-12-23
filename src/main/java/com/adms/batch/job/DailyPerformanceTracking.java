@@ -1,5 +1,6 @@
 package com.adms.batch.job;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,10 @@ import com.adms.imex.excelformat.DataHolder;
 import com.adms.imex.excelformat.ExcelFormat;
 
 public class DailyPerformanceTracking implements IExcelData {
+	
+	public void importFromInputStream(File file, List<Exception> exceptionList) throws Exception {
+		
+	}
 
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws IOException {
 		System.out.println("DailyPerformanceTracking");

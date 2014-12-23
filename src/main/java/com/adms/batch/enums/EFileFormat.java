@@ -18,6 +18,7 @@ public enum EFileFormat {
 	
 	SALES_BY_RECORD_MSIG("salesByRecordMSIG", "config/fileformat/salesByRecMSIGFormat.xml"),
 	
+	QC_RECONFIRM_OTO("qcReconfirmOTO", "config/fileformat/qcReconfirmFormat_121.xml"),
 	QC_RECONFIRM_NEW("qcReconfirmNew", "config/fileformat/qcReconfirmFormat_new.xml");
 	
 	private String code;

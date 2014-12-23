@@ -62,6 +62,7 @@ import com.adms.domain.entities.TsrSite;
 import com.adms.domain.entities.TsrStatus;
 import com.adms.domain.entities.TsrTalkTime;
 import com.adms.domain.entities.TsrTalkTimeDetail;
+import com.adms.utils.DateUtil;
 
 public class KpiService {
 
@@ -555,10 +556,10 @@ public class KpiService {
 				objs.add(tsrCode);
 			}
 			
-			if(!StringUtils.isBlank("")) {
-				hql += "and CONVERT(nvarchar(6), k.EFFECTIVE_DATE, 112) <= ? ";
+			if(!StringUtils.isBlank(processYearMonth)) {
+				hql += "and CONVERT(nvarchar(6), d.effectiveDate, 112) <= ? ";
 				objs.add(processYearMonth);
-				hql += "and CONVERT(nvarchar(6), k.END_DATE, 112) >= ? ";
+				hql += "and CONVERT(nvarchar(6), d.endDate, 112) >= ? ";
 				objs.add(processYearMonth);
 			}
 			
@@ -590,27 +591,44 @@ public class KpiService {
 		return v.length() < 3 ? v : v.substring(v.length() / 2 - 1, v.length() / 2 + 2);
 	}
 	
-	public PolicyInfo getPolicyInfoByCustomerName(String name) throws Exception {
-		if(name != null) {
+	public PolicyInfo getPolicyInfoByCustomerName(String customerName, Date saleDate) throws Exception {
+		if(!StringUtils.isBlank(customerName)) {
 			
 			String hql = " from PolicyInfo d "
-					+ " where replace(replace(d.customer.fullName, ' ', ''), ' ', '') like ? ";
+					+ " where replace(replace(d.customer.fullName, ' ', ''), ' ', '') like ? "
+					+ " order by d.id";
 			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
-			String param = "%" + name.replaceAll("  ", "").replaceAll(" ", "").trim() + "%";
+			String param = "%" + customerName.replaceAll("  ", "").replaceAll(" ", "").trim() + "%";
 			
 			List<PolicyInfo> list = bo.findByHql(hql, param);
 			if(null != list && !list.isEmpty()) {
 				if(list.size() == 1) {
 					return list.get(0);
 				} else {
-					throw new Exception("Found Policy more than one> name: " + name 
+					String sDate = DateUtil.convDateToString("yyyy-MM-dd", saleDate);
+					SalesRecordBo srbo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
+					String hql2 = " from SalesRecord s "
+							+ " where 1 = 1"
+							+ " and s.policyInfo.xRef = ? "
+							+ " and s.saleDate = ? ";
+					
+					System.err.println("Found Policy more than one > name: " + customerName);
+					for(PolicyInfo info : list) {
+						System.out.println("xRef: " + info.getxRef() + " | saleDate: " + sDate);
+						List<SalesRecord> sales = srbo.findByHQL(hql2, info.getxRef(), DateUtil.convStringToDate("yyyy-MM-dd", sDate));
+						if(sales != null && !sales.isEmpty() && sales.size() == 1) {
+							return sales.get(0).getPolicyInfo();
+						}
+					}
+					
+					throw new Exception("Found Policy more than one > name: " + customerName 
 							+ " | param: " + param + " | policy: " + Arrays.toString(list.toArray()));
 				}
 			} else {
-				throw new Exception("Policy not found: " + name + " | param: " + param + " | with hql: " + hql);
+				throw new Exception("Policy not found: " + customerName + " | param: " + param + " | with hql: " + hql);
 			}
 		} else {
-			throw new Exception("Name is null");
+			throw new Exception("Customer Name is Blank");
 		}
 		
 	}

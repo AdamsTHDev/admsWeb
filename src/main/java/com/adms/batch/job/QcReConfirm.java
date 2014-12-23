@@ -1,5 +1,6 @@
 package com.adms.batch.job;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,13 +16,17 @@ import com.adms.imex.excelformat.ExcelFormat;
 
 public class QcReConfirm implements IExcelData {
 	
-	private List<Exception> exceptions = new ArrayList<Exception>();
+	protected List<Exception> exceptions = new ArrayList<Exception>();
+	
+	public void importFromInputStream(File file, List<Exception> exceptionList) throws Exception {
+		
+	}
 	
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws Exception {
 		System.out.println("QcReConfirm");
 		
-		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
-//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
+//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
+		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
 //		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/fileformat/qcReconfirmFormat_MSIGHappyLife.xml");
 		ExcelFormat ef = new ExcelFormat(fileFormat);
 		
@@ -47,7 +52,7 @@ public class QcReConfirm implements IExcelData {
 		return result;
 	}
 	
-	private boolean process(DataHolder wbHolder, String sheetName) throws Exception {
+	protected boolean process(DataHolder wbHolder, String sheetName) throws Exception {
 		boolean result = false;
 		
 		DataHolder sheet = wbHolder.get(sheetName);
@@ -61,6 +66,7 @@ public class QcReConfirm implements IExcelData {
 			Date saleDate = (Date) data.get("saleDate").getValue();
 			Date qcDate = (Date) data.get("qcDate").getValue();
 			String qcCode = data.get("qcCode").getStringValue();
+			String tsrName = data.get("tsrName").getStringValue();
 			String tsrStatus = data.get("tsrStatus").getStringValue();
 			String qcStatus = data.get("qcStatus").getStringValue();
 			String reason = data.get("reason").getStringValue();
@@ -70,7 +76,7 @@ public class QcReConfirm implements IExcelData {
 			
 			PolicyInfo policyInfo = null;
 			try {
-				policyInfo = KpiService.getInstance().getPolicyInfoByCustomerName(customerName);
+				policyInfo = KpiService.getInstance().getPolicyInfoByCustomerName(customerName, saleDate);
 				QaStatus qaStatus = null;
 				PolicyStatus policyStatus = null;
 				

@@ -1,5 +1,7 @@
 package com.adms.batch.job;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -19,6 +21,37 @@ import com.adms.utils.DateUtil;
 public class ImportTsrTracking implements IExcelData {
 		
 	private List<Exception> exceptions = new ArrayList<Exception>();
+	
+	public void importFromInputStream(File file, List<Exception> exceptionList) throws Exception {
+		System.out.println("ImportTsrTracking processing..");
+//		file.getName()
+		
+//		InputStream fileFormat = URLClassLoader.getSystemResourceAsStream(EFileFormat.TSR_TRACKING.getValue());
+		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.TSR_TRACKING.getValue());
+		
+		ExcelFormat ef = new ExcelFormat(fileFormat);
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+			DataHolder wbHolder = ef.readExcel(is);
+			List<String> sheetNames = wbHolder.getKeyList();
+			if(sheetNames.size() == 0) {
+				return;
+			}
+		
+			for(String sheetName : sheetNames) {
+				process(wbHolder, sheetName);
+			}
+			
+		} catch (Exception e) {
+			exceptionList.add(e);
+			e.printStackTrace();
+		} finally {
+//			fileFormat.close();
+			is.close();
+		}
+		exceptionList.addAll(exceptions);
+	}
 	
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws Exception {
 		System.out.println("ImportTsrTracking processing..");

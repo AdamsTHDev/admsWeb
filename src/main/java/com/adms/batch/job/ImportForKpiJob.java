@@ -64,10 +64,10 @@ public class ImportForKpiJob {
 //			importTsr();
 //			importCampaignKeyCode();
 //			importPosition();
-			importKpiTargetSetup();
+//			importKpiTargetSetup();
 //			importEoc();
 			
-//			startBatch();
+			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -81,7 +81,7 @@ public class ImportForKpiJob {
 	
 	private void startBatch() {
 		List<Exception> exceptionList = new ArrayList<Exception>();
-		String dir = "D:/Test/upload/kpi/201409";
+		String dir = "D:/Test/upload/kpi/201410";
 		
 		if(StringUtils.isBlank(dir)) {
 			System.err.println("Directory is null");
@@ -92,21 +92,28 @@ public class ImportForKpiJob {
 		
 		for(File fd : path.listFiles(
 				new FileFilterByName(
-						"MSIG UOB"
+						"MSIG Happy Life BL",
+						"MSIG UOB",
+						"MTI-KBank",
+						"MTLife Hip Broker",
+						"MTLife POM 2nd Get",
+						"MTLife POM PA",
+						"MTLife WIN",
+						"POM_PA_Cash_Back"
 						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
-//						new FileFilterByName(
-//						"20141021",
-//						"20141022",
-//						"20141024",
-//						"20141027",
-//						"20141028",
-//						"20141029",
-//						"20141030",
-//						"20141031"
-//						)
+						new FileFilterByName(
+						"20141021",
+						"20141022",
+						"20141024",
+						"20141027",
+						"20141028",
+						"20141029",
+						"20141030",
+						"20141031"
+						)
 						)) {
 					System.out.println("=========================================================");
 					System.out.println("folder: " + fd.getName() + " >>> " + byDate.getName());
@@ -152,23 +159,23 @@ public class ImportForKpiJob {
 					}
 					
 					//process daily perfomance
-					for(File excel : excels) {
-						if(excel.getName().contains("Daily_Performance_Tracking_ByLot") || excel.getName().contains("DailyPerformanceTrackingReport")) {
-							FileInputStream fis = null;
-							try {
-								fis = new FileInputStream(excel);
-								IExcelData xd = factory(excel.getName());
-								Date start = Calendar.getInstance().getTime();
-								xd.importFromInputStream(fis, exceptionList);
-								Date end = Calendar.getInstance().getTime();
-								System.out.println("Import Daily Performance Tracking processing time: " + getProcessTime(start, end));
-							} catch(Exception e) {
-								e.printStackTrace();
-							} finally {
-								try { fis.close(); } catch (IOException e) {}
-							}
-						}
-					}
+//					for(File excel : excels) {
+//						if(excel.getName().contains("Daily_Performance_Tracking_ByLot") || excel.getName().contains("DailyPerformanceTrackingReport")) {
+//							FileInputStream fis = null;
+//							try {
+//								fis = new FileInputStream(excel);
+//								IExcelData xd = factory(excel.getName());
+//								Date start = Calendar.getInstance().getTime();
+//								xd.importFromInputStream(fis, exceptionList);
+//								Date end = Calendar.getInstance().getTime();
+//								System.out.println("Import Daily Performance Tracking processing time: " + getProcessTime(start, end));
+//							} catch(Exception e) {
+//								e.printStackTrace();
+//							} finally {
+//								try { fis.close(); } catch (IOException e) {}
+//							}
+//						}
+//					}
 
 					//process qc reconfirm
 					for(File excel : excels) {
@@ -213,6 +220,9 @@ public class ImportForKpiJob {
 			return new SalesByRecordMSIGUOB();
 		} else if(excelName.contains("Sales_Report_By_Records")) {
 			return new SalesByRecord();
+		
+		} else if(excelName.contains("QC_Reconfirm_")) {
+			return new QcReConfirmOTO();
 		} else if(excelName.contains("QC_Reconfirm")) {
 			return new QcReConfirm();
 			
@@ -506,11 +516,13 @@ public class ImportForKpiJob {
 		final String DSM = "DSM";
 		final String SUP = "SUP";
 		final String TSR = "TSR";
+		InputStream is = null;
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_SETUP_IMPORT.getValue()));
 			File fdir = new File(dir);
 			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201410"))) {
-				DataHolder wb = ef.readExcel(new FileInputStream(xls));
+				is = new FileInputStream(xls);
+				DataHolder wb = ef.readExcel(is);
 				
 				for(String sheetName : wb.getKeyList()) {
 					try {
@@ -525,7 +537,6 @@ public class ImportForKpiJob {
 							for(DataHolder data : sheet.getDataList("dsmTargetList")) {
 								
 								String dsmCode = data.get("dsmCode").getStringValue();
-//								String dsmName = data.get("dsmName").getStringValue();
 								
 								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, null, DSM, dsmCode);
 								
@@ -545,10 +556,6 @@ public class ImportForKpiJob {
 									BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
 									BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
 									
-//									System.out.println("cat: " + category);
-//									System.out.println("target: " + targetCat);
-//									System.out.println("weight: " + weightCat);
-									
 									kpiSetup.setCategory(category);
 									kpiSetup.setTarget(targetCat);
 									kpiSetup.setWeight(weightCat);
@@ -558,39 +565,7 @@ public class ImportForKpiJob {
 										kpiSetup.setId(kpiSetups.get(0).getId());
 										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
-								}
-								
-//								if(kpiSetups == null) {
-//									TsrInfo dsmInfo = KpiService.getInstance().getTsrInfoInMap(dsmCode);
-//									if(dsmInfo == null) throw new Exception("Dsm not found: " + dsmCode);
-//									
-//									for(int i = 1; i <= 4; i++) {
-//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-//										
-//										kpiSetup.setTsrLevel(DSM);
-//										kpiSetup.setPersonal(dsmInfo);
-//										
-//										kpiSetup.setEffectiveDate(effectiveDate);
-//										kpiSetup.setEndDate(endDate);
-//										
-//										String category = sheet.get("cat" + i).getStringValue();
-//										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-//										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-//										
-////										System.out.println("cat: " + category);
-////										System.out.println("target: " + targetCat);
-////										System.out.println("weight: " + weightCat);
-//										
-//										kpiSetup.setCategory(category);
-//										kpiSetup.setTarget(targetCat);
-//										kpiSetup.setWeight(weightCat);
-//										
-//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-//									}
-//								} else {
-//									
-//								}
-								
+								}								
 							}
 							
 						} else {
@@ -635,35 +610,6 @@ public class ImportForKpiJob {
 										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
 								}
-								
-//								if(kpiSetups == null) {
-//									TsrInfo supInfo = KpiService.getInstance().getTsrInfoInMap(supCode);
-//									if(supInfo == null) throw new Exception("SUP not found: " + supCode);
-//									
-//									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
-//									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
-//									
-//									for(int i = 1; i <= 5; i++) {
-//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-//										
-//										kpiSetup.setCampaign(campaign);
-//										kpiSetup.setTsrLevel(SUP);
-//										kpiSetup.setPersonal(supInfo);
-//										
-//										kpiSetup.setEffectiveDate(effectiveDate);
-//										kpiSetup.setEndDate(endDate);
-//										
-//										String category = sheet.get("cat" + i).getStringValue();
-//										BigDecimal targetCat = data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-//										BigDecimal weightCat = data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-//										
-//										kpiSetup.setCategory(category);
-//										kpiSetup.setTarget(targetCat);
-//										kpiSetup.setWeight(weightCat);
-//										
-//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-//									}
-//								}
 							}
 //							<!-- end Sup List -->
 							
@@ -697,29 +643,6 @@ public class ImportForKpiJob {
 										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
 								}
-								
-//								if(kpiSetups == null) {
-//									Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
-//									if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
-//									
-//									for(int i = 1; i <= 4; i++) {
-//										KpiCategorySetup kpiSetup = new KpiCategorySetup();
-//										
-//										kpiSetup.setCampaign(campaign);
-//										kpiSetup.setTsrLevel(TSR);
-//										
-//										kpiSetup.setEffectiveDate(effectiveDate);
-//										kpiSetup.setEndDate(endDate);
-//										
-//										DataHolder tsrCat = sheet.getDataList("tsrCat").get(0);
-//										
-//										kpiSetup.setCategory(tsrCat.get("tsrCat" + i).getStringValue());
-//										kpiSetup.setTarget(data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
-//										kpiSetup.setWeight(data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
-//										
-//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-//									}
-//								}
 							}
 //							<!-- end Tsr List -->
 						}
@@ -732,6 +655,11 @@ public class ImportForKpiJob {
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+			}
 		}
 	}
 	
