@@ -25,9 +25,8 @@ public class QcReConfirm implements IExcelData {
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws Exception {
 		System.out.println("QcReConfirm");
 		
-//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
-		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
-//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream("config/fileformat/qcReconfirmFormat_MSIGHappyLife.xml");
+		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
+//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
 		ExcelFormat ef = new ExcelFormat(fileFormat);
 		
 		try {

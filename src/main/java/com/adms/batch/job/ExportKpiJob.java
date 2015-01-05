@@ -91,10 +91,10 @@ public class ExportKpiJob {
 			System.out.println("START ExportKpiJob Batch - " + start);
 			System.out.println("=======================================================================");
 			
-			String mDate = "201409";
+			String mDate = "201410";
 			try {
 				processYearMonth = new String(mDate);
-//				processToDB(processYearMonth);
+				processToDB(processYearMonth);
 				processData();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -126,9 +126,9 @@ public class ExportKpiJob {
 			
 			for(KpiResult data : kpiResults) {
 				
-				if(data.getCampaign().getCode().equals("021DP1714L04")) {
-					continue;
-				}
+//				if(data.getCampaign().getCode().equals("021PA1714M03")) {
+//					System.out.println("021PA1714M03");
+//				}
 				
 				if(!campaignCode.equals(data.getCampaign().getCode())) {
 					
@@ -871,6 +871,12 @@ public class ExportKpiJob {
 		String fileName = name + "_" + processYearMonth + ".xlsx";
 		
 		try {
+			File fp = new File(path);
+			
+			if(!fp.exists()) {
+				fp.mkdirs();
+			}
+			
 			File outpath = new File(path + fileName);
 			if(!outpath.exists()) {
 				outpath.createNewFile();
@@ -916,7 +922,7 @@ public class ExportKpiJob {
 	
 	private void generateRowData(Sheet tempSheet, Sheet toSheet, List<KpiCategorySetup> kpiCats, String tsrCode, String level, KpiResult kpi) {
 
-		int groupStartRow = 1;
+		int groupRow = 1;
 		int groupSize = 0;
 		Integer startRowNum = new Integer(currentRow);
 		
@@ -946,12 +952,12 @@ public class ExportKpiJob {
 		for(int n = startRowNum; n <= (startRowNum + endRow); n++) {
 			
 //			<!-- Position Column -->
-			if(groupStartRow == 1) {
+			if(groupRow == 1) {
 //				<!-- copy Position name -->\
 				copyRow(tempSheet, toSheet, tempRow, n, POSITION_COL, POSITION_COL);
 			} else {
 				doColumn(tempSheet, toSheet, POSITION_COL, tempRow, n);
-				if(groupStartRow == 2) {
+				if(groupRow == 2) {
 					toSheet.getRow(n).getCell(POSITION_COL, Row.CREATE_NULL_AS_BLANK).setCellValue(kpiService().getTsrInfoInMap(tsrCode).getFullName());
 				}
 			}
@@ -960,7 +966,7 @@ public class ExportKpiJob {
 				KpiCategorySetup kpiCat = kpiCats.get(i);
 //				<!-- Kpis Column -->
 				if(level.equals(TSM)) {
-					String cat = groupStartRow == 1 ? kpiCat.getCategory() : tempSheet.getRow(tempRow)
+					String cat = groupRow == 1 ? kpiCat.getCategory() : tempSheet.getRow(tempRow)
 												.getCell(KPI_COL, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
 					doColumn(tempSheet, toSheet, KPI_COL, tempRow, n, cat);
 				} else {
@@ -968,11 +974,11 @@ public class ExportKpiJob {
 				}
 				
 //				<!-- Weight Column-->
-				if(level.equals(TSM) && groupStartRow == 1) {
+				if(level.equals(TSM) && groupRow == 1) {
 					Double weight = kpiCat.getWeight().doubleValue();
 					weightSum += weight;
 					doColumn(tempSheet, toSheet, WEIGHT_COL, tempRow, n, weight);
-				} else if(level.equals(TSM) && groupStartRow == 2) {
+				} else if(level.equals(TSM) && groupRow == 2) {
 					doColumn(tempSheet, toSheet, WEIGHT_COL, tempRow, n);
 					toSheet.addMergedRegion(new CellRangeAddress(n - 1, n, WEIGHT_COL, WEIGHT_COL));
 				} else {
@@ -1010,9 +1016,9 @@ public class ExportKpiJob {
 				
 //				<!-- set weight total -->
 				if(kpiCats == null) {
-					if(groupStartRow == 1) {
+					if(groupRow == 1) {
 						doColumn(tempSheet, toSheet, WEIGHT_COL, tempRow, n);
-					} else if(groupStartRow == 2) {
+					} else if(groupRow == 2) {
 						doColumn(tempSheet, toSheet, WEIGHT_COL, tempRow, n);
 						toSheet.addMergedRegion(new CellRangeAddress(n - 1, n, WEIGHT_COL, WEIGHT_COL));
 					} else {
@@ -1027,7 +1033,7 @@ public class ExportKpiJob {
 				
 //				<!-- actual -->
 				if(kpiCats == null) {
-					if(groupStartRow == 5) {
+					if(groupRow == 5) {
 						getRetentionForTsm();
 					}
 					doColumn(tempSheet, toSheet, ACTUAL_COL, tempRow, n);
@@ -1046,7 +1052,7 @@ public class ExportKpiJob {
 			}
 			tempRow++;
 			i++;
-			groupStartRow++;
+			groupRow++;
 			currentRow++;
 		}
 	}

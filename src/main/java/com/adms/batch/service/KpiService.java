@@ -266,8 +266,7 @@ public class KpiService {
 	}
 
 	public TsrCodeReplacer addTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
-		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
-		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
+		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, keyCode);
 		return addTsrCodeReplacer(t);
 	}
 	
@@ -716,9 +715,7 @@ public class KpiService {
 	}
 	
 	public List<TsrCodeReplacer> getTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
-		CampaignKeyCode ck = this.getCampaignKeyCode(keyCode);
-		if(null == ck) throw new Exception("Campaign not found by key code: " + keyCode);
-		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, ck.getCampaign().getId());
+		TsrCodeReplacer t = new TsrCodeReplacer(tsrCode, ownerFullName, replacerFullName, keyCode);
 		return getTsrCodeReplacer(t);
 	}
 	
@@ -829,7 +826,7 @@ public class KpiService {
 	}
 	
 	public TsrInfo getTsrInfoByName(String fullName) throws Exception {
-		if(null != fullName) {
+		if(!StringUtils.isBlank(fullName)) {
 			TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
 			String hql = " from TsrInfo d "
 					+ " where replace(replace(d.fullName, ' ', ''), ' ', '') like ? ";
@@ -859,14 +856,13 @@ public class KpiService {
 		TsrInfo tsrInfo = null;
 		String unTitle = this.removeTitle(fullName).replaceAll("  ", " ");
 		List<TsrCodeReplacer> rs = null;
-		
 		try {
 			String hql = " from TsrCodeReplacer d"
 					+ " where 1 = 1 "
 					+ " and d.ownerFullName = ? "
-					+ " and d.campaignId = ? ";
+					+ " and d.keyCode = ? ";
 			TsrCodeReplacerBo bo = (TsrCodeReplacerBo) AppConfig.getInstance().getBean("tsrCodeReplacerBo");
-			rs = bo.findByHql(hql, unTitle, getCampaignKeyCode(keyCode).getCampaign().getId());
+			rs = bo.findByHql(hql, unTitle, keyCode);
 			
 			if(null != rs && !rs.isEmpty()) {
 				tsrInfo = KpiService.getInstance().getTsrInfoInMap(rs.get(0).getTsrCode());

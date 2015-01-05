@@ -64,10 +64,10 @@ public class ImportForKpiJob {
 //			importTsr();
 //			importCampaignKeyCode();
 //			importPosition();
-//			importKpiTargetSetup();
+			importKpiTargetSetup();
 //			importEoc();
 			
-			startBatch();
+//			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -91,29 +91,22 @@ public class ImportForKpiJob {
 		File path = new File(dir);
 		
 		for(File fd : path.listFiles(
-				new FileFilterByName(
-						"MSIG Happy Life BL",
-						"MSIG UOB",
-						"MTI-KBank",
-						"MTLife Hip Broker",
-						"MTLife POM 2nd Get",
-						"MTLife POM PA",
-						"MTLife WIN",
-						"POM_PA_Cash_Back"
-						)
+//				new FileFilterByName(
+//						"KBANK DDOP -POM PA Cash Back"
+//						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
-						new FileFilterByName(
-						"20141021",
-						"20141022",
-						"20141024",
-						"20141027",
-						"20141028",
-						"20141029",
-						"20141030",
-						"20141031"
-						)
+//						new FileFilterByName(
+//						"20141021",
+//						"20141022",
+//						"20141024",
+//						"20141027",
+//						"20141028",
+//						"20141029",
+//						"20141030",
+//						"20141031"
+//						)
 						)) {
 					System.out.println("=========================================================");
 					System.out.println("folder: " + fd.getName() + " >>> " + byDate.getName());
@@ -512,7 +505,7 @@ public class ImportForKpiJob {
 	}
 	
 	private void importKpiTargetSetup() {
-		String dir = "D:/Test/upload/KpiTarget/20141001";
+		String dir = "D:/Test/upload/KpiTarget/201410";
 		final String DSM = "DSM";
 		final String SUP = "SUP";
 		final String TSR = "TSR";
@@ -603,12 +596,14 @@ public class ImportForKpiJob {
 									kpiSetup.setTarget(targetCat);
 									kpiSetup.setWeight(weightCat);
 									
-									if(kpiSetups == null) {
-										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-									} else {
-										kpiSetup.setId(kpiSetups.get(0).getId());
-										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
-									}
+									KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+									
+//									if(kpiSetups == null) {
+//										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
+//									} else {
+//										kpiSetup.setId(kpiSetups.get(0).getId());
+//										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
+//									}
 								}
 							}
 //							<!-- end Sup List -->

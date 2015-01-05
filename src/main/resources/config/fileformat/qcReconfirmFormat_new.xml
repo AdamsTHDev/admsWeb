@@ -8,7 +8,7 @@
 				<BeginRecordCondition column="A" comparator="EQ" checkValue="Campaign" />
 			
 				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
-				<DataCell row="1" column="G" dataType="DATE" fieldName="saleDate" />
+				<DataCell row="1" column="G" dataType="DATE" dataFormat="MM/dd/yy hh:mm:ss a" fieldName="saleDate" />
 				<DataCell row="1" column="H" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
 				<DataCell row="1" column="I" dataType="TEXT" fieldName="tsrCode" autoTrim="TRUE" />
 				<DataCell row="1" column="J" dataType="TEXT" fieldName="tsrName" autoTrim="TRUE" />

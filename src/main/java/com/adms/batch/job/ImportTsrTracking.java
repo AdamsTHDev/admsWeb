@@ -70,8 +70,6 @@ public class ImportTsrTracking implements IExcelData {
 				process(wbHolder, sheetName);
 			}
 			
-			
-			
 		} catch (Exception e) {
 			exceptionList.add(e);
 			e.printStackTrace();
@@ -102,10 +100,9 @@ public class ImportTsrTracking implements IExcelData {
 				try {
 					String name = data.get("tsrName").getStringValue();
 					BigDecimal talkTime = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
-					
+				
 					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name, keyCode);
 					if(null == tsrInfo)	{ 
-						System.out.println("name: " + name);
 						throw new Exception("Not found TSR: " + name + " | keyCode: " + keyCode);
 					}
 					

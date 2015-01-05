@@ -12,8 +12,8 @@
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignCode" autoTrim="TRUE" />
 				<DataCell row="1" column="C" dataType="TEXT" fieldName="listLotName" autoTrim="TRUE" />
 				<DataCell row="1" column="D" dataType="DATE" dataFormat="yyyy-MM-dd" fieldName="approveDate" />
-				<DataCell row="1" column="E" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
-				<DataCell row="1" column="G" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
+				<DataCell row="1" column="F" dataType="TEXT" fieldName="xRef" autoTrim="TRUE" />
+				<DataCell row="1" column="H" dataType="TEXT" fieldName="customerName" autoTrim="TRUE" />
 				<DataCell row="1" column="I" dataType="TEXT" fieldName="product" autoTrim="TRUE" />
 				<DataCell row="1" column="J" dataType="NUMBER" dataFormat="#,##0.00" fieldName="premium" />
 				<DataCell row="1" column="K" dataType="NUMBER" dataFormat="#,##0.00" fieldName="afyp" />

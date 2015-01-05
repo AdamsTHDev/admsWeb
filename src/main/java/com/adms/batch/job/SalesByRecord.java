@@ -58,20 +58,18 @@ public class SalesByRecord implements IExcelData {
 		exceptionList.addAll(exs);
 	}
 	
-	private void checkReplaceTsrCode(String tsrNameOnSale, TsrInfo tsr, String keyCode) {
+	private void checkReplaceTsrCode(String tsrNameOnSale, TsrInfo tsrFromCode, String keyCode) {
 		try {
 			
-			String a = kpiService().removeTitle(tsr.getFullName()).replaceAll(" ", "");
+			String a = kpiService().removeTitle(tsrFromCode.getFullName()).replaceAll(" ", "");
 //			a = a.length() <= 6 ? a : a.substring(a.length() / 2 - 3, a.length() / 2 + 3);
 			
 			String b = kpiService().removeTitle(tsrNameOnSale).replaceAll(" ", "");
 //			b = b.length() <= 6 ? b : b.substring(b.length() / 2 - 3, b.length() / 2 + 3);
-			
 			if(!a.equalsIgnoreCase(b)) {
-//				System.out.println("Found dif: " + tsr.getFullName() + " | and: " + tsrNameOnSale);
-				List<TsrCodeReplacer> list = kpiService().getTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+				List<TsrCodeReplacer> list = kpiService().getTsrCodeReplacer(tsrFromCode.getTsrCode(), tsrNameOnSale, tsrFromCode.getFullName(), keyCode);
 				if(null == list || list.isEmpty()) {
-					kpiService().addTsrCodeReplacer(tsr.getTsrCode(), tsrNameOnSale, tsr.getFullName(), keyCode);
+					kpiService().addTsrCodeReplacer(tsrFromCode.getTsrCode(), tsrNameOnSale, tsrFromCode.getFullName(), keyCode);
 				}
 			}
 			
@@ -110,27 +108,27 @@ public class SalesByRecord implements IExcelData {
 		
 		for(DataHolder data : dataList) {
 			try {
-				TsrInfo tsr = null;
+				TsrInfo tsrFromCode = null;
 				String tsrCode = data.get("tsrCode").getStringValue();
-				String tsrName = kpiService().removeTitle(data.get("tsrName").getStringValue()).replaceAll("  ", " ");
+				String tsrNameFromFile = kpiService().removeTitle(data.get("tsrName").getStringValue()).replaceAll("  ", " ");
 				
 //				<!-- Getting TSR_INFO -->
 				if(StringUtils.isBlank(tsrCode)) {
-					tsr = kpiService().getTsrInfoByName(tsrName.trim());
+					tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim());
 				} else {
-					tsr = kpiService().getTsrInfoInMap(tsrCode);
-					if(null == tsr) {
-						tsr = kpiService().getTsrInfoByName(tsrName.trim());
+					tsrFromCode = kpiService().getTsrInfoInMap(tsrCode);
+					if(null == tsrFromCode) {
+						tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim());
 					}
 				}
 				
 //				<!-- Check if null, throw Exception() -->
-				if(null == tsr) throw new Exception("Not Found TSR: " + "code |" + data.get("tsrCode").getStringValue() + "|");
+				if(null == tsrFromCode) throw new Exception("Not Found TSR: " + "code |" + data.get("tsrCode").getStringValue() + "|");
 				
 //				<!-- Check is Replace TSR CODE -->
 				String listLotName = data.get("listLotName").getStringValue();
 				listLotName = kpiService().getKeyCodeFromCampaignListLot(listLotName);
-				checkReplaceTsrCode(tsrName, tsr, listLotName);
+				checkReplaceTsrCode(tsrNameFromFile, tsrFromCode, listLotName);
 				
 //				<!-- get campaign keycode -->
 				CampaignKeyCode keyCode =  kpiService().getCampaignKeyCode(listLotName);
@@ -141,7 +139,7 @@ public class SalesByRecord implements IExcelData {
 //				<!-- Check TMR(Sup) -->
 				Date saleDate = (Date) data.get("saleDate").getValue();
 				String tmrCode = data.get("tmrCode").getStringValue();
-				checkSup(tsr, tmrCode, keyCode, saleDate);
+				checkSup(tsrFromCode, tmrCode, keyCode, saleDate);
 				
 //				<!-- getting customer -->
 				String customerName = data.get("customerName").getStringValue();
@@ -209,11 +207,11 @@ public class SalesByRecord implements IExcelData {
 //					System.out.println("Existed Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
 				}
 				
-				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, tsr, policy);
+				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, tsrFromCode, policy);
 				
 				if(saleRec != null) {
 					saleRec.setSaleDate(saleDate);
-					saleRec.setTsrInfo(tsr);
+					saleRec.setTsrInfo(tsrFromCode);
 					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
@@ -221,7 +219,7 @@ public class SalesByRecord implements IExcelData {
 				} else {
 					saleRec = new SalesRecord();
 					saleRec.setSaleDate(saleDate);
-					saleRec.setTsrInfo(tsr);
+					saleRec.setTsrInfo(tsrFromCode);
 					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);

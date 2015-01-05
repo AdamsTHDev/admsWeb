@@ -16,7 +16,7 @@ public enum EFileFormat {
 	SALES_BY_RECORD_OTO("salesByRecordOTO", "config/fileformat/salesByRec121Format.xml"),
 	TSR_TRACKING_OTO("tsrTrackingOTO", "config/fileformat/tsrTracking121Format.xml"),
 	
-	SALES_BY_RECORD_MSIG("salesByRecordMSIG", "config/fileformat/salesByRecMSIGFormat.xml"),
+	SALES_BY_RECORD_MSIG_UOB("salesByRecordMSIG", "config/fileformat/salesByRecMSIGUOBFormat.xml"),
 	
 	QC_RECONFIRM_OTO("qcReconfirmOTO", "config/fileformat/qcReconfirmFormat_121.xml"),
 	QC_RECONFIRM_NEW("qcReconfirmNew", "config/fileformat/qcReconfirmFormat_new.xml");
