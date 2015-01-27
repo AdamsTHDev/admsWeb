@@ -119,7 +119,7 @@ public class FileUtils {
 		try {
 			is = new FileInputStream(source);
 			os = new FileOutputStream(dest);
-			byte[] buff = new byte[1024];
+			byte[] buff = new byte[DEFAULT_BUFFER_SIZE];
 			int read;
 			while((read = is.read(buff)) > 0) {
 				os.write(buff, 0, read);

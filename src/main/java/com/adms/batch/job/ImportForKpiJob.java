@@ -19,7 +19,7 @@ import com.adms.batch.service.KpiService;
 import com.adms.domain.entities.Campaign;
 import com.adms.domain.entities.CampaignKeyCode;
 import com.adms.domain.entities.KpiCategorySetup;
-import com.adms.domain.entities.TsrContract;
+import com.adms.domain.entities.TsrHierarchical;
 import com.adms.domain.entities.TsrInfo;
 import com.adms.domain.entities.TsrPosition;
 import com.adms.domain.entities.TsrSite;
@@ -64,10 +64,12 @@ public class ImportForKpiJob {
 //			importTsr();
 //			importCampaignKeyCode();
 //			importPosition();
-			importKpiTargetSetup();
+//			importSupDsmHierarchy("D:/Test/upload/TSRUpdate/", "UPDATE_SUP_DSM_112014.xlsx");
+			
+//			importKpiTargetSetup();
 //			importEoc();
 			
-//			startBatch();
+			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -81,7 +83,7 @@ public class ImportForKpiJob {
 	
 	private void startBatch() {
 		List<Exception> exceptionList = new ArrayList<Exception>();
-		String dir = "D:/Test/upload/kpi/201410";
+		String dir = "D:/Test/upload/kpi/201412";
 		
 		if(StringUtils.isBlank(dir)) {
 			System.err.println("Directory is null");
@@ -92,20 +94,18 @@ public class ImportForKpiJob {
 		
 		for(File fd : path.listFiles(
 //				new FileFilterByName(
-//						"KBANK DDOP -POM PA Cash Back"
+//						"MSIG Happy Life BL"
+//						,"MTI-KBank"
+//						,"MTLife Hip Broker"
+//						,"MTLife POM PA"
+//						,"MTLife WIN"
+//						,"POM_PA_Cash_Back"
 //						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
 //						new FileFilterByName(
-//						"20141021",
-//						"20141022",
-//						"20141024",
-//						"20141027",
-//						"20141028",
-//						"20141029",
-//						"20141030",
-//						"20141031"
+//						"15112014"
 //						)
 						)) {
 					System.out.println("=========================================================");
@@ -115,11 +115,11 @@ public class ImportForKpiJob {
 
 					//process sales report by record
 					for(File excel : excels) {
-						if(excel.getName().contains("Sales_Report_By_Records") || excel.getName().contains("SalesReportByRecords")) {
+						if(excel.getName().contains("Sales_Report_By_Record") || excel.getName().contains("SalesReportByRecord")) {
 							FileInputStream fis = null;
 							try {
 								fis = new FileInputStream(excel);
-								IExcelData xd = factory(excel.getName());
+								IExcelData xd = factory(excel.getName(), fd.getName());
 								Date start = Calendar.getInstance().getTime();
 								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
@@ -138,7 +138,7 @@ public class ImportForKpiJob {
 							FileInputStream fis = null;
 							try {
 								fis = new FileInputStream(excel);
-								IExcelData xd = factory(excel.getName());
+								IExcelData xd = factory(excel.getName(), fd.getName());
 								Date start = Calendar.getInstance().getTime();
 								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
@@ -176,7 +176,7 @@ public class ImportForKpiJob {
 							FileInputStream fis = null;
 							try {
 								fis = new FileInputStream(excel);
-								IExcelData xd = factory(excel.getName());
+								IExcelData xd = factory(excel.getName(), fd.getName());
 								Date start = Calendar.getInstance().getTime();
 								xd.importFromInputStream(fis, exceptionList);
 								Date end = Calendar.getInstance().getTime();
@@ -202,7 +202,7 @@ public class ImportForKpiJob {
 		
 	}
 	
-	private IExcelData factory(String excelName) {
+	private IExcelData factory(String excelName, String campaignFolderName) {
 		System.out.println("Excel Name: " + excelName);
 		
 		if(excelName.contains("TSRTracking")) {
@@ -211,9 +211,11 @@ public class ImportForKpiJob {
 			return new DailyPerformanceTracking();
 		} else if(excelName.contains("Sales_Report_By_Records_Pending")) {
 			return new SalesByRecordMSIGUOB();
-		} else if(excelName.contains("Sales_Report_By_Records")) {
+		} else if(excelName.contains("Sales_Report_By_Record")) {
 			return new SalesByRecord();
-		
+			
+		} else if(excelName.toLowerCase().contains("qc_reconfirm") && campaignFolderName.equalsIgnoreCase("MSIG UOB")) {
+			return new QcReConfirmMSIGUOB();
 		} else if(excelName.contains("QC_Reconfirm_")) {
 			return new QcReConfirmOTO();
 		} else if(excelName.contains("QC_Reconfirm")) {
@@ -223,7 +225,7 @@ public class ImportForKpiJob {
 			return new ImportTsrTrackingOTO();
 		} else if(excelName.contains("DailyPerformanceTrackingReport")) {
 			return new DailyPerformanceOTO();
-		} else if(excelName.contains("SalesReportByRecords")) {
+		} else if(excelName.contains("SalesReportByRecord")) {
 			return new SalesByRecordOTO();
 			
 		} else {
@@ -231,9 +233,42 @@ public class ImportForKpiJob {
 		}
 	}
 	
+	private void importSupDsmHierarchy(String dir, String fileName) {
+		File file = new File(dir + fileName);
+		
+		try {
+			InputStream xls = new FileInputStream(file);
+			InputStream format = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.SUP_DSM_IMPORT.getValue());
+			
+			ExcelFormat ef = new ExcelFormat(format);
+			DataHolder wbHolder = ef.readExcel(xls);
+			DataHolder sheetHolder = wbHolder.get(wbHolder.getKeyList().get(0));
+
+			KpiService service = KpiService.getInstance();
+			List<DataHolder> list = sheetHolder.getDataList("dataList");
+			for(DataHolder data : list) {
+				String tsrCode = data.get("tsrCode").getStringValue();
+				String uplineCode = data.get("uplineCode").getStringValue();
+				Date startDate = (Date) data.get("startDate").getValue();
+				Date endDate = (Date) data.get("endDate").getValue();
+				
+				TsrHierarchical h = service.getTsrHierarchical(tsrCode, uplineCode, null, startDate, null);
+				if(h == null) {
+					service.addTsrHierarchical(service.getTsrInfoInMap(tsrCode), service.getTsrInfoInMap(uplineCode), null, startDate, endDate);
+					System.out.println("ADD ==> " + tsrCode + " | uplineCode: " + uplineCode + " | startDate: " + startDate + " | endDate: " + endDate);
+				} else {
+					
+				}
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void importTsr() {
 		String dir = "D:/Test/upload/TSRUpdate/";
-		String fileName = "TSR_update041114.xlsx";
+		String fileName = "TSR_update20150114.xlsx";
 		File file = new File(dir + fileName);
 		
 		try {
@@ -246,9 +281,9 @@ public class ImportForKpiJob {
 			DataHolder sheetHolder = wbHolder.get(wbHolder.getKeyList().get(0));
 			List<DataHolder> list = sheetHolder.getDataList("tsrInfoList");
 			
-			TsrContract tsrContract = null;
+//			TsrContract tsrContract = null;
 			TsrInfo tsrInfo = null;
-			Campaign campaign = null;
+//			Campaign campaign = null;
 			TsrSite tsrSite = null;
 			TsrStatus tsrStatus = null;
 			TsrPosition tsrPosition = null;
@@ -261,20 +296,20 @@ public class ImportForKpiJob {
 				String siteName = data.get("site").getStringValue();
 				
 //				String accNo = data.get("accNo").getStringValue();
-				String citizenCode = data.get("citizenCode").getStringValue();
+//				String citizenCode = data.get("citizenCode").getStringValue();
 				Date startDate = (Date) data.get("startDate").getValue();
 //				Date startDateMtb = (Date) data.get("startDateMtb").getValue();
 				String campaignA = data.get("campaignA").getStringValue();
 //				String campaignB = data.get("campaignB").getStringValue();
 				String position = data.get("position").getStringValue();
-				String title = data.get("title").getStringValue();
+//				String title = data.get("title").getStringValue();
 				String firstName = data.get("firstName").getStringValue();
 				String lastName = data.get("lastName").getStringValue();
 //				String nickName = data.get("nickName").getStringValue().trim();
 //				String firstNameEn = null != data.get("firstNameEn").getValue() ? data.get("firstNameEn").getStringValue().trim() : null;
 //				String lastNameEn = null != data.get("lastNameEn").getValue() ? data.get("lastNameEn").getStringValue().trim() : null;
 				String status = data.get("status").getStringValue();
-				Date lastDateOfWork = (Date) data.get("lastDateOfWork").getValue();
+//				Date lastDateOfWork = (Date) data.get("lastDateOfWork").getValue();
 //				Date resignEffectiveDate = (Date) data.get("resignEffectiveDate").getValue();
 //				Date completePro = (Date) data.get("completeProbation").getValue();
 //				String remark = data.get("remark").getStringValue();
@@ -282,43 +317,42 @@ public class ImportForKpiJob {
 //				String highestGrad = data.get("highestGrad").getStringValue();
 //				String addressOnIdCard = data.get("addressOnIdCard").getStringValue();
 //				String addressCurrent = data.get("addressCurrent").getStringValue();
-				String mobileNo = data.get("mobileNo").getStringValue();
+//				String mobileNo = data.get("mobileNo").getStringValue();
 //				String suggestedBy = data.get("suggestedBy").getStringValue();
 				
-				tsrInfo = service.getTsrInfo(tsrCode);
 				tsrSite = service.getTsrSite(siteName);
 				tsrPosition = service.getTsrPosition(position);
-				
 				tsrStatus = service.getTsrStatus(status);
 				
 				tsrInfo = new TsrInfo();
 				tsrInfo.setTsrCode(tsrCode);
-				tsrInfo.setCitizenCode(citizenCode);
+//				tsrInfo.setCitizenCode(citizenCode);
 				tsrInfo.setFullName(firstName + " " + lastName);
 //				tsrInfo.setFullNameEn(firstNameEn + " " + lastNameEn);
-				tsrInfo.setTitle(title);
+//				tsrInfo.setTitle(title);
 				tsrInfo.setFirstName(firstName);
 				tsrInfo.setLastName(lastName);
 //				tsrInfo.setFirstNameEn(firstNameEn);
 //				tsrInfo.setLastNameEn(lastNameEn);
-				tsrInfo.setMobileNo(mobileNo);
+//				tsrInfo.setMobileNo(mobileNo);
 				tsrInfo.setTsrPosition(tsrPosition);
 //				tsrInfo.setBirthDate(birthDate);
 				
-				tsrInfo = service.addOrUpdateTsrInfo(tsrInfo);
+//				tsrInfo = service.addOrUpdateTsrInfo(tsrInfo);
+				service.saveTsrInfoAndContract(tsrInfo, tsrSite, tsrStatus, startDate, campaignA);
 				
-				tsrContract = new TsrContract();
-				tsrContract.setTsrInfo(tsrInfo);
-				tsrContract.setTsrSite(tsrSite);
-				tsrContract.setTsrStatus(tsrStatus);
-				tsrContract.setStartDate(startDate);
-				tsrContract.setResignDate(lastDateOfWork);
-//				tsrContract.setResignEffectiveDate(resignEffectiveDate);
-				tsrContract.setTsrCampaign(campaignA);
+//				tsrContract = new TsrContract();
+//				tsrContract.setTsrInfo(tsrInfo);
+//				tsrContract.setTsrSite(tsrSite);
+//				tsrContract.setTsrStatus(tsrStatus);
+//				tsrContract.setStartDate(startDate);
+//				tsrContract.setResignDate(lastDateOfWork);
+////				tsrContract.setResignEffectiveDate(resignEffectiveDate);
+//				tsrContract.setTsrCampaign(campaignA);
+//				
+//				service.addTsrContract(tsrContract);
 				
-				service.addTsrContract(tsrContract);
-				
-				System.out.println("COMPLETE Added: " + tsrInfo.toString());
+				System.out.println("COMPLETE saved: " + tsrInfo.toString());
 			}
 			
 			fileFormat.close();
@@ -382,9 +416,7 @@ public class ImportForKpiJob {
 					String scriptCode = data.get("scriptCode").getStringValue();
 					String desc = data.get("desc").getStringValue();
 					
-					CampaignKeyCode listLot = new CampaignKeyCode();
-					listLot.setKeyCode(keyCode);
-					listLot = KpiService.getInstance().getCampaignKeyCode(listLot);
+					CampaignKeyCode listLot = KpiService.getInstance().getCampaignKeyCode(keyCode);
 					
 //					if(listLot != null) {
 //						System.err.println("Key Code existing");
@@ -425,7 +457,6 @@ public class ImportForKpiJob {
 
 						listLot = KpiService.getInstance().addCampaignKeyCode(listLot);
 					} else {
-
 						listLot.setKeyCode(keyCode);
 						listLot.setCampaign(campaign);
 						listLot.setDescription(desc);
@@ -505,7 +536,8 @@ public class ImportForKpiJob {
 	}
 	
 	private void importKpiTargetSetup() {
-		String dir = "D:/Test/upload/KpiTarget/201410";
+		String dir = "D:/Test/upload/KpiTarget/201412";
+		String fileName = "Sales KPIs Target Setup - 201412.xlsx";
 		final String DSM = "DSM";
 		final String SUP = "SUP";
 		final String TSR = "TSR";
@@ -513,7 +545,7 @@ public class ImportForKpiJob {
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_SETUP_IMPORT.getValue()));
 			File fdir = new File(dir);
-			for(File xls : fdir.listFiles(new FileFilterByName("Sales KPIs Target Setup - 201410"))) {
+			for(File xls : fdir.listFiles(new FileFilterByName(fileName))) {
 				is = new FileInputStream(xls);
 				DataHolder wb = ef.readExcel(is);
 				
@@ -659,10 +691,11 @@ public class ImportForKpiJob {
 	}
 	
 	private void importEoc() {
-		String dir = "D:/Test/upload/EOC/EOC_20141106.xlsx";
+		String fileName = "EOC_20150116.xlsx";
+		String dir = "D:/Test/upload/EOC/";
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_EOC_IMPORT.getValue()));
-			File file = new File(dir);
+			File file = new File(dir + fileName);
 			
 			if(!file.isFile()) return;
 			

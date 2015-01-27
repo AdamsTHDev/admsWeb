@@ -11,10 +11,11 @@
 				<BeginRecordCondition column="F" comparator="EQ" checkValue="New" />
 			
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
 				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 				
-				<EndRecordCondition column="C" comparator="NE" checkValue="1" dataType="NUMBER" />
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
 			</DataRecord>
 		</DataSheet>
 
@@ -29,10 +30,11 @@
 				
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
 				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 
-				<EndRecordCondition column="C" comparator="NE" checkValue="1" dataType="NUMBER" />
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
 			</DataRecord>
 		</DataSheet>
 
@@ -47,10 +49,11 @@
 				
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
 				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 				
-				<EndRecordCondition column="C" comparator="NE" checkValue="1" dataType="NUMBER" />
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
 			</DataRecord>
 		</DataSheet>
 
@@ -65,10 +68,68 @@
 				
 				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
 				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
 				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
 				
-				<EndRecordCondition column="C" comparator="NE" checkValue="1" dataType="NUMBER" />
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
+			</DataRecord>
+		</DataSheet>
+
+		<DataSheet sheetName="" sheetIndex="4" skipWhenNull="TRUE">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
+			<DataCell row="2" column="C" dataType="TEXT" fieldName="listLotName" />
+			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
+
+			<DataRecord listSourceName="tsrTrackingList" beginRow="2" endRow="1000">
+			
+				<BeginRecordCondition column="F" comparator="EQ" checkValue="New" />
+				
+				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
+				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
+				
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
+			</DataRecord>
+		</DataSheet>
+
+		<DataSheet sheetName="" sheetIndex="5" skipWhenNull="TRUE">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
+			<DataCell row="2" column="C" dataType="TEXT" fieldName="listLotName" />
+			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
+
+			<DataRecord listSourceName="tsrTrackingList" beginRow="2" endRow="1000">
+			
+				<BeginRecordCondition column="F" comparator="EQ" checkValue="New" />
+				
+				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
+				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
+				
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
+			</DataRecord>
+		</DataSheet>
+
+		<DataSheet sheetName="" sheetIndex="6" skipWhenNull="TRUE">
+			<DataCell row="1" column="A" dataType="TEXT" fieldName="reportName" />
+			<DataCell row="2" column="C" dataType="TEXT" fieldName="listLotName" />
+			<DataCell row="3" column="C" dataType="TEXT" fieldName="period" />
+
+			<DataRecord listSourceName="tsrTrackingList" beginRow="2" endRow="1000">
+			
+				<BeginRecordCondition column="F" comparator="EQ" checkValue="New" />
+				
+				<DataCell row="1" column="A" dataType="NUMBER" dataFormat="0" fieldName="index" />
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="tsrName" />
+				<DataCell row="1" column="C" dataType="NUMBER" fieldName="workday" />
+				<DataCell row="1" column="AC" dataType="NUMBER" dataFormat="#,##0.00" fieldName="hours" />
+				<DataCell row="1" column="AG" dataType="NUMBER" dataFormat="#,##0.00" fieldName="totalTalkTime" />
+				
+				<EndRecordCondition column="A" comparator="EQ" checkValue="TOTAL" dataType="TEXT" />
 			</DataRecord>
 		</DataSheet>
 	</DataSet>

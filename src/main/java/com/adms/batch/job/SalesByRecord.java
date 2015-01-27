@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +17,6 @@ import com.adms.domain.entities.CampaignKeyCode;
 import com.adms.domain.entities.Customer;
 import com.adms.domain.entities.PolicyInfo;
 import com.adms.domain.entities.PolicyStatus;
-import com.adms.domain.entities.ProductType;
 import com.adms.domain.entities.QaStatus;
 import com.adms.domain.entities.SalesRecord;
 import com.adms.domain.entities.TsrCodeReplacer;
@@ -79,23 +79,35 @@ public class SalesByRecord implements IExcelData {
 		}
 	}
 	
-	private void checkSup(TsrInfo tsrInfo, String tmrCode, CampaignKeyCode keyCode, Date saleDate) {
-		try {
-			if(!StringUtils.isBlank(tmrCode) && null != keyCode) {
-
-//				<!-- check upline campaign -->
-				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, keyCode.getKeyCode(), null);
-				if(null == h) {
-					kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), keyCode, saleDate, null);
-				} else if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
-					h.setUplineInfo(kpiService().getTsrInfoInMap(tmrCode));
-					kpiService().updateTsrHierarchical(h);
-				}
-				
+//	private void checkSup(TsrInfo tsrInfo, String tmrCode, CampaignKeyCode keyCode, Date saleDate) {
+//		try {
+//			if(!StringUtils.isBlank(tmrCode) && null != keyCode) {
+////				<!-- check upline campaign -->
+//				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, keyCode.getKeyCode(), null);
+//				if(null == h) {
+////					kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), keyCode, saleDate, null);
+//				} else if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
+////					h.setUplineInfo(kpiService().getTsrInfoInMap(tmrCode));
+////					kpiService().updateTsrHierarchical(h);
+//				}
+//				
+//			}
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//			exs.add(e);
+//		}
+//	}
+	
+	private TsrInfo getDsm(String tsmCode, Date saleDate) throws Exception {
+		if(kpiService().isDsm(tsmCode)) {
+			return kpiService().getTsrInfoInMap(tsmCode);
+		} else {
+			TsrHierarchical tsm = kpiService().getTsrHierarchical(tsmCode, null, null, saleDate);
+			if(tsm != null) {
+				return tsm.getUplineInfo();
+			} else {
+				return null;
 			}
-		} catch(Exception e) {
-			e.printStackTrace();
-			exs.add(e);
 		}
 	}
 	
@@ -105,11 +117,18 @@ public class SalesByRecord implements IExcelData {
 		List<DataHolder> dataList = sheetHolder.getDataList("salesByRecordList");
 		
 		System.out.println("Sales By Rec size: " + dataList.size());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		Date c = sdf.parse("20141001");
 		
 		for(DataHolder data : dataList) {
 			try {
-				TsrInfo tsrFromCode = null;
+				Date saleDate = (Date) data.get("saleDate").getValue();
+				if(saleDate.before(c)) {
+					continue;
+				}
 				String tsrCode = data.get("tsrCode").getStringValue();
+				
+				TsrInfo tsrFromCode = null;
 				String tsrNameFromFile = kpiService().removeTitle(data.get("tsrName").getStringValue()).replaceAll("  ", " ");
 				
 //				<!-- Getting TSR_INFO -->
@@ -137,9 +156,11 @@ public class SalesByRecord implements IExcelData {
 				}
 				
 //				<!-- Check TMR(Sup) -->
-				Date saleDate = (Date) data.get("saleDate").getValue();
-				String tmrCode = data.get("tmrCode").getStringValue();
-				checkSup(tsrFromCode, tmrCode, keyCode, saleDate);
+				String tsmCode = data.get("tmrCode").getStringValue();
+//				checkSup(tsrFromCode, tmrCode, keyCode, saleDate);
+				
+//				<!-- get DSM -->
+				TsrInfo dsmInfo = getDsm(tsmCode, saleDate);
 				
 //				<!-- getting customer -->
 				String customerName = data.get("customerName").getStringValue();
@@ -147,13 +168,12 @@ public class SalesByRecord implements IExcelData {
 				
 //				<!-- Add new customer if customer is null -->
 				if(customer == null) {
-					customer = new Customer();
-					customer.setFullName(customerName);
-					customer = kpiService().addCustomer(customer);
+					customer = kpiService().addCustomer(new Customer(customerName));
 				}
+//				System.out.println("getting customer time: " + getProcessTime(d, new Date()));
 				
 //				<!-- getting product type -->
-				ProductType productType = kpiService().getProductTypeByValue(data.get("product").getStringValue());
+//				ProductType productType = kpiService().getProductTypeByValue(data.get("product").getStringValue());
 				
 //				<!-- Data -->
 				Date approveDate = (Date) data.get("approveDate").getValue();
@@ -162,16 +182,16 @@ public class SalesByRecord implements IExcelData {
 				BigDecimal protectAmt = new BigDecimal(data.get("protectAmount").getStringValue()).setScale(2, BigDecimal.ROUND_HALF_UP);
 				String qaStatus = data.get("qaStatus").getStringValue();
 				
-				
 				String xRef = data.get("xRef").getStringValue();
 				if(StringUtils.isBlank(xRef)) {
 					throw new Exception("XRef on this record is null " + xRef + " | saleDate: " + saleDate + " | keyCode: " + listLotName);
 				}
+
 				PolicyInfo policy = kpiService().getPolicyInfoByXRef(xRef);
 				if(policy != null) {
 					policy.setCustomer(customer);
 					policy.setCampaignKeyCode(keyCode);
-					policy.setProductType(productType);
+//					policy.setProductType(productType);
 					policy.setAfyp(afyp);
 					policy.setPremium(premium);
 					policy.setProtectAmt(protectAmt);
@@ -181,19 +201,20 @@ public class SalesByRecord implements IExcelData {
 					policy.setxRef(xRef);
 					policy.setCustomer(customer);
 					policy.setCampaignKeyCode(keyCode);
-					policy.setProductType(productType);
+//					policy.setProductType(productType);
 					policy.setAfyp(afyp);
 					policy.setPremium(premium);
 					policy.setProtectAmt(protectAmt);
 					policy = kpiService().addPolicyInfo(policy);
 				}
+//				System.out.println("policy process time: " + getProcessTime(d, new Date()));
 
 				QaStatus qa = kpiService().getQaStatusInMap(qaStatus);
 				if(null == qa) {
 					throw new Exception("Not Found QaStatus: " + qaStatus);
 				}
-				PolicyStatus policyStatus = kpiService().getPolicyStatus(saleDate, xRef, qa.getQaValue());
 				
+				PolicyStatus policyStatus = kpiService().getPolicyStatus(saleDate, xRef, qa.getQaValue());
 				if(policyStatus == null) {
 //					System.out.println("Add Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
 					policyStatus = new PolicyStatus();
@@ -206,13 +227,14 @@ public class SalesByRecord implements IExcelData {
 				} else {
 //					System.out.println("Existed Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
 				}
+//				System.out.println("Policy Status process time: " + getProcessTime(d, new Date()));
 				
 				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, tsrFromCode, policy);
-				
 				if(saleRec != null) {
 					saleRec.setSaleDate(saleDate);
 					saleRec.setTsrInfo(tsrFromCode);
-					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
+					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tsmCode));
+					saleRec.setDsmInfo(dsmInfo);
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().updateSalesRecord(saleRec);
@@ -220,11 +242,13 @@ public class SalesByRecord implements IExcelData {
 					saleRec = new SalesRecord();
 					saleRec.setSaleDate(saleDate);
 					saleRec.setTsrInfo(tsrFromCode);
-					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tmrCode));
+					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tsmCode));
+					saleRec.setDsmInfo(dsmInfo);
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().addSalesRecord(saleRec);
 				}
+//				System.out.println("saleRecord process time: " + getProcessTime(d, new Date()));
 			} catch(Exception e) { 
 				e.printStackTrace();
 				exs.add(e);
@@ -233,5 +257,18 @@ public class SalesByRecord implements IExcelData {
 		}
 		
 	}
+	
+//	private static String getProcessTime(Date start, Date end) {
+//		Long ms = end.getTime() - start.getTime();
+//		Long min = (ms / 1000L) / 60;
+//		Long sec = (ms / 1000L) - (min * 60);
+//		String result = "";
+//		if(min < 1l && sec < 1l) {
+//			result = ms.toString() + " ms";
+//		} else {
+//			result = min.toString() + "." + (sec < 10 ? "0" + sec.toString() : sec) + " min";
+//		}
+//		return result;
+//	}
 
 }

@@ -91,7 +91,7 @@ public class ExportKpiJob {
 			System.out.println("START ExportKpiJob Batch - " + start);
 			System.out.println("=======================================================================");
 			
-			String mDate = "201410";
+			String mDate = "201411";
 			try {
 				processYearMonth = new String(mDate);
 				processToDB(processYearMonth);
@@ -126,8 +126,8 @@ public class ExportKpiJob {
 			
 			for(KpiResult data : kpiResults) {
 				
-//				if(data.getCampaign().getCode().equals("021PA1714M03")) {
-//					System.out.println("021PA1714M03");
+//				if(!data.getCampaign().getCode().equals("021DP1714L04")) {
+//					continue;
 //				}
 				
 				if(!campaignCode.equals(data.getCampaign().getCode())) {
@@ -319,9 +319,13 @@ public class ExportKpiJob {
 //					<!-- for using in TSM Kpi(Sup Kpi) -->
 					if(level.toUpperCase().contains(TSM)) {
 						String tsmCode = sheet.getRow(currRowNum).getCell(POSITION_COL, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
-						TsmActualKpi tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
-						tsmKpi.totalScore = sumScore;
-						tsmKpi.isGradeNull = grade == null ? true : false;
+						if(!StringUtils.isBlank(tsmCode)) {
+							TsmActualKpi tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
+							tsmKpi.totalScore = sumScore;
+							tsmKpi.isGradeNull = grade == null ? true : false;
+						} else {
+							System.err.println("TSM IS NULL -> currRowNum: " + currRowNum + " | POLISITION COL: " + POSITION_COL + " | Campaign: " + campaignCode);
+						}
 					}
 				}
 			}

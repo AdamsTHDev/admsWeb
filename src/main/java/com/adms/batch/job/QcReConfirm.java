@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.adms.batch.enums.EFileFormat;
 import com.adms.batch.service.KpiService;
 import com.adms.domain.entities.PolicyInfo;
@@ -25,8 +27,7 @@ public class QcReConfirm implements IExcelData {
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws Exception {
 		System.out.println("QcReConfirm");
 		
-		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM.getValue());
-//		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
+		InputStream fileFormat = Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.QC_RECONFIRM_NEW.getValue());
 		ExcelFormat ef = new ExcelFormat(fileFormat);
 		
 		try {
@@ -62,6 +63,7 @@ public class QcReConfirm implements IExcelData {
 			
 			String customerName = data.get("customerName").getStringValue();
 			
+			String xRef = data.get("xRef") != null ? data.get("xRef").getStringValue() : null;
 			Date saleDate = (Date) data.get("saleDate").getValue();
 			Date qcDate = (Date) data.get("qcDate").getValue();
 			String qcCode = data.get("qcCode").getStringValue();
@@ -75,11 +77,13 @@ public class QcReConfirm implements IExcelData {
 			
 			PolicyInfo policyInfo = null;
 			try {
-				policyInfo = KpiService.getInstance().getPolicyInfoByCustomerName(customerName, saleDate);
+				if(StringUtils.isNotBlank(xRef)) policyInfo = KpiService.getInstance().getPolicyInfoByXRef(xRef);
+				if(policyInfo == null) policyInfo = KpiService.getInstance().getPolicyInfoByCustomerName(customerName, saleDate);
+				
 				QaStatus qaStatus = null;
 				PolicyStatus policyStatus = null;
 				
-				if(tsrStatus.equalsIgnoreCase(qcStatus)) {
+				if(StringUtils.isNotBlank(tsrStatus) && tsrStatus.equalsIgnoreCase(qcStatus)) {
 					qaStatus = getQaStatusByValue(qcStatus);
 					
 					policyStatus = KpiService.getInstance().getPolicyStatus(saleDate, policyInfo.getxRef(), qaStatus.getQaValue());
@@ -95,7 +99,7 @@ public class QcReConfirm implements IExcelData {
 						policyStatus = KpiService.getInstance().updatePolicyStatus(policyStatus);
 						result = true;
 					}
-				} else {
+				} else if(StringUtils.isNotBlank(tsrStatus)) {
 					QaStatus qaFromQc = getQaStatusByValue(qcStatus);
 					PolicyStatus psFromQc = KpiService.getInstance().getPolicyStatus(saleDate, policyInfo.getxRef(), qaFromQc.getQaValue());
 					if(psFromQc == null) {

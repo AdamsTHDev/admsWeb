@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -98,9 +97,17 @@ public class ImportTsrTracking implements IExcelData {
 			System.out.println("TSR Tracking Size: " + datas.size());
 			for(DataHolder data : datas) {
 				try {
+//					System.out.println("workday: " + data.get("workday").getDecimalValue());
+					Integer workday = Integer.valueOf(data.get("workday").getDecimalValue() != null 
+							? Integer.valueOf(data.get("workday").getDecimalValue().intValue()) : new Integer(0));
+					
+					if(workday == 0) {
+						continue;
+					}
+					
 					String name = data.get("tsrName").getStringValue();
 					BigDecimal talkTime = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
-				
+					
 					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name, keyCode);
 					if(null == tsrInfo)	{ 
 						throw new Exception("Not found TSR: " + name + " | keyCode: " + keyCode);
@@ -111,7 +118,6 @@ public class ImportTsrTracking implements IExcelData {
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
-				
 			}
 			
 		} catch(Exception e) {

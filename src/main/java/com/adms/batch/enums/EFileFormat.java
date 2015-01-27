@@ -3,7 +3,7 @@ package com.adms.batch.enums;
 public enum EFileFormat {
 	TSR_TRACKING("tsrTracking", "config/fileformat/tsrTrackingFormat.xml"),
 	SALES_BY_RECORD("salesByRecord", "config/fileformat/salesByRecFormat.xml"),
-	QC_RECONFIRM("qcReconfirm", "config/fileformat/qcReconfirmFormat.xml"),
+	QC_RECONFIRM_MSIG_UOB("qcReconfirm", "config/fileformat/qcReconfirmFormat_MSIGUOB.xml"),
 	DAILY_PERFORMANCE("dailyPerformanceTracking", "config/fileformat/dailyPerformanceFormat.xml"),
 	
 	TSR_IMPORT("tsrImport", "config/fileformat/tsrImportFormat.xml"),
@@ -19,7 +19,8 @@ public enum EFileFormat {
 	SALES_BY_RECORD_MSIG_UOB("salesByRecordMSIG", "config/fileformat/salesByRecMSIGUOBFormat.xml"),
 	
 	QC_RECONFIRM_OTO("qcReconfirmOTO", "config/fileformat/qcReconfirmFormat_121.xml"),
-	QC_RECONFIRM_NEW("qcReconfirmNew", "config/fileformat/qcReconfirmFormat_new.xml");
+	QC_RECONFIRM_NEW("qcReconfirmNew", "config/fileformat/qcReconfirmFormat_new.xml"),
+	SUP_DSM_IMPORT("supDsmImportFormat", "config/fileformat/supDsmImportFormat.xml");
 	
 	private String code;
 	private String value;
