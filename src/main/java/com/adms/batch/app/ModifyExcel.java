@@ -1,4 +1,4 @@
-package com.adms.batch.job;
+package com.adms.batch.app;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
