@@ -83,7 +83,7 @@ public class ImportForKpiJob {
 	
 	private void startBatch() {
 		List<Exception> exceptionList = new ArrayList<Exception>();
-		String dir = "D:/Test/upload/kpi/201412";
+		String dir = "D:/Test/upload/kpi/201411";
 		
 		if(StringUtils.isBlank(dir)) {
 			System.err.println("Directory is null");
@@ -93,14 +93,9 @@ public class ImportForKpiJob {
 		File path = new File(dir);
 		
 		for(File fd : path.listFiles(
-//				new FileFilterByName(
-//						"MSIG Happy Life BL"
-//						,"MTI-KBank"
-//						,"MTLife Hip Broker"
-//						,"MTLife POM PA"
-//						,"MTLife WIN"
-//						,"POM_PA_Cash_Back"
-//						)
+				new FileFilterByName(
+						"POM_PA_Cash_Back"
+						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
@@ -309,7 +304,7 @@ public class ImportForKpiJob {
 //				String firstNameEn = null != data.get("firstNameEn").getValue() ? data.get("firstNameEn").getStringValue().trim() : null;
 //				String lastNameEn = null != data.get("lastNameEn").getValue() ? data.get("lastNameEn").getStringValue().trim() : null;
 				String status = data.get("status").getStringValue();
-//				Date lastDateOfWork = (Date) data.get("lastDateOfWork").getValue();
+				Date lastDateOfWork = (Date) data.get("lastDateOfWork").getValue();
 //				Date resignEffectiveDate = (Date) data.get("resignEffectiveDate").getValue();
 //				Date completePro = (Date) data.get("completeProbation").getValue();
 //				String remark = data.get("remark").getStringValue();
@@ -339,7 +334,7 @@ public class ImportForKpiJob {
 //				tsrInfo.setBirthDate(birthDate);
 				
 //				tsrInfo = service.addOrUpdateTsrInfo(tsrInfo);
-				service.saveTsrInfoAndContract(tsrInfo, tsrSite, tsrStatus, startDate, campaignA);
+				service.saveTsrInfoAndContract(tsrInfo, tsrSite, tsrStatus, startDate, campaignA, lastDateOfWork);
 				
 //				tsrContract = new TsrContract();
 //				tsrContract.setTsrInfo(tsrInfo);
