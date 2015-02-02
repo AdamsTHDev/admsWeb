@@ -108,7 +108,7 @@ public class ImportTsrTracking implements IExcelData {
 					String name = data.get("tsrName").getStringValue();
 					BigDecimal talkTime = new BigDecimal(data.get("totalTalkTime").getStringValue()).setScale(14, BigDecimal.ROUND_HALF_UP);
 					
-					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name, keyCode);
+					TsrInfo tsrInfo = KpiService.getInstance().getTsrInfoByNameAdvanceMode(name, keyCode, null);
 					if(null == tsrInfo)	{ 
 						throw new Exception("Not found TSR: " + name + " | keyCode: " + keyCode);
 					}

@@ -18,6 +18,7 @@
 				<DataCell row="1" column="J" dataType="TEXT" fieldName="campaignB" autoTrim="TRUE" />
 				
 				<DataCell row="1" column="K" dataType="DATE" dataFormat="d-MMM-yy" fieldName="startDate" />
+				<DataCell row="1" column="L" dataType="DATE" dataFormat="d-MMM-yy" fieldName="lastDateOfWork" />
 				<DataCell row="1" column="N" dataType="TEXT" fieldName="status" />
 				
 				

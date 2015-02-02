@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import com.adms.domain.entities.TsrHierarchical;
 import com.adms.domain.entities.TsrInfo;
 import com.adms.imex.excelformat.DataHolder;
 import com.adms.imex.excelformat.ExcelFormat;
+import com.adms.utils.DateUtil;
 
 public class SalesByRecord implements IExcelData {
 	
@@ -79,30 +81,40 @@ public class SalesByRecord implements IExcelData {
 		}
 	}
 	
-//	private void checkSup(TsrInfo tsrInfo, String tmrCode, CampaignKeyCode keyCode, Date saleDate) {
-//		try {
-//			if(!StringUtils.isBlank(tmrCode) && null != keyCode) {
-////				<!-- check upline campaign -->
-//				TsrHierarchical h = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, keyCode.getKeyCode(), null);
-//				if(null == h) {
-////					kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tmrCode), keyCode, saleDate, null);
-//				} else if(!h.getUplineInfo().getTsrCode().equals(tmrCode)) {
-////					h.setUplineInfo(kpiService().getTsrInfoInMap(tmrCode));
-////					kpiService().updateTsrHierarchical(h);
-//				}
-//				
-//			}
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//			exs.add(e);
-//		}
-//	}
+	private void checkSup(TsrInfo tsrInfo, String tsmCode, CampaignKeyCode keyCode, Date saleDate) {
+		try {
+			if(!StringUtils.isBlank(tsmCode) && null != keyCode) {
+//				<!-- check upline campaign -->
+				List<TsrHierarchical> list = kpiService().getTsrHierarchical(tsrInfo.getTsrCode(), null, keyCode.getCampaign().getCode(), saleDate);
+				if(list == null) {
+					kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tsmCode), keyCode.getCampaign(), saleDate, null);
+				} else {
+					TsrHierarchical h = list.get(0);
+					if(!h.getUplineInfo().getTsrCode().equals(tsmCode)) {
+						Calendar cal = Calendar.getInstance();
+						cal.setTime(saleDate);
+						cal.add(Calendar.DATE, -1);
+						//remove time
+						Date end = DateUtil.convStringToDate("yyyyMMdd", DateUtil.convDateToString("yyyyMMdd", cal.getTime()));
+						h.setEndDate(end);
+						kpiService().updateTsrHierarchical(h);
+						
+						kpiService().addTsrHierarchical(tsrInfo, kpiService().getTsrInfoInMap(tsmCode), keyCode.getCampaign(), saleDate, null);
+					}
+				}
+				
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			exs.add(e);
+		}
+	}
 	
 	private TsrInfo getDsm(String tsmCode, Date saleDate) throws Exception {
 		if(kpiService().isDsm(tsmCode)) {
 			return kpiService().getTsrInfoInMap(tsmCode);
 		} else {
-			TsrHierarchical tsm = kpiService().getTsrHierarchical(tsmCode, null, null, saleDate);
+			TsrHierarchical tsm = kpiService().getDsmHierarchical(tsmCode, saleDate);
 			if(tsm != null) {
 				return tsm.getUplineInfo();
 			} else {
@@ -133,11 +145,12 @@ public class SalesByRecord implements IExcelData {
 				
 //				<!-- Getting TSR_INFO -->
 				if(StringUtils.isBlank(tsrCode)) {
-					tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim());
+//					tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim(), saleDate);
+					throw new Exception("TSR CODE is NULL");
 				} else {
 					tsrFromCode = kpiService().getTsrInfoInMap(tsrCode);
 					if(null == tsrFromCode) {
-						tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim());
+						tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim(), saleDate);
 					}
 				}
 				
@@ -157,7 +170,7 @@ public class SalesByRecord implements IExcelData {
 				
 //				<!-- Check TMR(Sup) -->
 				String tsmCode = data.get("tmrCode").getStringValue();
-//				checkSup(tsrFromCode, tmrCode, keyCode, saleDate);
+				checkSup(tsrFromCode, tsmCode, keyCode, saleDate);
 				
 //				<!-- get DSM -->
 				TsrInfo dsmInfo = getDsm(tsmCode, saleDate);
@@ -248,7 +261,6 @@ public class SalesByRecord implements IExcelData {
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().addSalesRecord(saleRec);
 				}
-//				System.out.println("saleRecord process time: " + getProcessTime(d, new Date()));
 			} catch(Exception e) { 
 				e.printStackTrace();
 				exs.add(e);
