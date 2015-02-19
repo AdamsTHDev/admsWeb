@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.adms.utils.FileFilterByName;
 import com.adms.web.utils.FileUtils;
 
 public class MoveFileManually {
@@ -14,7 +13,7 @@ public class MoveFileManually {
 	public static void main(String[] args) {
 		System.out.println("START");
 		
-		String monthYear = "201412";
+		String monthYear = "201501";
 		
 //		String[] targetCampaigns = new String[]{
 //				"POM_PA_Cash_Back"
@@ -52,7 +51,7 @@ public class MoveFileManually {
 		for(File root : origDir.listFiles()) {
 //			OTO & TELE
 			System.out.println("root: " + root.getName());
-			for(File cPath : root.listFiles(new FileFilterByName("MSIGUOB"))) {
+			for(File cPath : root.listFiles()) {
 
 				System.out.println("cPath: " + cPath.getName());
 				if(cPath.isFile()) {

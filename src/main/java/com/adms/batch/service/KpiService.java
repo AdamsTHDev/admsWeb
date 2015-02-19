@@ -79,10 +79,10 @@ public class KpiService {
 
 	private Map<String, Campaign> campaignMap;
 	private Map<String, CampaignKeyCode> keyCodeMap;
-	Map<String, Customer> customerMap;
-	Map<String, TsrHierarchical> dsmMap;
+	private Map<String, Customer> customerMap;
+	private List<TsrHierarchical> dsmList;
 	
-	List<KpiScoreRate> kpiScoreRates;
+	private List<KpiScoreRate> kpiScoreRates;
 	
 	private static KpiService instance;
 
@@ -102,7 +102,11 @@ public class KpiService {
 	public Campaign addCampaign(Campaign campaign) throws Exception {
 		if(campaign != null) {
 			CampaignBo bo = (CampaignBo) AppConfig.getInstance().getBean("campaignBo");
-			return bo.addCampaign(campaign, USER_LOGIN);
+			campaign = bo.addCampaign(campaign, USER_LOGIN);
+			if(campaign != null) {
+				prepareCampaignCode();
+			}
+			return campaign;
 		}
 		return null;
 	}
@@ -110,7 +114,11 @@ public class KpiService {
 	public CampaignKeyCode addCampaignKeyCode(CampaignKeyCode campaignKeyCode) throws Exception {
 		if(campaignKeyCode != null) {
 			CampaignKeyCodeBo bo = (CampaignKeyCodeBo) AppConfig.getInstance().getBean("campaignKeyCodeBo");
-			return bo.addCampaignKeyCode(campaignKeyCode, USER_LOGIN);
+			campaignKeyCode = bo.addCampaignKeyCode(campaignKeyCode, USER_LOGIN);
+			if(campaignKeyCode != null) {
+				initCampaignKeyCodeMap();
+			}
+			return campaignKeyCode;
 		}
 		return null;
 	}
@@ -173,24 +181,28 @@ public class KpiService {
 	}
 	
 	private void initDsmMap() {
-		dsmMap = new HashMap<>();
+		dsmList = new ArrayList<>();
 		TsrHierarchicalBo bo = (TsrHierarchicalBo) AppConfig.getInstance().getBean("tsrHierarchicalBo");
 		
 		String hql = " from TsrHierarchical d "
-				+ " where d.campaign.code is null";
+				+ " where d.campaign is null";
 		try {
-			List<TsrHierarchical> list = bo.findByHql(hql);
-			for(TsrHierarchical t : list) {
-				dsmMap.put(t.getUplineInfo().getTsrCode(), t);
-			}
+			dsmList = bo.findByHql(hql);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public boolean isDsm(String code) {
-		if(dsmMap.get(code) != null) {
-			return true;
+	public boolean isDsm(String code, Date date) {
+		try {
+			for(TsrHierarchical h : dsmList) {
+				if(h.getUplineInfo().getTsrCode().equals(code)
+						&& (h.getStartDate().compareTo(date) <= 0 && h.getEndDate().compareTo(date) >= 0)) {
+					return true;
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -907,12 +919,17 @@ public class KpiService {
 	}
 	
 	public TsrHierarchical getDsmHierarchical(String code, Date saleDate) throws Exception {
-		for(String s : dsmMap.keySet()) {
-			TsrHierarchical h = dsmMap.get(s);
-			if(h.getUplineInfo().getTsrCode().equals(code) && (h.getStartDate().compareTo(saleDate) <= 0 && h.getEndDate().compareTo(saleDate) >= 0)) {
+		for(TsrHierarchical h : dsmList) {
+//			String format = "yyyyMMdd";
+//			saleDate = DateUtil.convStringToDate(format, DateUtil.convDateToString(format, saleDate));
+//			System.out.println("dsm: " + h.getUplineInfo().getTsrCode() + " | startDate: " + h.getStartDate() + " | endDate: " + h.getEndDate());
+			
+			if(h.getTsrInfo().getTsrCode().equals(code) 
+					&& (h.getStartDate().compareTo(saleDate) <= 0 && h.getEndDate().compareTo(saleDate) >= 0)) {
 				return h;
 			}
 		}
+		System.err.println("not found DSM for " + code + " | saleDate: " + saleDate);
 		return null;
 	}
 	

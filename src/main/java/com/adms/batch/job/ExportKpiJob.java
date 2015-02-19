@@ -91,10 +91,10 @@ public class ExportKpiJob {
 			System.out.println("START ExportKpiJob Batch - " + start);
 			System.out.println("=======================================================================");
 			
-			String mDate = "201411";
+			String mDate = "201501";
 			try {
 				processYearMonth = new String(mDate);
-				processToDB(processYearMonth);
+//				processToDB(processYearMonth);
 				processData();
 			} catch(Exception e) {
 				e.printStackTrace();

@@ -3,19 +3,33 @@
 	<DataSet description="campaignKeyCode">
 		<DataSheet sheetName="" sheetIndex="0">
 
-			<DataRecord listSourceName="campaignKeyCodeList" beginRow="2" endRow="9999">
+			<DataRecord listSourceName="dataList" beginRow="2" endRow="9999">
 				
 				<DataCell row="1" column="A" dataType="TEXT" fieldName="campaignCode"/>
 				<DataCell row="1" column="B" dataType="TEXT" fieldName="keyCode" />
-				<DataCell row="1" column="C" dataType="TEXT" fieldName="site" />
-				<DataCell row="1" column="D" dataType="TEXT" fieldName="partner" />
-				<DataCell row="1" column="E" dataType="TEXT" fieldName="insurer"/>
-				<DataCell row="1" column="F" dataType="TEXT" fieldName="campaignName"/>
-				<DataCell row="1" column="G" dataType="TEXT" fieldName="product"/>
-				<DataCell row="1" column="H" dataType="TEXT" fieldName="productCode" />
-				<DataCell row="1" column="I" dataType="TEXT" fieldName="scriptCode" />
-				<DataCell row="1" column="J" dataType="TEXT" fieldName="desc" />
-				<DataCell row="1" column="K" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="launchDate" />
+				<DataCell row="1" column="C" dataType="TEXT" fieldName="listLotName" />
+				<DataCell row="1" column="E" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="lotEffectiveDate" />
+<!-- 				<DataCell row="1" column="F" dataType="TEXT" fieldName="campaignName"/> -->
+<!-- 				<DataCell row="1" column="G" dataType="TEXT" fieldName="product"/> -->
+<!-- 				<DataCell row="1" column="H" dataType="TEXT" fieldName="productCode" /> -->
+<!-- 				<DataCell row="1" column="I" dataType="TEXT" fieldName="scriptCode" /> -->
+<!-- 				<DataCell row="1" column="J" dataType="TEXT" fieldName="desc" /> -->
+<!-- 				<DataCell row="1" column="K" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="launchDate" /> -->
+		
+				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
+				
+			</DataRecord>
+		</DataSheet>
+		
+		<DataSheet sheetName="" sheetIndex="1">
+
+			<DataRecord listSourceName="dataList" beginRow="2" endRow="9999">
+				
+				<DataCell row="1" column="A" dataType="TEXT" fieldName="campaignCode"/>
+				<DataCell row="1" column="B" dataType="TEXT" fieldName="campaignName" />
+				<DataCell row="1" column="D" dataType="TEXT" fieldName="site" />
+				<DataCell row="1" column="E" dataType="TEXT" fieldName="partner" />
+				<DataCell row="1" column="F" dataType="TEXT" fieldName="insurer"/>
 		
 				<EndRecordCondition column="A" comparator="BLANK" checkValue="" />
 				

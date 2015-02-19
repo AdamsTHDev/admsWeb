@@ -111,7 +111,7 @@ public class SalesByRecord implements IExcelData {
 	}
 	
 	private TsrInfo getDsm(String tsmCode, Date saleDate) throws Exception {
-		if(kpiService().isDsm(tsmCode)) {
+		if(kpiService().isDsm(tsmCode, saleDate)) {
 			return kpiService().getTsrInfoInMap(tsmCode);
 		} else {
 			TsrHierarchical tsm = kpiService().getDsmHierarchical(tsmCode, saleDate);

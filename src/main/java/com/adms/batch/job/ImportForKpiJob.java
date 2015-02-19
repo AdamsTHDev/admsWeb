@@ -64,12 +64,13 @@ public class ImportForKpiJob {
 //			importTsr();
 //			importCampaignKeyCode();
 //			importPosition();
-//			importSupDsmHierarchy("D:/Test/upload/TSRUpdate/", "UPDATE_SUP_DSM_112014.xlsx");
+			
+//			importSupDsmHierarchy("D:/Test/upload/TSRUpdate/", "UPDATE_SUP_DSM.xlsx");
 			
 //			importKpiTargetSetup();
 //			importEoc();
 			
-			startBatch();
+//			startBatch();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -83,7 +84,7 @@ public class ImportForKpiJob {
 	
 	private void startBatch() {
 		List<Exception> exceptionList = new ArrayList<Exception>();
-		String dir = "D:/Test/upload/kpi/201411";
+		String dir = "D:/Test/upload/kpi/201501";
 		
 		if(StringUtils.isBlank(dir)) {
 			System.err.println("Directory is null");
@@ -93,9 +94,9 @@ public class ImportForKpiJob {
 		File path = new File(dir);
 		
 		for(File fd : path.listFiles(
-				new FileFilterByName(
-						"POM_PA_Cash_Back"
-						)
+//				new FileFilterByName(
+//						"POM_PA_Cash_Back"
+//						)
 				)) {
 			if(fd.isDirectory()) {
 				for(File byDate: fd.listFiles(
@@ -263,7 +264,7 @@ public class ImportForKpiJob {
 	
 	private void importTsr() {
 		String dir = "D:/Test/upload/TSRUpdate/";
-		String fileName = "TSR_update20150114.xlsx";
+		String fileName = "Update New Staff by month for comm_February-2015.xlsx";
 		File file = new File(dir + fileName);
 		
 		try {
@@ -359,7 +360,7 @@ public class ImportForKpiJob {
 	}
 	
 	private void importCampaignKeyCode() {
-		String dir = "D:/Test/upload/CampaignAndKeycode/";
+		String dir = "D:/Test/upload/CampaignAndKeycode/import";
 
 		File path = new File(dir);
 		File[] excels = path.listFiles(new ExcelFileFilter());
@@ -376,89 +377,122 @@ public class ImportForKpiJob {
 				ExcelFormat ef = new ExcelFormat(fileFormat);
 				DataHolder wb = ef.readExcel(xlsStream);
 				
-				List<String> sheetNames = wb.getKeyList();
+				DataHolder sheetHolder = wb.get(wb.getKeyList().get(1));
+				List<DataHolder> dataHolders = sheetHolder.getDataList("dataList");
 				
-				DataHolder sheet = wb.get(sheetNames.get(0));
-				
-				List<DataHolder> datas = sheet.getDataList("campaignKeyCodeList");
-				
-				for(DataHolder data : datas) {
-					
-					/*
-					 * 
-					 * <DataCell row="1" column="A" dataType="TEXT" fieldName="campaignCode"/>
-						<DataCell row="1" column="B" dataType="TEXT" fieldName="keyCode" />
-						<DataCell row="1" column="C" dataType="TEXT" fieldName="site" />
-						<DataCell row="1" column="D" dataType="TEXT" fieldName="partner" />
-						<DataCell row="1" column="E" dataType="TEXT" fieldName="insurer"/>
-						<DataCell row="1" column="F" dataType="TEXT" fieldName="campaignName"/>
-						<DataCell row="1" column="G" dataType="TEXT" fieldName="product"/>
-						<DataCell row="1" column="H" dataType="TEXT" fieldName="productCode" />
-						<DataCell row="1" column="I" dataType="TEXT" fieldName="scriptCode" />
-						<DataCell row="1" column="J" dataType="TEXT" fieldName="desc" />
-						<DataCell row="1" column="K" dataType="DATE" dataFormat="dd/MM/yyyy" fieldName="launchDate" />
-					 */
+				for(DataHolder data : dataHolders) {
 					String campaignCode = data.get("campaignCode").getStringValue();
-					
-					String keyCode = data.get("keyCode").getStringValue();
+					String campaignName = data.get("campaignName").getStringValue();
 					String site = data.get("site").getStringValue();
-					
 					String partner = data.get("partner").getStringValue();
 					String insurer = data.get("insurer").getStringValue();
-					String campaignName = data.get("campaignName").getStringValue();
-					String product = data.get("product").getStringValue();
-					String productCode = data.get("productCode").getStringValue();
-					String scriptCode = data.get("scriptCode").getStringValue();
-					String desc = data.get("desc").getStringValue();
+					
+					Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
+					
+					if(campaign == null) {
+						campaign = new Campaign();
+						campaign.setCode(campaignCode);
+						campaign.setDisplayName(campaignName);
+						campaign.setFullName(campaignName);
+						campaign.setPartner(partner);
+						campaign.setInsurer(insurer);
+						campaign.setSite(site);
+						
+						KpiService.getInstance().addCampaign(campaign);
+					}
+				}
+//				
+//				
+				sheetHolder = wb.get(wb.getKeyList().get(0));
+				dataHolders = sheetHolder.getDataList("dataList");
+				
+				for(DataHolder data : dataHolders) {
+					String campaignCode = data.get("campaignCode").getStringValue();
+					String keyCode = data.get("keyCode").getStringValue();
+					String listLotName = data.get("listLotName").getStringValue();
+					Date effectiveDate = (Date) data.get("lotEffectiveDate").getValue();
 					
 					CampaignKeyCode listLot = KpiService.getInstance().getCampaignKeyCode(keyCode);
 					
-//					if(listLot != null) {
-//						System.err.println("Key Code existing");
-//						continue;
-//					}
-					
-					Campaign campaign = KpiService.getInstance().isCampaignExist(data.get("campaignCode").getStringValue());
-					
-					if(campaign != null) {
-						campaign.setCode(campaignCode);
-						campaign.setPartner(partner);
-						campaign.setInsurer(insurer);
-						campaign.setFullName(campaignName);
-						campaign.setProduct(product);
-						campaign.setProductCode(productCode);
-						campaign.setScript(scriptCode);
-						campaign.setDescription(desc);
-						
-						campaign = KpiService.getInstance().updateCampaign(campaign);
-					} else {
-						campaign = new Campaign();
-						campaign.setCode(campaignCode);
-						campaign.setPartner(partner);
-						campaign.setInsurer(insurer);
-						campaign.setFullName(campaignName);
-						campaign.setProduct(product);
-						campaign.setProductCode(productCode);
-						campaign.setScript(scriptCode);
-						campaign.setDescription(desc);
-						campaign = KpiService.getInstance().addCampaign(campaign);
-					}
-
 					if(listLot == null) {
 						listLot = new CampaignKeyCode();
 						listLot.setKeyCode(keyCode);
-						listLot.setCampaign(campaign);
-						listLot.setDescription(desc);
-
-						listLot = KpiService.getInstance().addCampaignKeyCode(listLot);
-					} else {
-						listLot.setKeyCode(keyCode);
-						listLot.setCampaign(campaign);
-						listLot.setDescription(desc);
-						listLot = KpiService.getInstance().updateCampaignKeyCode(listLot);
+						listLot.setCampaign(KpiService.getInstance().getCampaignInMap(campaignCode));
+						listLot.setDescription(listLotName);
+						listLot.setStartDate(effectiveDate);
+						KpiService.getInstance().addCampaignKeyCode(listLot);
 					}
-					
 				}
+				
+//				List<String> sheetNames = wb.getKeyList();
+//				
+//				DataHolder sheet = wb.get(sheetNames.get(0));
+//				
+//				List<DataHolder> datas = sheet.getDataList("dataList");
+//				
+//				for(DataHolder data : datas) {
+//					
+//					String campaignCode = data.get("campaignCode").getStringValue();
+//					
+//					String keyCode = data.get("keyCode").getStringValue();
+//					String site = data.get("site").getStringValue();
+//					
+//					String partner = data.get("partner").getStringValue();
+//					String insurer = data.get("insurer").getStringValue();
+//					String campaignName = data.get("campaignName").getStringValue();
+//					String product = data.get("product").getStringValue();
+//					String productCode = data.get("productCode").getStringValue();
+//					String scriptCode = data.get("scriptCode").getStringValue();
+//					String desc = data.get("desc").getStringValue();
+//					
+//					CampaignKeyCode listLot = KpiService.getInstance().getCampaignKeyCode(keyCode);
+//					
+////					if(listLot != null) {
+////						System.err.println("Key Code existing");
+////						continue;
+////					}
+//					
+//					Campaign campaign = KpiService.getInstance().isCampaignExist(data.get("campaignCode").getStringValue());
+//					
+//					if(campaign != null) {
+//						campaign.setCode(campaignCode);
+//						campaign.setPartner(partner);
+//						campaign.setInsurer(insurer);
+//						campaign.setFullName(campaignName);
+//						campaign.setProduct(product);
+//						campaign.setProductCode(productCode);
+//						campaign.setScript(scriptCode);
+//						campaign.setDescription(desc);
+//						
+//						campaign = KpiService.getInstance().updateCampaign(campaign);
+//					} else {
+//						campaign = new Campaign();
+//						campaign.setCode(campaignCode);
+//						campaign.setPartner(partner);
+//						campaign.setInsurer(insurer);
+//						campaign.setFullName(campaignName);
+//						campaign.setProduct(product);
+//						campaign.setProductCode(productCode);
+//						campaign.setScript(scriptCode);
+//						campaign.setDescription(desc);
+//						campaign = KpiService.getInstance().addCampaign(campaign);
+//					}
+//
+//					if(listLot == null) {
+//						listLot = new CampaignKeyCode();
+//						listLot.setKeyCode(keyCode);
+//						listLot.setCampaign(campaign);
+//						listLot.setDescription(desc);
+//
+//						listLot = KpiService.getInstance().addCampaignKeyCode(listLot);
+//					} else {
+//						listLot.setKeyCode(keyCode);
+//						listLot.setCampaign(campaign);
+//						listLot.setDescription(desc);
+//						listLot = KpiService.getInstance().updateCampaignKeyCode(listLot);
+//					}
+//					
+//				}
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -531,8 +565,8 @@ public class ImportForKpiJob {
 	}
 	
 	private void importKpiTargetSetup() {
-		String dir = "D:/Test/upload/KpiTarget/201412";
-		String fileName = "Sales KPIs Target Setup - 201412.xlsx";
+		String dir = "D:/Test/upload/KpiTarget/201501";
+		String fileName = "Sales KPIs Target Setup - 201501.xlsx";
 		final String DSM = "DSM";
 		final String SUP = "SUP";
 		final String TSR = "TSR";
@@ -563,6 +597,8 @@ public class ImportForKpiJob {
 								TsrInfo dsmInfo = KpiService.getInstance().getTsrInfoInMap(dsmCode);
 								if(dsmInfo == null) throw new Exception("Dsm not found: " + dsmCode);
 								
+								System.out.println("DSM => " + dsmInfo.getTsrCode() + " | name: " + dsmInfo.getFullName());
+								
 								for(int i = 1; i <= 4; i++) {
 									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
@@ -581,10 +617,8 @@ public class ImportForKpiJob {
 									kpiSetup.setWeight(weightCat);
 									if(kpiSetups == null) {
 										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-									} else {
-										kpiSetup.setId(kpiSetups.get(0).getId());
-										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
 									}
+									
 								}								
 							}
 							
@@ -596,7 +630,7 @@ public class ImportForKpiJob {
 							System.out.println("+++ SUP +++");
 							for(DataHolder data : sheet.getDataList("supTargetList")) {
 								String supCode = data.get("supCode").getStringValue();
-								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, SUP, supCode);
+//								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, SUP, supCode);
 								
 
 								TsrInfo supInfo = KpiService.getInstance().getTsrInfoInMap(supCode);
@@ -660,10 +694,7 @@ public class ImportForKpiJob {
 									
 									if(kpiSetups == null) {
 										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-									} else {
-										kpiSetup.setId(kpiSetups.get(0).getId());
-										KpiService.getInstance().updateKpiCategorySetup(kpiSetup);
-									}
+									} 
 								}
 							}
 //							<!-- end Tsr List -->
@@ -686,7 +717,7 @@ public class ImportForKpiJob {
 	}
 	
 	private void importEoc() {
-		String fileName = "EOC_20150116.xlsx";
+		String fileName = "EOC_20150219.xlsx";
 		String dir = "D:/Test/upload/EOC/";
 		try {
 			ExcelFormat ef = new ExcelFormat(Thread.currentThread().getContextClassLoader().getResourceAsStream(EFileFormat.KPI_EOC_IMPORT.getValue()));
