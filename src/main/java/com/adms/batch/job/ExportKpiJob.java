@@ -42,6 +42,8 @@ public class ExportKpiJob {
 	private final String TSM = "SUP";
 	private final String TSR = "TSR";
 	
+	private final String FIX_MSIG_WB_KEYCODE = "AGA15";
+	
 	private final int START_DSM_ROW = -1;
 	private final int START_TSM_ROW = 1;
 	private final int START_TSR_ROW = 7;
@@ -63,6 +65,8 @@ public class ExportKpiJob {
 	
 	private int currentRow = 0;
 	private String campaignCode = "";
+	private String keyCode = "";
+	
 	private String dsmCode = "";
 	private String tsmCode = "";
 	private String tsrCode = "";
@@ -86,180 +90,203 @@ public class ExportKpiJob {
 
 	public void execute() {
 			
-			Date start = Calendar.getInstance().getTime();
-			System.out.println("=======================================================================");
-			System.out.println("START ExportKpiJob Batch - " + start);
-			System.out.println("=======================================================================");
-			
-			String mDate = "201501";
-			try {
-				processYearMonth = new String(mDate);
-//				processToDB(processYearMonth);
-				processData();
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-			
-			Date end = Calendar.getInstance().getTime();
-			System.out.println("=======================================================================");
-			System.out.println("END ExportKpiJob Batch - " + end);
-			System.out.println("Batch processing time: " + getProcessTime(start, end));
-			System.out.println("=======================================================================");
+		Date start = Calendar.getInstance().getTime();
+		System.out.println("=======================================================================");
+		System.out.println("START ExportKpiJob Batch - " + start);
+		System.out.println("=======================================================================");
+		
+		String mDate = "201501";
+		try {
+			processYearMonth = new String(mDate);
+			processToDB(processYearMonth);
+			processData();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-
-	private void processToDB(String yyyyMM) {
-		List<KpiBean> list = kpiService().getKpi(yyyyMM);
-		for(KpiBean kpi : list) {
-			kpiService().addOrUpdateKpiResult(kpi, yyyyMM);
-		}
+		
+		Date end = Calendar.getInstance().getTime();
+		System.out.println("=======================================================================");
+		System.out.println("END ExportKpiJob Batch - " + end);
+		System.out.println("Batch processing time: " + getProcessTime(start, end));
+		System.out.println("=======================================================================");
 	}
 
+	private void processToDB(String yyyyMM) throws Exception {
+		List<KpiBean> list = kpiService().getKpi(yyyyMM);
+
+		System.out.println("KPI Result size: " + list.size());
+		kpiService().deleteKpiResultByYearMonth(yyyyMM);
+		kpiService().addKpiResult(list, yyyyMM, FIX_MSIG_WB_KEYCODE);
+//		for(KpiBean kpi : list) {
+//			kpiService().addOrUpdateKpiResult(kpi, yyyyMM, FIX_MSIG_WB_KEYCODE);
+//		}
+	}
+	
+	private boolean isSpecialCampaign(String campaignCode, String keyCode) {
+		if(StringUtils.isNoneBlank(keyCode)) {
+			if(FIX_MSIG_WB_KEYCODE.contains(keyCode)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void processData() throws Exception {
-			kpiResults = kpiService().getKpiResults(processYearMonth);
-			if(null == kpiResults) throw new Exception("No data has been found: " + processYearMonth);
-			
-			kpiRetentions = kpiService().findKpiRetentionByYearMonth(processYearMonth);
-			
-			Workbook wb = getWbTemplate();
-			Sheet tSheet = null;
-			Sheet toSheet = null;
-			
-			for(KpiResult data : kpiResults) {
+		kpiResults = kpiService().getKpiResults(processYearMonth);
+		if(null == kpiResults) throw new Exception("No data has been found: " + processYearMonth);
+		
+		kpiRetentions = kpiService().findKpiRetentionByYearMonth(processYearMonth);
+		
+		Workbook wb = getWbTemplate();
+		Sheet tSheet = null;
+		Sheet toSheet = null;
+//		kpiResults = combineData(kpiResults);
+		
+		for(KpiResult data : kpiResults) {
+			if(!(campaignCode + keyCode).equals(data.getCampaign().getCode() + data.getKeyCode()) ) {
+//			if(!(campaignCode).equals(data.getCampaign().getCode())) {
+
+				System.out.println("from campaignCode: " + campaignCode + " | keyCode: " + keyCode + " | to campaign:" + data.getCampaign().getCode() + " | keyCode: " + data.getKeyCode());
 				
-//				if(!data.getCampaign().getCode().equals("021DP1714L04")) {
-//					continue;
-//				}
-				
-				if(!campaignCode.equals(data.getCampaign().getCode())) {
-					
-					if(toSheet != null && !StringUtils.isBlank(campaignCode)) {
-						System.out.println("campaignCode: " + campaignCode);
-						setTSMActual();
-						doCalculate(toSheet, false);
+				if(toSheet != null && !StringUtils.isBlank(campaignCode)) {
+					setTSMActual();
+					doCalculate(toSheet, false);
 //						doDsmGroup(toSheet);
-						doWriteWorkbook(wb, kpiService().getCampaignInMap(campaignCode).getDisplayName());
-						wb = null;
-					}
-					
-					campaignCode = data.getCampaign().getCode();
-					Campaign campaign = kpiService().getCampaignInMap(campaignCode);
-					
-					if(wb == null) {
-						wb = getWbTemplate();
-					}
-					
-					tSheet = wb.getSheetAt(0);
-					toSheet = wb.createSheet(campaign.getDisplayName());
-					doHead(wb, campaign.getDisplayName());
-					
-	//				<!-- set width -->
-					for(int n = 0; n < 7; n++) {
-						copyColumnWidth(tSheet, n, toSheet, n);
-					}
-					
-	//				campaignCode = "";
-					dsmCode = "";
-					tsmCode = "";
-					tsrCode = "";
-					currentRow = 1;
-					
+					String fileName = isSpecialCampaign("", keyCode) ? "MSIG Broker POM WB"  : kpiService().getCampaignInMap(campaignCode).getDisplayName(); /* fix value */
+					doWriteWorkbook(wb, fileName);
+					wb = null;
 				}
 				
-	//			<!-- DSM rows -->
-				if(!dsmCode.equals(data.getDsmInfo().getTsrCode())) {
-					
-					dsmCode = data.getDsmInfo().getTsrCode();
-	
-	//				<!-- DSM have no campaignCode -->
+				campaignCode = data.getCampaign().getCode().trim();
+//				lastKeyCode = new String(keyCode);
+				keyCode = data.getKeyCode().trim();
+				
+				Campaign campaign = kpiService().getCampaignInMap(campaignCode);
+				
+				if(wb == null) {
+					wb = getWbTemplate();
+				}
+				
+				tSheet = wb.getSheetAt(0);
+				String sheetName = isSpecialCampaign("", keyCode) ? "MSIG Broker POM WB" : campaign.getDisplayName();
+				toSheet = wb.createSheet(sheetName);
+				doHead(wb, sheetName);
+				
+//				<!-- set width -->
+				for(int n = 0; n < 7; n++) {
+					copyColumnWidth(tSheet, n, toSheet, n);
+				}
+				
+//				campaignCode = "";
+				dsmCode = "";
+				tsmCode = "";
+				tsrCode = "";
+				currentRow = 1;
+				
+			}
+			
+//			<!-- DSM rows -->
+			if(!dsmCode.equals(data.getDsmInfo().getTsrCode())) {
+
+				dsmCode = data.getDsmInfo().getTsrCode();
+
+//				<!-- DSM have no campaignCode -->
 //					List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(DSM, null, dsmCode, processYearMonth);
-					try {
+				try {
 //						if(kpiCats == null || kpiCats.isEmpty()) {
 //							System.err.println("Not found KPIs Category-> dsmCode:" + dsmCode + " | campaignCode: " + campaignCode);
 //							kpiCats = null;
 //						}
-						
-						Map<String, DsmKpiByCampaign> campaignMap = null;
-						if(dsmActualMaps.get(dsmCode) == null) {
-							campaignMap = new HashMap<>();
-							dsmActualMaps.put(dsmCode, campaignMap);
-						} else {
-							campaignMap = dsmActualMaps.get(dsmCode);
-						}
-						
-						if(campaignMap.get(campaignCode) == null) {
-							campaignMap.put(campaignCode, new DsmKpiByCampaign());
-						}
-						
+					
+					Map<String, DsmKpiByCampaign> campaignMap = null;
+					if(dsmActualMaps.get(dsmCode) == null) {
+						campaignMap = new HashMap<>();
+						dsmActualMaps.put(dsmCode, campaignMap);
+					} else {
+						campaignMap = dsmActualMaps.get(dsmCode);
+					}
+					
+					if(campaignMap.get(campaignCode) == null) {
+						campaignMap.put(campaignCode, new DsmKpiByCampaign());
+					}
+					
 //						generateRowData(tSheet, toSheet, kpiCats, dsmCode, DSM, data);
-						generateRowData(tSheet, toSheet, null, dsmCode, DSM, data);
-						
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
-				}
-	//			</!-- End DSM row -->
-	//			<!-- TSM row -->
-				if(!tsmCode.equals(data.getTsmInfo().getTsrCode())) {
+					generateRowData(tSheet, toSheet, null, dsmCode, DSM, data);
 					
-					setTSMActual();
-					
-					tsmCode = data.getTsmInfo().getTsrCode();
-	
-					List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(TSM, campaignCode, tsmCode, processYearMonth);
-					try {
-						if(kpiCats == null || kpiCats.isEmpty()) {
-							System.err.println("!!!!!!!!!!!!!!!!!!!!!| Not found KPIs Category-> tsmCode:" + tsmCode + " | campaignCode: " + campaignCode + " |!!!!!!!!!!!!!!!!!!!!!");
-							kpiCats = null;
-						}
-						
-						Map<String, TsmActualKpi> campaignMap = null;
-						if(tsmActualMaps.get(tsmCode) == null) {
-							campaignMap = new HashMap<>();
-							tsmActualMaps.put(tsmCode, campaignMap);
-						} else {
-							campaignMap = tsmActualMaps.get(tsmCode);
-						}
-						
-						if(campaignMap.get(campaignCode) == null) {
-							campaignMap.put(campaignCode, new TsmActualKpi());
-						}
-						
-						generateRowData(tSheet, toSheet, kpiCats, tsmCode, TSM, data);
-						
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
+				} catch(Exception e) {
+					e.printStackTrace();
 				}
-	//			</!-- End TSM row -->
-	//			<!-- TSR row -->
-				if(!tsrCode.equals(data.getTsrInfo().getTsrCode())) {
-					tsrCode = data.getTsrInfo().getTsrCode();
-					
-					List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(TSR, campaignCode, null, processYearMonth);
-					try {
-						if(kpiCats == null || kpiCats.isEmpty()) {
-							throw new Exception("Not found KPIs Category-> tsrCode:" + tsrCode + " | campaignCode: " + campaignCode);
-						}
-						
-						generateRowData(tSheet, toSheet, kpiCats, tsrCode, TSR, data);
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
-				}
-	//			</!-- End TSR row -->
-				
 			}
-	//		<!-- for last campaign -->
-			setTSMActual();
-			doCalculate(toSheet, false);
-//			doDsmGroup(toSheet);
-			doWriteWorkbook(wb, kpiService().getCampaignInMap(campaignCode).getDisplayName());
-			wb.close();
-	//		<!-- end KPIs -->
-	
-			doDsmKpi();
-			doTsmKpi();
+//			</!-- End DSM row -->
+//			<!-- TSM row -->
+			if(!tsmCode.equals(data.getTsmInfo().getTsrCode())) {
+				
+				setTSMActual();
+
+				tsmCode = data.getTsmInfo().getTsrCode();
+				List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(TSM, campaignCode, isSpecialCampaign("", keyCode) ? keyCode : null, tsmCode, processYearMonth);
+				try {
+					if(kpiCats == null || kpiCats.isEmpty()) {
+						System.err.println("!!!!!!!!!!!!!!!!!!!!!| Not found KPIs Category-> tsmCode:" + tsmCode + " | campaignCode: " + campaignCode + " | keyCode: " + keyCode + " |!!!!!!!!!!!!!!!!!!!!!");
+						kpiCats = null;
+					}
+					
+					Map<String, TsmActualKpi> campaignMap = null;
+					
+					if(tsmActualMaps.get(tsmCode) == null) {
+						campaignMap = new HashMap<>();
+						tsmActualMaps.put(tsmCode, campaignMap);
+					} else {
+						campaignMap = tsmActualMaps.get(tsmCode);
+					}
+					
+//					if(FIX_MSIG_WB_KEYCODE.equals(keyCode)) {
+//						System.out.println("WB");
+//					}
+					String campaignCode = isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
+					if(campaignMap.get(campaignCode) == null) {
+						campaignMap.put(campaignCode, new TsmActualKpi());
+					}
+					
+					generateRowData(tSheet, toSheet, kpiCats, tsmCode, TSM, data);
+					
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+//			</!-- End TSM row -->
+//			<!-- TSR row -->
+			if(!tsrCode.equals(data.getTsrInfo().getTsrCode())) {
+				tsrCode = data.getTsrInfo().getTsrCode();
+				
+				List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(TSR, campaignCode, isSpecialCampaign("", keyCode) ? keyCode : null, null, processYearMonth);
+				try {
+					if(kpiCats == null || kpiCats.isEmpty()) {
+						throw new Exception("Not found KPIs Category-> tsrCode:" + tsrCode + " | campaignCode: " + campaignCode + " | keyCode: " + keyCode);
+					}
+					
+					generateRowData(tSheet, toSheet, kpiCats, tsrCode, TSR, data);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+//			</!-- End TSR row -->
+			
 		}
+//		<!-- for last campaign -->
+		setTSMActual();
+		doCalculate(toSheet, false);
+//			doDsmGroup(toSheet);
+		
+//		Write out
+		String fileName = isSpecialCampaign("", keyCode) ? "MSIG Broker POM WB"  : kpiService().getCampaignInMap(campaignCode).getDisplayName(); /* fix value */
+		doWriteWorkbook(wb, fileName);
+		wb.close();
+//		<!-- end KPIs -->
+
+		doDsmKpi();
+		doTsmKpi();
+	}
 
 	private String calculateGrade(Double score, boolean isNewbie) {
 		List<KpiScoreRate> kpiScoreRates = kpiService().getKpiScoreRateAll();
@@ -290,7 +317,7 @@ public class ExportKpiJob {
 
 		scoreValue = vsTargetValue * weightValue;
 		if(vsTargetValue >= 1) {
-			scoreValue = weightValue;
+			scoreValue = new Double(weightValue);
 		}
 		
 		if(isDSMGroup) {
@@ -320,6 +347,7 @@ public class ExportKpiJob {
 					if(level.toUpperCase().contains(TSM)) {
 						String tsmCode = sheet.getRow(currRowNum).getCell(POSITION_COL, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
 						if(!StringUtils.isBlank(tsmCode)) {
+							String campaignCode = isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
 							TsmActualKpi tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
 							tsmKpi.totalScore = sumScore;
 							tsmKpi.isGradeNull = grade == null ? true : false;
@@ -432,6 +460,7 @@ public class ExportKpiJob {
 		DsmKpiByCampaign dsmKpi = dsmActualMaps.get(dsmCode).get(campaignCode);
 		TsmActualKpi tsmKpi = null;
 		if(!StringUtils.isBlank(tsmCode)) {
+			String campaignCode = isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
 			tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
 		}
 		
@@ -669,7 +698,7 @@ public class ExportKpiJob {
 					
 				}
 				
-				List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(DSM, null, dsmCode, processYearMonth);
+				List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(DSM, null, null, dsmCode, processYearMonth);
 				groupRow = 1;
 				
 				if(kpiCats != null && !kpiCats.isEmpty()) {
@@ -795,12 +824,20 @@ public class ExportKpiJob {
 						copyRow(tempSheet, toSheet, groupRow - 1, currentRow, positionCol, positionCol);
 					}
 					
+					String campaignName = "";
+					if(campaignCode.contains(FIX_MSIG_WB_KEYCODE)) {
+						System.out.println("contain MSIG WB");
+						campaignName = "MSIG Broker POM WB";
+						campaignCode = campaignCode.replace(FIX_MSIG_WB_KEYCODE, "");
+					} else {
+						campaignName = kpiService().getCampaignInMap(campaignCode).getDisplayName();
+					}
 					if(groupRow == 4) {
 						doColumn(tempSheet, toSheet, campaignCodeCol, groupRow - 1, currentRow, campaignCode);
-						doColumn(tempSheet, toSheet, campaignNameCol, groupRow - 1, currentRow, kpiService().getCampaignInMap(campaignCode).getDisplayName());
+						doColumn(tempSheet, toSheet, campaignNameCol, groupRow - 1, currentRow, campaignName);
 					} else {
 						doColumn(tempSheet, toSheet, campaignCodeCol, groupRow, currentRow, campaignCode);
-						doColumn(tempSheet, toSheet, campaignNameCol, groupRow, currentRow, kpiService().getCampaignInMap(campaignCode).getDisplayName());
+						doColumn(tempSheet, toSheet, campaignNameCol, groupRow, currentRow, campaignName);
 					}
 					
 					if(tsmKpi.isGradeNull) {
@@ -1115,7 +1152,10 @@ public class ExportKpiJob {
 	private void setTSMActual() {
 		
 		if(!StringUtils.isBlank(tsmCode)) {
+			
+			String campaignCode =isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
 			TsmActualKpi tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
+			
 			if(tsmKpi != null) {
 				Double tarpPerTsr = tsmKpi.totalTarp / tsmKpi.countTsr;
 				Double firstConfirmSale = tsmKpi.firstSale / tsmKpi.allSale;

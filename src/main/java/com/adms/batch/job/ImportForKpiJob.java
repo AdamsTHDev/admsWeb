@@ -67,7 +67,7 @@ public class ImportForKpiJob {
 			
 //			importSupDsmHierarchy("D:/Test/upload/TSRUpdate/", "UPDATE_SUP_DSM.xlsx");
 			
-//			importKpiTargetSetup();
+			importKpiTargetSetup();
 //			importEoc();
 			
 //			startBatch();
@@ -625,6 +625,7 @@ public class ImportForKpiJob {
 						} else {
 							
 							String campaignCode = sheet.get("campaignCode").getStringValue();
+							String keyCode = sheet.get("keyCode").getStringValue();
 							
 //							<!-- Sup List -->
 							System.out.println("+++ SUP +++");
@@ -643,6 +644,8 @@ public class ImportForKpiJob {
 									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
 									kpiSetup.setCampaign(campaign);
+									kpiSetup.setKeyCode(keyCode);
+									
 									kpiSetup.setTsrLevel(SUP);
 									kpiSetup.setPersonal(supInfo);
 									
@@ -672,7 +675,7 @@ public class ImportForKpiJob {
 //							<!-- Tsr List -->
 							System.out.println("+++ TSR +++");
 							for(DataHolder data : sheet.getDataList("tsrTargetList")) {
-								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, TSR, null);
+//								List<KpiCategorySetup> kpiSetups = KpiService.getInstance().findKpiCategorySetup(effectiveDate, endDate, campaignCode, TSR, null);
 
 								Campaign campaign = KpiService.getInstance().getCampaignInMap(campaignCode);
 								if(campaign == null) throw new Exception("Camapaign not found: " + campaignCode);
@@ -681,6 +684,8 @@ public class ImportForKpiJob {
 									KpiCategorySetup kpiSetup = new KpiCategorySetup();
 									
 									kpiSetup.setCampaign(campaign);
+									kpiSetup.setKeyCode(keyCode);
+									
 									kpiSetup.setTsrLevel(TSR);
 									
 									kpiSetup.setEffectiveDate(effectiveDate);
@@ -692,9 +697,7 @@ public class ImportForKpiJob {
 									kpiSetup.setTarget(data.get("targetCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
 									kpiSetup.setWeight(data.get("weightCat" + i).getDecimalValue().setScale(2, BigDecimal.ROUND_HALF_UP));
 									
-									if(kpiSetups == null) {
-										KpiService.getInstance().addKpiCategorySetup(kpiSetup);
-									} 
+									KpiService.getInstance().addKpiCategorySetup(kpiSetup);
 								}
 							}
 //							<!-- end Tsr List -->

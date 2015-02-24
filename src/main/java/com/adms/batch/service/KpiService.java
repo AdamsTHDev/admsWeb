@@ -1,5 +1,6 @@
 package com.adms.batch.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -207,45 +208,245 @@ public class KpiService {
 		return false;
 	}
 	
-	public KpiResult addOrUpdateKpiResult(KpiBean kpiBean, String yearMonth) {
+	public void addKpiResult(List<KpiBean> kpiBeans, String yearMonth, String delimKeyCodeMSIGWB) throws Exception {
+		try {
+			
+			Map<String, Map<String, Map<String, Map<String, KpiResult>>>> campaignMap = new HashMap<>();
+			Map<String, Map<String, Map<String, KpiResult>>> dsmMap = null;
+			Map<String, Map<String, KpiResult>> tsmMap = null;
+			Map<String, KpiResult> tsrMap = null;
+
+			String campaignCode = "";
+			String keyCode = "";
+			
+			String dsmCode = "";
+			String tsmCode = "";
+			String tsrCode = "";
+			
+			KpiResult kpi = null;
+			
+			BigDecimal afyp = null;
+			Integer talkDate = null;
+			BigDecimal talkHrs = null;
+			Integer fcs = null;
+			Integer sale = null;
+			Integer successEoc = null;
+			Integer allEoc = null;
+			
+			for(KpiBean kpiBean : kpiBeans) {
+				
+				if(kpiBean.getKeyCode().contains(delimKeyCodeMSIGWB)) {
+					campaignCode = new String(kpiBean.getCampaignCode() + "_" + kpiBean.getKeyCode());
+					keyCode = new String(kpiBean.getKeyCode());
+				} else {
+					campaignCode = new String(kpiBean.getCampaignCode());
+					keyCode = "";
+				}
+				
+				dsmCode = kpiBean.getDsmCode();
+				tsmCode = kpiBean.getTsmCode();
+				tsrCode = kpiBean.getTsrCode();
+
+				dsmMap = campaignMap.get(campaignCode);
+				if(dsmMap == null) {
+					dsmMap = new HashMap<>();
+					campaignMap.put(campaignCode, dsmMap);
+				}
+				
+				tsmMap = dsmMap.get(dsmCode);
+				if(tsmMap == null) {
+					tsmMap = new HashMap<>();
+					dsmMap.put(dsmCode, tsmMap);
+				}
+				
+				tsrMap = tsmMap.get(tsmCode);
+				if(tsrMap == null) {
+					tsrMap = new HashMap<>();
+					tsmMap.put(tsmCode, tsrMap);
+				}
+				
+				kpi = tsrMap.get(tsrCode);
+				if(kpi == null) {
+					kpi = new KpiResult();
+					
+					kpi.setYearMonth(yearMonth);
+					kpi.setCampaign(getCampaignInMap(kpiBean.getCampaignCode()));
+					kpi.setDsmInfo(getTsrInfoInMap(dsmCode));
+					kpi.setTsmInfo(getTsrInfoInMap(tsmCode));
+					kpi.setTsrInfo(getTsrInfoInMap(tsrCode));
+					
+					kpi.setKeyCode(keyCode);
+					
+					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp());
+					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate());
+					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk());
+					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue());
+					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue());
+					successEoc = (kpiBean.getSuccessEoc() == null ? new Integer(0) : kpiBean.getSuccessEoc());
+					allEoc = (kpiBean.getAllEoc() == null ? new Integer(0) : kpiBean.getAllEoc());
+					
+				} else {
+					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp()).add(kpi.getSumOfAfyp());
+					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate()) + kpi.getCountTalkDate();
+					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk()).add(kpi.getTotalTalkHrs());
+					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue()) + kpi.getFirstConfirmSale().intValue();
+					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue()) + kpi.getAllSale();
+					successEoc = (kpiBean.getSuccessEoc() == null ? new Integer(0) : kpiBean.getSuccessEoc()) + kpi.getSuccessEoc();
+					allEoc = (kpiBean.getAllEoc() == null ? new Integer(0) : kpiBean.getAllEoc()) + kpi.getAllEoc();
+				}
+
+				kpi.setSumOfAfyp(afyp);
+				kpi.setCountTalkDate(talkDate);
+				kpi.setTotalTalkHrs(talkHrs);
+				kpi.setFirstConfirmSale(fcs);
+				kpi.setAllSale(sale);
+				kpi.setSuccessEoc(successEoc);
+				kpi.setAllEoc(allEoc);
+				
+				tsrMap.put(tsrCode, kpi);
+				
+			}
+			
+			addKpiResultFromSuperMap(campaignMap);
+			
+		} catch(Exception e) {
+			throw e;
+		}
+	}
+	
+	private void addKpiResultFromSuperMap(Object obj) throws Exception {
+		if(obj instanceof Map<?, ?>) {
+			for(Object key : ((Map<?, ?>) obj).keySet()) {
+				addKpiResultFromSuperMap(((Map<?, ?>) obj).get(key));
+			}
+		} else if(obj instanceof KpiResult) {
+//			System.out.println(obj.toString());
+			addKpiResult((KpiResult) obj);
+		} else {
+			throw new Exception("Not found instance of " + obj.getClass());
+		}
+	}
+	
+	public KpiResult addKpiResult(KpiResult kpiResult) throws Exception {
+		KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+		try {
+			return bo.addKpiResult(kpiResult, USER_LOGIN);
+		} catch(Exception e) {
+			throw e;
+		}
+	}
+	
+//	public KpiResult addOrUpdateKpiResult(KpiBean kpiBean, String yearMonth) {
+	public KpiResult addOrUpdateKpiResult(KpiBean kpiBean, String yearMonth, String delimKeyCodeWB) {
 		if(kpiBean != null) {
 			try {
-				KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
-				String tsmCode = kpiBean.getTsmCode();
-				String dsmCode = kpiBean.getDsmCode();
 				
-				KpiResult k = findKpiResultByDateAndCampaign(yearMonth, kpiBean.getCampaignCode(), kpiBean.getTsrCode(), tsmCode, dsmCode);
-				if(k != null) {
-					if(!k.getTsrInfo().getTsrCode().equals(kpiBean.getTsrCode())) k.setTsrInfo(getTsrInfoInMap(kpiBean.getTsrCode()));
-					if(!k.getTsmInfo().getTsrCode().equals(tsmCode)) k.setTsmInfo(getTsrInfoInMap(tsmCode));
-					if(!k.getDsmInfo().getTsrCode().equals(dsmCode)) k.setDsmInfo(getTsrInfoInMap(dsmCode));
-					
-					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
-					k.setCountTalkDate(kpiBean.getCountTalkDate());
-					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
-					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
-					k.setAllSale(kpiBean.getCountAll().intValue());
-					k.setSuccessEoc(kpiBean.getSuccessEoc());
-					k.setAllEoc(kpiBean.getAllEoc());
-					return bo.updateKpiResult(k, USER_LOGIN);
-				} else {
+				KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+
+				String campaignCode = kpiBean.getCampaignCode();
+				String dsmCode = kpiBean.getDsmCode();
+				String tsmCode = kpiBean.getTsmCode();
+				String tsrCode = kpiBean.getTsrCode();
+				
+//				<Process>
+				String hql = " from KpiResult d"
+						+ " where 1 = 1"
+						+ " and d.yearMonth = ? "
+						+ " and d.campaign.code = ? "
+						+ " and d.dsmInfo.tsrCode = ? "
+						+ " and d.tsmInfo.tsrCode = ? "
+						+ " and d.tsrInfo.tsrCode = ? ";
+				
+				KpiResult k = null;
+				
+				BigDecimal afyp = null;
+				Integer talkDate = null;
+				BigDecimal talkHrs = null;
+				Integer fcs = null;
+				Integer sale = null;
+				Integer successEoc = null;
+				Integer allEoc = null;
+				boolean isNew = false;
+				
+				
+				List<KpiResult> list = bo.findByHql(hql, yearMonth, campaignCode, dsmCode, tsmCode, tsrCode);
+				if(list.size() == 1) {
+					k = list.get(0);
+				}
+
+				if(k == null) {
 					k = new KpiResult();
-					k.setTsrInfo(this.getTsrInfoInMap(kpiBean.getTsrCode()));
+					
+					k.setTsrInfo(this.getTsrInfoInMap(tsrCode));
 					k.setTsmInfo(this.getTsrInfoInMap(tsmCode));
 					k.setDsmInfo(this.getTsrInfoInMap(dsmCode));
-					k.setCampaign(this.getCampaignInMap(kpiBean.getCampaignCode()));
-					
+					k.setCampaign(this.getCampaignInMap(campaignCode));
+					k.setKeyCode(kpiBean.getKeyCode());
 					k.setYearMonth(yearMonth);
 					
-					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
-					k.setCountTalkDate(kpiBean.getCountTalkDate());
-					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
-					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
-					k.setAllSale(kpiBean.getCountAll().intValue());
-					k.setSuccessEoc(kpiBean.getSuccessEoc());
-					k.setAllEoc(kpiBean.getAllEoc());
-					return bo.addKpiResult(k, USER_LOGIN);
+					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp());
+					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate());
+					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk());
+					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue());
+					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue());
+					successEoc = (kpiBean.getSuccessEoc() == null ? new Integer(0) : kpiBean.getSuccessEoc());
+					allEoc = (kpiBean.getAllEoc() == null ? new Integer(0) : kpiBean.getAllEoc());
+					
+					isNew = true;
+				} else {
+
+					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp()).add(k.getSumOfAfyp());
+					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate()) + k.getCountTalkDate();
+					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk()).add(k.getTotalTalkHrs());
+					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue()) + k.getFirstConfirmSale().intValue();
+					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue()) + k.getAllSale();
+					successEoc = (kpiBean.getSuccessEoc() == null ? new Integer(0) : kpiBean.getSuccessEoc()) + k.getSuccessEoc();
+					allEoc = (kpiBean.getAllEoc() == null ? new Integer(0) : kpiBean.getAllEoc()) + k.getAllEoc();
 				}
+				
+				k.setSumOfAfyp(afyp);
+				k.setCountTalkDate(talkDate);
+				k.setTotalTalkHrs(talkHrs);
+				k.setFirstConfirmSale(fcs);
+				k.setAllSale(sale);
+				k.setSuccessEoc(successEoc);
+				k.setAllEoc(allEoc);
+				return isNew ? bo.addKpiResult(k, USER_LOGIN) : bo.updateKpiResult(k, USER_LOGIN);
+
+				
+//				<!-- Old method -->
+//				KpiResult k = findKpiResultByDateAndCampaign(yearMonth, kpiBean.getCampaignCode(), kpiBean.getKeyCode(), kpiBean.getTsrCode(), tsmCode, dsmCode);
+//				if(k != null) {
+//					if(!k.getTsrInfo().getTsrCode().equals(kpiBean.getTsrCode())) k.setTsrInfo(getTsrInfoInMap(kpiBean.getTsrCode()));
+//					if(!k.getTsmInfo().getTsrCode().equals(tsmCode)) k.setTsmInfo(getTsrInfoInMap(tsmCode));
+//					if(!k.getDsmInfo().getTsrCode().equals(dsmCode)) k.setDsmInfo(getTsrInfoInMap(dsmCode));
+//					
+//					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
+//					k.setCountTalkDate(kpiBean.getCountTalkDate());
+//					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
+//					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
+//					k.setAllSale(kpiBean.getCountAll().intValue());
+//					k.setSuccessEoc(kpiBean.getSuccessEoc());
+//					k.setAllEoc(kpiBean.getAllEoc());
+//					return bo.updateKpiResult(k, USER_LOGIN);
+//				} else {
+//					k = new KpiResult();
+//					k.setTsrInfo(this.getTsrInfoInMap(kpiBean.getTsrCode()));
+//					k.setTsmInfo(this.getTsrInfoInMap(tsmCode));
+//					k.setDsmInfo(this.getTsrInfoInMap(dsmCode));
+//					k.setCampaign(this.getCampaignInMap(kpiBean.getCampaignCode()));
+//					k.setKeyCode(kpiBean.getKeyCode());
+//					k.setYearMonth(yearMonth);
+//					
+//					k.setSumOfAfyp(kpiBean.getSumOfAfyp());
+//					k.setCountTalkDate(kpiBean.getCountTalkDate());
+//					k.setTotalTalkHrs(kpiBean.getSumTotalTalk());
+//					k.setFirstConfirmSale(kpiBean.getFirstConfirmSale().intValue());
+//					k.setAllSale(kpiBean.getCountAll().intValue());
+//					k.setSuccessEoc(kpiBean.getSuccessEoc());
+//					k.setAllEoc(kpiBean.getAllEoc());
+//					return bo.addKpiResult(k, USER_LOGIN);
+//				}
 				
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -455,19 +656,52 @@ public class KpiService {
 		return null;
 	}
 	
-	public KpiResult findKpiResultByDateAndCampaign(String yearMonth, String campaignCode, String tsrCode, String tsmCode, String dsmCode) {
+	public void deleteKpiResultByYearMonth(String yearMonth) throws Exception {
+		KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+		KpiResult example = new KpiResult();
+		example.setYearMonth(yearMonth);
+		List<KpiResult> list = bo.findKpiResult(example);
+		for(KpiResult k : list) {
+			bo.deleteKpiResult(k);
+		}
+	}
+	
+	public KpiResult findKpiResultByDateAndCampaign(String yearMonth, String campaignCode, String keyCode, String tsrCode, String tsmCode, String dsmCode) {
 		try {
 			KpiResultBo bo = (KpiResultBo) AppConfig.getInstance().getBean("kpiResultBo");
+			List<String> objs = new ArrayList<>();
 			
 			String hql = " from KpiResult d "
 						+ " where 1 = 1"
-						+ " and d.yearMonth = ? "
-						+ " and d.campaign.code = ? "
-						+ " and d.tsrInfo.tsrCode = ? "
-						+ " and d.tsmInfo.tsrCode = ? "
-						+ " and d.dsmInfo.tsrCode = ? ";
+						+ " and d.yearMonth = ? ";
+			objs.add(yearMonth);
 			
-			List<KpiResult> list = bo.findByHql(hql, yearMonth, campaignCode, tsrCode, tsmCode, dsmCode);
+			if(StringUtils.isNoneBlank(campaignCode)) {
+				hql += " and d.campaign.code = ? ";
+				objs.add(campaignCode);
+			}
+
+			if(StringUtils.isNoneBlank(keyCode)) {
+				hql += " and d.keyCode = ? ";
+				objs.add(keyCode);
+			}
+			
+			if(StringUtils.isNoneBlank(tsrCode)) {
+				hql += " and d.tsrInfo.tsrCode = ? ";
+				objs.add(tsrCode);
+			}
+			
+			if(StringUtils.isNoneBlank(tsmCode)) {
+				hql += " and d.tsmInfo.tsrCode = ? ";
+				objs.add(tsmCode);
+			}
+			
+			if(StringUtils.isNoneBlank(dsmCode)) {
+				hql += " and d.dsmInfo.tsrCode = ? ";
+				objs.add(dsmCode);
+			}
+			
+			List<KpiResult> list = bo.findByHql(hql, objs.toArray());
 			if(null != list && !list.isEmpty() && list.size() == 1) {
 				return list.get(0);
 			} else if(null != list && !list.isEmpty()) {
@@ -632,7 +866,7 @@ public class KpiService {
 		return null;
 	}
 	
-	public List<KpiCategorySetup> getKpiCategorySetups(String tsrLevel, String campaignCode, String tsrCode, String processYearMonth) {
+	public List<KpiCategorySetup> getKpiCategorySetups(String tsrLevel, String campaignCode, String keyCode, String tsrCode, String processYearMonth) {
 		try {
 			KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
 			List<Object> objs = new ArrayList<>();
@@ -648,6 +882,13 @@ public class KpiService {
 			if(!StringUtils.isBlank(campaignCode)) {
 				hql += " and d.campaign.code = ? ";
 				objs.add(campaignCode);
+			}
+			
+			if(StringUtils.isBlank(keyCode)) {
+				hql += " and d.keyCode is null ";
+			} else {
+				hql += " and d.keyCode = ? ";
+				objs.add(keyCode);
 			}
 			
 			if(!StringUtils.isBlank(tsrCode)) {

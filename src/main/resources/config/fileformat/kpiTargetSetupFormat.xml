@@ -52,6 +52,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -137,6 +139,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -221,6 +225,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -305,6 +311,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -391,6 +399,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -475,6 +485,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -561,6 +573,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -645,6 +659,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -731,6 +747,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -815,6 +833,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -901,6 +921,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -985,6 +1007,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -1071,6 +1095,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -1155,6 +1181,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
@@ -1241,6 +1269,8 @@
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
 			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
+			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
 			<DataCell row="9" column="G" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="endDate" />
@@ -1325,6 +1355,8 @@
 		
 			<DataCell row="6" column="E" dataType="TEXT" fieldName="campaignName" />
 			<DataCell row="7" column="E" dataType="TEXT" fieldName="campaignCode" />
+			
+			<DataCell row="7" column="H" dataType="TEXT" fieldName="keyCode" />
 			
 		
 			<DataCell row="9" column="E" dataType="DATE" dataFormat="dd-MM-yyyy" fieldName="effectiveDate" />
