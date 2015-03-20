@@ -13,7 +13,7 @@ public class MoveFileManually {
 	public static void main(String[] args) {
 		System.out.println("START");
 		
-		String monthYear = "201501";
+		String monthYear = "201502";
 		
 //		String[] targetCampaigns = new String[]{
 //				"POM_PA_Cash_Back"

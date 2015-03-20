@@ -1,4 +1,4 @@
-package com.adms.batch.job;
+package com.adms.batch.job.sub;
 
 import java.io.File;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ public class QcReConfirm implements IExcelData {
 			Date saleDate = (Date) data.get("saleDate").getValue();
 			Date qcDate = (Date) data.get("qcDate").getValue();
 			String qcCode = data.get("qcCode").getStringValue();
-			String tsrName = data.get("tsrName").getStringValue();
+//			String tsrName = data.get("tsrName").getStringValue();
 			String tsrStatus = data.get("tsrStatus").getStringValue();
 			String qcStatus = data.get("qcStatus").getStringValue();
 			String reason = data.get("reason").getStringValue();
@@ -79,6 +79,10 @@ public class QcReConfirm implements IExcelData {
 			try {
 				if(StringUtils.isNotBlank(xRef)) policyInfo = KpiService.getInstance().getPolicyInfoByXRef(xRef);
 				if(policyInfo == null) policyInfo = KpiService.getInstance().getPolicyInfoByCustomerName(customerName, saleDate);
+
+//				<!-- New Extension for Re-confirm --> 
+				KpiService.getInstance().savePolicyInfoExtRcf(policyInfo);
+//				</!-- New Extension for Re-confirm -->
 				
 				QaStatus qaStatus = null;
 				PolicyStatus policyStatus = null;

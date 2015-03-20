@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import com.adms.domain.entities.KpiScoreRate;
 @Component
 public class ExportKpiJob {
 	
-	private final Double WORK_DAYS = 22D;
+	private Double WORK_DAYS = 0D;
 	
 	private final String NOT_AVILABLE = "N/A";
 	private final String GRADE_A = "A";
@@ -42,7 +43,7 @@ public class ExportKpiJob {
 	private final String TSM = "SUP";
 	private final String TSR = "TSR";
 	
-	private final String FIX_MSIG_WB_KEYCODE = "AGA15";
+	private String FIX_MSIG_WB_KEYCODE = "";
 	
 	private final int START_DSM_ROW = -1;
 	private final int START_TSM_ROW = 1;
@@ -95,10 +96,12 @@ public class ExportKpiJob {
 		System.out.println("START ExportKpiJob Batch - " + start);
 		System.out.println("=======================================================================");
 		
-		String mDate = "201501";
 		try {
-			processYearMonth = new String(mDate);
-			processToDB(processYearMonth);
+			processYearMonth = new String("201501");
+			System.out.println("Process Year Month: " + processYearMonth);
+			setFixMsigWBKeyCode();
+			
+//			processToDB(processYearMonth);
 			processData();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -110,8 +113,14 @@ public class ExportKpiJob {
 		System.out.println("Batch processing time: " + getProcessTime(start, end));
 		System.out.println("=======================================================================");
 	}
+	
+	public void setFixMsigWBKeyCode() throws Exception {
+		FIX_MSIG_WB_KEYCODE = kpiService().getMsigWBKeycode(processYearMonth);
+		System.out.println("Fix MSIG WB KeyCode: " + FIX_MSIG_WB_KEYCODE);
+	}
 
-	private void processToDB(String yyyyMM) throws Exception {
+	public void processToDB(String yyyyMM) throws Exception {
+		System.out.println("Getting data...");
 		List<KpiBean> list = kpiService().getKpi(yyyyMM);
 
 		System.out.println("KPI Result size: " + list.size());
@@ -136,6 +145,9 @@ public class ExportKpiJob {
 		if(null == kpiResults) throw new Exception("No data has been found: " + processYearMonth);
 		
 		kpiRetentions = kpiService().findKpiRetentionByYearMonth(processYearMonth);
+		
+//		HARD CODE
+		WORK_DAYS = 20D;
 		
 		Workbook wb = getWbTemplate();
 		Sheet tSheet = null;
@@ -168,9 +180,10 @@ public class ExportKpiJob {
 				}
 				
 				tSheet = wb.getSheetAt(0);
+				tSheet.setPrintGridlines(false);
 				String sheetName = isSpecialCampaign("", keyCode) ? "MSIG Broker POM WB" : campaign.getDisplayName();
 				toSheet = wb.createSheet(sheetName);
-				doHead(wb, sheetName);
+				doHead(wb, toSheet);
 				
 //				<!-- set width -->
 				for(int n = 0; n < 7; n++) {
@@ -223,6 +236,12 @@ public class ExportKpiJob {
 				
 				setTSMActual();
 
+				tsmActualTarpCell = null;
+				tsmActualTotalTarpCell = null;
+				tsmActualListConvCell = null;
+				tsmActualConfCell = null;
+				tsmActualRetenCell = null;
+				
 				tsmCode = data.getTsmInfo().getTsrCode();
 				List<KpiCategorySetup> kpiCats = kpiService().getKpiCategorySetups(TSM, campaignCode, isSpecialCampaign("", keyCode) ? keyCode : null, tsmCode, processYearMonth);
 				try {
@@ -289,16 +308,18 @@ public class ExportKpiJob {
 	}
 
 	private String calculateGrade(Double score, boolean isNewbie) {
-		List<KpiScoreRate> kpiScoreRates = kpiService().getKpiScoreRateAll();
-		for(KpiScoreRate rate : kpiScoreRates) {
-			if(isNewbie) {
-				if(rate.getCondition() == null) {
-					return rate.getGrade();
-				}
-			} else {
-				if(score.doubleValue() > rate.getMin().doubleValue() 
-						&& score.doubleValue() <= rate.getMax().doubleValue()) {
-					return rate.getGrade();
+		if(score > 0D) {
+			List<KpiScoreRate> kpiScoreRates = kpiService().getKpiScoreRateAll();
+			for(KpiScoreRate rate : kpiScoreRates) {
+				if(isNewbie) {
+					if(rate.getCondition() == null) {
+						return rate.getGrade();
+					}
+				} else {
+					if(score.doubleValue() >= rate.getMin().doubleValue() 
+							&& score.doubleValue() < rate.getMax().doubleValue()) {
+						return rate.getGrade();
+					}
 				}
 			}
 		}
@@ -306,16 +327,26 @@ public class ExportKpiJob {
 	}
 	
 	private Double calculateScore(Sheet sheet, int currRowNum, String level, int groupStartRow, int totalRowNum, Double sumScore, boolean isDSMGroup) {
-		Cell scoreCell = sheet.getRow(currRowNum).getCell(SCORE_COL, Row.CREATE_NULL_AS_BLANK);
+		Row row = null;
+		
+		if(level.toUpperCase().contains(TSM) && groupStartRow == 2) {
+			currRowNum--;
+		}
+		
+		row = sheet.getRow(currRowNum);
+		Cell scoreCell = row.getCell(SCORE_COL, Row.CREATE_NULL_AS_BLANK);
 		
 		DsmKpiByCampaign dsmKpi = dsmActualMaps.get(dsmCode).get(campaignCode);
 		
-		Double vsTargetValue = sheet.getRow(currRowNum).getCell(VS_TARGET_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
-		Double weightValue = sheet.getRow(currRowNum).getCell(WEIGHT_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
+		Double vsTargetValue = row.getCell(VS_TARGET_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
+		Double weightValue = row.getCell(WEIGHT_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
 		Double scoreValue = 0D;
 		String grade = "";
 
-		scoreValue = vsTargetValue * weightValue;
+		if((level.toUpperCase().contains(TSM) && groupStartRow != 1) || !level.toUpperCase().contains(TSM)) {
+			scoreValue = vsTargetValue * weightValue;
+		}
+		
 		if(vsTargetValue >= 1) {
 			scoreValue = new Double(weightValue);
 		}
@@ -329,11 +360,14 @@ public class ExportKpiJob {
 				doGrade(sheet, currRowNum, level, grade == null ? NOT_AVILABLE : grade);
 			}
 		} else {
-			if(!level.equals(DSM)) {
+//			if(!level.equals(DSM)) {
 				if(level.toUpperCase().contains(TSM) && groupStartRow == 2){
-					sheet.addMergedRegion(new CellRangeAddress(currRowNum - 1, currRowNum, SCORE_COL, SCORE_COL));
-				} else if(groupStartRow != totalRowNum) {
 					scoreCell.setCellValue(scoreValue);
+					sheet.addMergedRegion(new CellRangeAddress(currRowNum, currRowNum + 1, SCORE_COL, SCORE_COL));
+					
+				} else if(groupStartRow != totalRowNum) {
+					if((level.toUpperCase().contains(TSM) && groupStartRow != 1 && groupStartRow != 2) || !level.toUpperCase().contains(TSM)) scoreCell.setCellValue(scoreValue);
+					
 				} else if(groupStartRow == totalRowNum) {
 					scoreCell.setCellValue(sumScore);
 					grade = calculateGrade(sumScore * 100, false);
@@ -345,7 +379,7 @@ public class ExportKpiJob {
 					
 //					<!-- for using in TSM Kpi(Sup Kpi) -->
 					if(level.toUpperCase().contains(TSM)) {
-						String tsmCode = sheet.getRow(currRowNum).getCell(POSITION_COL, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
+						String tsmCode = row.getCell(POSITION_COL, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
 						if(!StringUtils.isBlank(tsmCode)) {
 							String campaignCode = isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
 							TsmActualKpi tsmKpi = tsmActualMaps.get(tsmCode).get(campaignCode);
@@ -356,25 +390,51 @@ public class ExportKpiJob {
 						}
 					}
 				}
-			}
+//			}
 		}
 		return scoreValue;
 	}
 	
+//	private void calculateWorkingDayInMonth(Date monthDate) {
+//		try {
+//			
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
 	private void calculateVsTarget(Sheet sheet, int curRowNum, String level, int groupStartRow, int totalRowNum, boolean isDSMGroup) {
 		try {
+			
 			Cell vsTargetCell = sheet.getRow(curRowNum).getCell(VS_TARGET_COL, Row.CREATE_NULL_AS_BLANK);
+			
 			try {
 				sheet.getRow(curRowNum).getCell(ACTUAL_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
 			} catch(Exception e) {
 				System.out.println("sheet: " + sheet.getSheetName() + " | curRownum: " + curRowNum + " | cell: " + ACTUAL_COL);
 				throw e;
 			}
+			
 			Double actualValue = sheet.getRow(curRowNum).getCell(ACTUAL_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
 			Double targetValue = sheet.getRow(curRowNum).getCell(TARGET_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
 			Double vsTarget = 0D;
 			
 			if(targetValue != null && targetValue != 0) {
+				/* <row 3 is talk time; it need to convert> */
+				if(level.equals(TSR) && groupStartRow == 3) {
+					BigDecimal multiplyVal = new BigDecimal(100D / 60D);
+					String[] split = new String[2];
+					split = actualValue.toString().split("\\.");
+//					new BigDecimal(split[0]).add(new BigDecimal("0." + split[1]).multiply(multiplyVal));
+					BigDecimal val = new BigDecimal(split[0]).add(new BigDecimal("0." + split[1]).multiply(multiplyVal));
+					actualValue = val.doubleValue();
+					
+					split = new String[2];
+					split = targetValue.toString().split("\\.");
+					val = new BigDecimal(split[0]).add(new BigDecimal("0." + split[1]).multiply(multiplyVal));
+					targetValue = val.doubleValue();
+					
+				}
 				vsTarget = actualValue / targetValue;
 			}
 			
@@ -383,15 +443,18 @@ public class ExportKpiJob {
 					vsTargetCell.setCellValue(vsTarget);
 				}
 			} else {
-				if(!level.equals(DSM)) {
+//				if(!level.equals(DSM)) {
 					if(level.toUpperCase().contains(TSM) && groupStartRow == 2){
-						Double combineTarget = sheet.getRow(curRowNum - 1).getCell(VS_TARGET_COL, Row.CREATE_NULL_AS_BLANK).getNumericCellValue() * vsTarget;
-						vsTargetCell.setCellValue(combineTarget);
+						
+						Cell cell = sheet.getRow(curRowNum - 1).getCell(VS_TARGET_COL, Row.CREATE_NULL_AS_BLANK);
+						Double combineTarget = cell.getNumericCellValue() * vsTarget;
+//						vsTargetCell.setCellValue(combineTarget);
+						cell.setCellValue(combineTarget);
 						sheet.addMergedRegion(new CellRangeAddress(curRowNum - 1, curRowNum, VS_TARGET_COL, VS_TARGET_COL));
 					} else if(groupStartRow != totalRowNum) {
 						vsTargetCell.setCellValue(vsTarget);
-					}
-				}
+					}	
+//				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -531,7 +594,13 @@ public class ExportKpiJob {
 		case 9 : 
 			toCell = toSheet.getRow(toRowNum).getCell(colNum, Row.CREATE_NULL_AS_BLANK);
 			copyCellTypeAndStyle(tempCell, toCell);
-			toCell.setCellValue(kpi.getTotalTalkHrs() == null ? 0D : (kpi.getTotalTalkHrs().doubleValue()));
+
+			BigDecimal val = new BigDecimal(0);
+			if(kpi.getTotalTalkHrs() != null) {
+				String[] split = kpi.getTotalTalkHrs().toString().split("\\.");
+				val = new BigDecimal(split[0] + "." + new BigDecimal("0." + split[1]).multiply(new BigDecimal(60)).setScale(0, BigDecimal.ROUND_HALF_UP));
+			}
+			toCell.setCellValue(val.doubleValue());
 			break;
 		case 10 : 
 			Double firstConf = kpi.getFirstConfirmSale().doubleValue() / kpi.getAllSale().doubleValue();
@@ -815,7 +884,7 @@ public class ExportKpiJob {
 //							+ " | score: " + campaignMaps.get(campaignCode).totalScore);
 					
 					TsmActualKpi tsmKpi = campaignMaps.get(campaignCode);
-					
+					if(tsmKpi.isGradeNull) continue;
 					if(groupRow == 1) {
 						copyRow(tempSheet, toSheet, groupRow, currentRow, positionCol, positionCol);
 					} else if(groupRow == 2) {
@@ -826,7 +895,6 @@ public class ExportKpiJob {
 					
 					String campaignName = "";
 					if(campaignCode.contains(FIX_MSIG_WB_KEYCODE)) {
-						System.out.println("contain MSIG WB");
 						campaignName = "MSIG Broker POM WB";
 						campaignCode = campaignCode.replace(FIX_MSIG_WB_KEYCODE, "");
 					} else {
@@ -899,10 +967,14 @@ public class ExportKpiJob {
 		sheet.getRow(row).getCell(GRADE_COL, Row.CREATE_NULL_AS_BLANK).setCellValue(grade);
 	}
 
-	private void doHead(Workbook wb, String newSheetName) {
+	private void doHead(Workbook wb, Sheet toSheet) {
 		Sheet sheet = wb.getSheetAt(0);
-		Sheet toSheet = wb.getSheet(newSheetName);
-		copyRow(sheet, toSheet, 0, 0, 0, 6);
+		try {
+			copyRow(sheet, toSheet, 0, 0, 0, 6);
+		} catch(Exception e) {
+			System.err.println("ERROR while copy row => " + sheet + " | " + toSheet);
+			throw e;
+		}
 	}
 
 	private void doWriteWorkbook(Workbook wb, String name) {

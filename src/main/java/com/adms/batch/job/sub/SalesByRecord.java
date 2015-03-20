@@ -1,10 +1,11 @@
-package com.adms.batch.job;
+
+package com.adms.batch.job.sub;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,7 +37,7 @@ public class SalesByRecord implements IExcelData {
 	}
 	
 	public void importFromInputStream(File file, List<Exception> exceptionList) throws Exception {
-		
+		importFromInputStream(new FileInputStream(file), exceptionList);
 	}
 	
 	public void importFromInputStream(InputStream is, List<Exception> exceptionList) throws IOException {
@@ -129,8 +130,7 @@ public class SalesByRecord implements IExcelData {
 		List<DataHolder> dataList = sheetHolder.getDataList("salesByRecordList");
 		
 		System.out.println("Sales By Rec size: " + dataList.size());
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		Date c = sdf.parse("20141001");
+		Date c = DateUtil.convStringToDate("yyyyMMdd", "20141001");
 		
 		for(DataHolder data : dataList) {
 			try {
@@ -140,7 +140,7 @@ public class SalesByRecord implements IExcelData {
 				}
 				String tsrCode = data.get("tsrCode").getStringValue();
 				
-				TsrInfo tsrFromCode = null;
+				TsrInfo tsrFromFile = null;
 				String tsrNameFromFile = kpiService().removeTitle(data.get("tsrName").getStringValue()).replaceAll("  ", " ");
 				
 //				<!-- Getting TSR_INFO -->
@@ -148,19 +148,20 @@ public class SalesByRecord implements IExcelData {
 //					tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim(), saleDate);
 					throw new Exception("TSR CODE is NULL");
 				} else {
-					tsrFromCode = kpiService().getTsrInfoInMap(tsrCode);
-					if(null == tsrFromCode) {
-						tsrFromCode = kpiService().getTsrInfoByName(tsrNameFromFile.trim(), saleDate);
+					tsrFromFile = kpiService().getTsrInfoInMap(tsrCode);
+					if(null == tsrFromFile) {
+						System.out.println("Find tsr by name: " + tsrNameFromFile);
+						tsrFromFile = kpiService().getTsrInfoByName(tsrNameFromFile.trim(), saleDate);
 					}
 				}
 				
 //				<!-- Check if null, throw Exception() -->
-				if(null == tsrFromCode) throw new Exception("Not Found TSR: " + "code |" + data.get("tsrCode").getStringValue() + "|");
+				if(null == tsrFromFile) throw new Exception("TSR Not Found: " + "code |" + data.get("tsrCode").getStringValue() + "|");
 				
 //				<!-- Check is Replace TSR CODE -->
 				String listLotName = data.get("listLotName").getStringValue();
 				listLotName = kpiService().getKeyCodeFromCampaignListLot(listLotName);
-				checkReplaceTsrCode(tsrNameFromFile, tsrFromCode, listLotName);
+				checkReplaceTsrCode(tsrNameFromFile, tsrFromFile, listLotName);
 				
 //				<!-- get campaign keycode -->
 				CampaignKeyCode keyCode =  kpiService().getCampaignKeyCode(listLotName);
@@ -170,7 +171,7 @@ public class SalesByRecord implements IExcelData {
 				
 //				<!-- Check TMR(Sup) -->
 				String tsmCode = data.get("tmrCode").getStringValue();
-				checkSup(tsrFromCode, tsmCode, keyCode, saleDate);
+//				checkSup(tsrFromFile, tsmCode, keyCode, saleDate);
 				
 //				<!-- get DSM -->
 				TsrInfo dsmInfo = getDsm(tsmCode, saleDate);
@@ -199,16 +200,18 @@ public class SalesByRecord implements IExcelData {
 				if(StringUtils.isBlank(xRef)) {
 					throw new Exception("XRef on this record is null " + xRef + " | saleDate: " + saleDate + " | keyCode: " + listLotName);
 				}
-
+				
 				PolicyInfo policy = kpiService().getPolicyInfoByXRef(xRef);
 				if(policy != null) {
-					policy.setCustomer(customer);
-					policy.setCampaignKeyCode(keyCode);
-//					policy.setProductType(productType);
-					policy.setAfyp(afyp);
-					policy.setPremium(premium);
-					policy.setProtectAmt(protectAmt);
-					policy = kpiService().updatePolicyInfo(policy);
+					if(!policy.getAfyp().equals(afyp) || !policy.getPremium().equals(premium) || !policy.getProtectAmt().equals(protectAmt)) {
+						policy.setCustomer(customer);
+						policy.setCampaignKeyCode(keyCode);
+//						policy.setProductType(productType);
+						policy.setAfyp(afyp);
+						policy.setPremium(premium);
+						policy.setProtectAmt(protectAmt);
+						policy = kpiService().updatePolicyInfo(policy);
+					}
 				} else {
 					policy = new PolicyInfo();
 					policy.setxRef(xRef);
@@ -221,46 +224,41 @@ public class SalesByRecord implements IExcelData {
 					policy = kpiService().addPolicyInfo(policy);
 				}
 //				System.out.println("policy process time: " + getProcessTime(d, new Date()));
-
-				QaStatus qa = kpiService().getQaStatusInMap(qaStatus);
-				if(null == qa) {
-					throw new Exception("Not Found QaStatus: " + qaStatus);
+//				PolicyStatus policyStatus = null;
+				
+				boolean isExistedStatus = false;
+				if(policy.getPolicyStatuses() != null) {
+					for(PolicyStatus ps : policy.getPolicyStatuses()) {
+						if(ps.getQaStatus().getQaValue().equals(qaStatus)) {
+							isExistedStatus = true;
+							break;
+						}
+					}
+					
+					if(!isExistedStatus) {
+						savePolicyStatus(qaStatus, saleDate, xRef, policy, approveDate, data.get("remark").getStringValue());
+					}
 				}
 				
-				PolicyStatus policyStatus = kpiService().getPolicyStatus(saleDate, xRef, qa.getQaValue());
-				if(policyStatus == null) {
-//					System.out.println("Add Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
-					policyStatus = new PolicyStatus();
-					policyStatus.setPolicyInfo(policy);
-					policyStatus.setSaleDate(saleDate);
-					policyStatus.setQaStatus(qa);
-					policyStatus.setQcDate(approveDate);
-					policyStatus.setRemark(data.get("remark").getStringValue());
-					policyStatus = kpiService().addPolicyStatus(policyStatus);
-				} else {
-//					System.out.println("Existed Policy Status by SaleByRec: " + " xRef: " + xRef + " | saleDate: " + saleDate + " | qa: " + qa.getQaValue());
-				}
-//				System.out.println("Policy Status process time: " + getProcessTime(d, new Date()));
-				
-				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, tsrFromCode, policy);
+				SalesRecord saleRec = kpiService().isSalesRecordExist(saleDate, policy);
 				if(saleRec != null) {
-					saleRec.setSaleDate(saleDate);
-					saleRec.setTsrInfo(tsrFromCode);
+
+					saleRec.setPolicyInfo(policy);
 					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tsmCode));
 					saleRec.setDsmInfo(dsmInfo);
-					saleRec.setPolicyInfo(policy);
-					saleRec.setCampaignKeycode(keyCode);
+					
 					saleRec = kpiService().updateSalesRecord(saleRec);
 				} else {
 					saleRec = new SalesRecord();
 					saleRec.setSaleDate(saleDate);
-					saleRec.setTsrInfo(tsrFromCode);
+					saleRec.setTsrInfo(tsrFromFile);
 					saleRec.setTsmInfo(kpiService().getTsrInfoInMap(tsmCode));
 					saleRec.setDsmInfo(dsmInfo);
 					saleRec.setPolicyInfo(policy);
 					saleRec.setCampaignKeycode(keyCode);
 					saleRec = kpiService().addSalesRecord(saleRec);
 				}
+//				kpiService().saveSalesRecordByMonth(saleRec);
 			} catch(Exception e) { 
 				e.printStackTrace();
 				exs.add(e);
@@ -268,6 +266,27 @@ public class SalesByRecord implements IExcelData {
 			
 		}
 		
+	}
+	
+	private PolicyStatus savePolicyStatus(String qaStatus, Date saleDate, String xRef, PolicyInfo policyInfo, Date approveDate, String remark) throws Exception {
+		PolicyStatus policyStatus = null;
+		
+		QaStatus qa = kpiService().getQaStatusInMap(qaStatus);
+		if(null == qa) {
+			throw new Exception("Not Found QaStatus: " + qaStatus);
+		}
+		
+//		policyStatus = kpiService().getPolicyStatus(saleDate, xRef, qa.getQaValue());
+		
+		policyStatus = new PolicyStatus();
+		policyStatus.setPolicyInfo(policyInfo);
+		policyStatus.setSaleDate(saleDate);
+		policyStatus.setQaStatus(qa);
+		policyStatus.setQcDate(approveDate);
+		policyStatus.setRemark(remark);
+		policyStatus = kpiService().addPolicyStatus(policyStatus);
+		
+		return policyStatus;
 	}
 	
 //	private static String getProcessTime(Date start, Date end) {

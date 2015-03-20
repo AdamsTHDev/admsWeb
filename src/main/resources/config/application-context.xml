@@ -34,46 +34,7 @@
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="DataSource" />
 
-		<property name="annotatedClasses">
-			<list>
-				<value>com.adms.domain.entities.Address</value>
-				<value>com.adms.domain.entities.AddressDetail</value>
-				<value>com.adms.domain.entities.BeneficiaryDetail</value>
-				<value>com.adms.domain.entities.Campaign</value>
-				<value>com.adms.domain.entities.CampaignKeyCode</value>
-				<value>com.adms.domain.entities.CampaignLead</value>
-				<value>com.adms.domain.entities.Customer</value>
-				<value>com.adms.domain.entities.FileBase</value>
-				<value>com.adms.domain.entities.ImportFile</value>
-				<value>com.adms.domain.entities.ImportFileHistory</value>
-				<value>com.adms.domain.entities.KpiBean</value>
-				<value>com.adms.domain.entities.KpiCategorySetup</value>
-				<value>com.adms.domain.entities.KpiEoc</value>
-				<value>com.adms.domain.entities.KpiResult</value>
-				<value>com.adms.domain.entities.KpiRetention</value>
-				<value>com.adms.domain.entities.KpiScoreRate</value>
-				<value>com.adms.domain.entities.PaymentChannel</value>
-				<value>com.adms.domain.entities.PaymentDetail</value>
-				<value>com.adms.domain.entities.PaymentMode</value>
-				<value>com.adms.domain.entities.PolicyInfo</value>
-				<value>com.adms.domain.entities.PolicyStatus</value>
-				<value>com.adms.domain.entities.ProductType</value>
-				<value>com.adms.domain.entities.QaStatus</value>
-				<value>com.adms.domain.entities.SalesRecord</value>
-				<value>com.adms.domain.entities.SalesStatus</value>
-				<value>com.adms.domain.entities.TsrCodeReplacer</value>
-				<value>com.adms.domain.entities.TsrContract</value>
-				<value>com.adms.domain.entities.TsrHierarchical</value>
-				<value>com.adms.domain.entities.TsrInfo</value>
-				<value>com.adms.domain.entities.TsrKpi</value>
-				<value>com.adms.domain.entities.TsrLevel</value>
-				<value>com.adms.domain.entities.TsrPosition</value>
-				<value>com.adms.domain.entities.TsrSite</value>
-				<value>com.adms.domain.entities.TsrStatus</value>
-				<value>com.adms.domain.entities.TsrTalkTime</value>
-				<value>com.adms.domain.entities.TsrTalkTimeDetail</value>
-			</list>
-		</property>
+		<property name="packagesToScan" value="com.adms.domain.entities"/>
 
 		<property name="hibernateProperties">
 			<props>

@@ -1,4 +1,4 @@
-package com.adms.batch.job;
+package com.adms.batch.job.sub;
 
 import java.io.IOException;
 import java.io.InputStream;

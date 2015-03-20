@@ -24,6 +24,7 @@ import com.adms.bo.kpiresult.KpiResultBo;
 import com.adms.bo.kpiretention.KpiRetentionBo;
 import com.adms.bo.kpiscorerate.KpiScoreRateBo;
 import com.adms.bo.policyinfo.PolicyInfoBo;
+import com.adms.bo.policyinfoextrcf.PolicyInfoExtRcfBo;
 import com.adms.bo.policystatus.PolicyStatusBo;
 import com.adms.bo.producttype.ProductTypeBo;
 import com.adms.bo.qastatus.QaStatusBo;
@@ -33,11 +34,11 @@ import com.adms.bo.tsrcontract.TsrContractBo;
 import com.adms.bo.tsrhierarchical.TsrHierarchicalBo;
 import com.adms.bo.tsrinfo.TsrInfoBo;
 import com.adms.bo.tsrlevel.TsrLevelBo;
+import com.adms.bo.tsrperformance.TsrPerformanceBo;
 import com.adms.bo.tsrposition.TsrPositionBo;
 import com.adms.bo.tsrsite.TsrSiteBo;
 import com.adms.bo.tsrstatus.TsrStatusBo;
 import com.adms.bo.tsrtalktime.TsrTalkTimeBo;
-import com.adms.bo.tsrtalktimedetail.TsrTalkTimeDetailBo;
 import com.adms.domain.entities.Campaign;
 import com.adms.domain.entities.CampaignKeyCode;
 import com.adms.domain.entities.CampaignLead;
@@ -49,6 +50,7 @@ import com.adms.domain.entities.KpiResult;
 import com.adms.domain.entities.KpiRetention;
 import com.adms.domain.entities.KpiScoreRate;
 import com.adms.domain.entities.PolicyInfo;
+import com.adms.domain.entities.PolicyInfoExtRcf;
 import com.adms.domain.entities.PolicyStatus;
 import com.adms.domain.entities.ProductType;
 import com.adms.domain.entities.QaStatus;
@@ -62,7 +64,7 @@ import com.adms.domain.entities.TsrPosition;
 import com.adms.domain.entities.TsrSite;
 import com.adms.domain.entities.TsrStatus;
 import com.adms.domain.entities.TsrTalkTime;
-import com.adms.domain.entities.TsrTalkTimeDetail;
+import com.adms.domain.entities.TsrPerformance;
 import com.adms.utils.DateUtil;
 
 public class KpiService {
@@ -71,6 +73,11 @@ public class KpiService {
 		if(instance == null) {
 			instance = new KpiService();
 		}
+		return instance;
+	}
+	
+	public static KpiService renewInstance() {
+		instance = new KpiService();
 		return instance;
 	}
 	
@@ -85,9 +92,11 @@ public class KpiService {
 	
 	private List<KpiScoreRate> kpiScoreRates;
 	
+//	private Map<String, Map<String, Map<String, SalesRecord>>> salesRecordByMonthMap;
+	
 	private static KpiService instance;
 
-	private final List<String> TITLES = Arrays.asList(new String[]{"นาย", "น.ส.", "นาง", "ว่าที่", "นส."});
+	private final List<String> TITLES = Arrays.asList(new String[]{"นาย", "น.ส.", "นาง", "ว่าที่", "นส.", "นางสาว", "สาว"});
 	
 	public KpiService() {
 		System.out.println("New Kpi Service");
@@ -152,6 +161,22 @@ public class KpiService {
 		return null;
 	}
 	
+	public void deleteKpiCategorySetupByEffectiveMonth(String yearMonth) {
+		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+		String hql = " from KpiCategorySetup d"
+				+ " where 1 = 1"
+				+ " and CONVERT(nvarchar(6), d.effectiveDate, 112) = ? ";
+		
+		try {
+
+			for(KpiCategorySetup k : bo.findByHql(hql, yearMonth)) {
+				bo.deleteKpiCategory(k);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public KpiCategorySetup updateKpiCategorySetup(KpiCategorySetup kpiCategorySetup) {
 		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
 		try {
@@ -179,6 +204,10 @@ public class KpiService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public void refreshDsmMap() {
+		initDsmMap();
 	}
 	
 	private void initDsmMap() {
@@ -278,7 +307,7 @@ public class KpiService {
 					kpi.setKeyCode(keyCode);
 					
 					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp());
-					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate());
+					talkDate = (kpiBean.getAttendant() == null ? new Integer(0) : kpiBean.getAttendant());
 					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk());
 					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue());
 					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue());
@@ -287,8 +316,8 @@ public class KpiService {
 					
 				} else {
 					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp()).add(kpi.getSumOfAfyp());
-					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate()) + kpi.getCountTalkDate();
-					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk()).add(kpi.getTotalTalkHrs());
+					talkDate = (kpiBean.getAttendant() == null ? new Integer(0) : kpiBean.getAttendant());
+					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk());
 					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue()) + kpi.getFirstConfirmSale().intValue();
 					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue()) + kpi.getAllSale();
 					successEoc = (kpiBean.getSuccessEoc() == null ? new Integer(0) : kpiBean.getSuccessEoc()) + kpi.getSuccessEoc();
@@ -320,7 +349,6 @@ public class KpiService {
 				addKpiResultFromSuperMap(((Map<?, ?>) obj).get(key));
 			}
 		} else if(obj instanceof KpiResult) {
-//			System.out.println(obj.toString());
 			addKpiResult((KpiResult) obj);
 		} else {
 			throw new Exception("Not found instance of " + obj.getClass());
@@ -385,7 +413,7 @@ public class KpiService {
 					k.setYearMonth(yearMonth);
 					
 					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp());
-					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate());
+					talkDate = (kpiBean.getAttendant() == null ? new Integer(0) : kpiBean.getAttendant());
 					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk());
 					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue());
 					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue());
@@ -396,7 +424,7 @@ public class KpiService {
 				} else {
 
 					afyp = (kpiBean.getSumOfAfyp() == null ? new BigDecimal(0) : kpiBean.getSumOfAfyp()).add(k.getSumOfAfyp());
-					talkDate = (kpiBean.getCountTalkDate() == null ? new Integer(0) : kpiBean.getCountTalkDate()) + k.getCountTalkDate();
+					talkDate = (kpiBean.getAttendant() == null ? new Integer(0) : kpiBean.getAttendant()) + k.getCountTalkDate();
 					talkHrs = (kpiBean.getSumTotalTalk() == null ? new BigDecimal(0) : kpiBean.getSumTotalTalk()).add(k.getTotalTalkHrs());
 					fcs = (kpiBean.getFirstConfirmSale() == null ? new Integer(0) : kpiBean.getFirstConfirmSale().intValue()) + k.getFirstConfirmSale().intValue();
 					sale = (kpiBean.getCountAll() == null ? new Integer(0) : kpiBean.getCountAll().intValue()) + k.getAllSale();
@@ -455,30 +483,19 @@ public class KpiService {
 		return null;
 	}
 	
-	public TsrInfo addOrUpdateTsrInfo(String firstName, String lastName) throws Exception {
-		TsrInfo tsrInfo = new TsrInfo();
-		tsrInfo.setFirstName(firstName);
-		tsrInfo.setLastName(lastName);
-		return addOrUpdateTsrInfo(tsrInfo);
-	}
-	
-	public TsrInfo addOrUpdateTsrInfo(TsrInfo tsrInfo) throws Exception {
-		TsrInfoBo tsrInfoBo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
-		
-		if(!StringUtils.isBlank(tsrInfo.getTsrCode())) {
-			TsrInfo isExist = new TsrInfo();
-			isExist.setTsrCode(tsrInfo.getTsrCode());
-			
-			List<TsrInfo> exists = tsrInfoBo.findTsrInfo(isExist);
-			if(exists != null && !exists.isEmpty()) {
-				tsrInfo.setId(exists.get(0).getId());
-				
-				tsrInfo.setCreateBy(exists.get(0).getCreateBy());
-				tsrInfo.setCreateDate(exists.get(0).getCreateDate());
-				return updateTsrInfo(tsrInfo);
-			}
+	public void saveTsrInfo(TsrInfo tsrInfo) throws Exception {
+		TsrInfo check = getTsrInfoInMap(tsrInfo.getTsrCode());
+		if(check == null) {
+			tsrInfo = addTsrInfo(tsrInfo);
+			System.out.println("ADD Tsr: " + tsrInfo.toString());
+		} else {
+			check.setFirstName(tsrInfo.getFirstName());
+			check.setLastName(tsrInfo.getLastName());
+			check.setFullName(tsrInfo.getFullName());
+			check.setResignDate(tsrInfo.getResignDate());
+			tsrInfo = updateTsrInfo(check);
+			System.out.println("UPDATE Tsr: " + tsrInfo);
 		}
-		return addTsrInfo(tsrInfo);
 	}
 	
 	public void saveTsrInfoAndContract(TsrInfo tsrInfo, TsrSite tsrSite, TsrStatus tsrStatus, Date startDate, String tsrCampaign, Date lastDateOfWork) throws Exception {
@@ -487,36 +504,37 @@ public class KpiService {
 		
 		if(check != null) {
 			if(StringUtils.isNotBlank(check.getTsrCode())) {
-				tsrInfo.setCreateBy(check.getCreateBy());
-				tsrInfo.setCreateDate(check.getCreateDate());
-				tsrInfo.setId(check.getId());
-				tsrInfo.setTitle(StringUtils.isNotBlank(tsrInfo.getTitle()) ? tsrInfo.getTitle() : check.getTitle());
-				tsrInfo.setCitizenCode(StringUtils.isNotBlank(tsrInfo.getCitizenCode()) ? tsrInfo.getCitizenCode() : check.getCitizenCode());
+				check.setStartDate(startDate);
+				check.setResignDate(lastDateOfWork);
+				check.setFirstName(tsrInfo.getFirstName());
+				check.setLastName(tsrInfo.getLastName());
+				check.setFullName(tsrInfo.getFullName());
+				
 				tsrInfo = updateTsrInfo(tsrInfo);
 				
-				TsrContract tsrContract = tsrInfo.getTsrContract();
-				if(tsrContract != null) {
-					tsrContract.setTsrSite(tsrSite);
-					tsrContract.setTsrStatus(tsrStatus);
-					tsrContract.setStartDate(startDate);
+//				TsrContract tsrContract = tsrInfo.getTsrContract();
+//				if(tsrContract != null) {
+//					tsrContract.setTsrSite(tsrSite);
+//					tsrContract.setTsrStatus(tsrStatus);
+//					tsrContract.setStartDate(startDate);
+////					tsrContract.setResignDate(lastDateOfWork);
+//					tsrContract.setTsrCampaign(tsrCampaign);
 //					tsrContract.setResignDate(lastDateOfWork);
-					tsrContract.setTsrCampaign(tsrCampaign);
-					tsrContract.setResignDate(lastDateOfWork);
-					updateTsrContract(tsrContract);
-				}
+//					updateTsrContract(tsrContract);
+//				}
 			}
 		} else {
 			tsrInfo = addTsrInfo(tsrInfo);
 			
-			TsrContract tsrContract = new TsrContract();
-			tsrContract.setTsrInfo(tsrInfo);
-			tsrContract.setTsrSite(tsrSite);
-			tsrContract.setTsrStatus(tsrStatus);
-			tsrContract.setStartDate(startDate);
-			tsrContract.setResignDate(lastDateOfWork);
-			tsrContract.setTsrCampaign(tsrCampaign);
+//			TsrContract tsrContract = new TsrContract();
+//			tsrContract.setTsrInfo(tsrInfo);
+//			tsrContract.setTsrSite(tsrSite);
+//			tsrContract.setTsrStatus(tsrStatus);
+//			tsrContract.setStartDate(startDate);
+//			tsrContract.setResignDate(lastDateOfWork);
+//			tsrContract.setTsrCampaign(tsrCampaign);
 			
-			addTsrContract(tsrContract);
+//			addTsrContract(tsrContract);
 		}
 		
 	}
@@ -525,6 +543,27 @@ public class KpiService {
 		if(policyInfo != null) {
 			PolicyInfoBo bo = (PolicyInfoBo) AppConfig.getInstance().getBean("policyInfoBo");
 			return bo.addPolicyInfo(policyInfo, USER_LOGIN);
+		}
+		return null;
+	}
+	
+	public PolicyInfoExtRcf savePolicyInfoExtRcf(PolicyInfo policyInfo) throws Exception {
+		if(policyInfo != null) {
+			PolicyInfoExtRcfBo bo = (PolicyInfoExtRcfBo) AppConfig.getInstance().getBean("policyInfoExtRcfBo");
+			
+			List<PolicyInfoExtRcf> list = bo.findByHql(" from PolicyInfoExtRcf d "
+					+ " where d.policyInfo.xRef = ? ", policyInfo.getxRef());
+			
+			if(list != null) {
+				if(list.size() == 1) {
+//					do nothing
+				} else if(list.size() > 1) {
+					throw new Exception("ERROR: Found Policy Info Ext Rcf more than 1 => " + Arrays.toString(list.toArray()));
+				}
+			} else {
+				return bo.add(new PolicyInfoExtRcf(policyInfo, "Y"), USER_LOGIN);
+			}
+			
 		}
 		return null;
 	}
@@ -540,6 +579,7 @@ public class KpiService {
 	public SalesRecord addSalesRecord(SalesRecord salesRecord) throws Exception {
 		if(salesRecord != null) {
 			SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
+//			initSalesRecordByMonth(salesRecord.getSaleDate());
 			return bo.addSalesRecord(salesRecord, USER_LOGIN);
 		}
 		return null;
@@ -551,9 +591,9 @@ public class KpiService {
 		return tsrTalkTimeBo.addTsrTalkTime(tsrTalkTime, USER_LOGIN);
 	}
 	
-	public TsrTalkTimeDetail addTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
-		return bo.addTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
+	public TsrPerformance addTsrPerformance(TsrPerformance tsrPerformance) throws Exception {
+		TsrPerformanceBo bo = (TsrPerformanceBo) AppConfig.getInstance().getBean("tsrPerformanceBo");
+		return bo.addTsrPerformance(tsrPerformance, USER_LOGIN);
 	}
 
 	public TsrCodeReplacer addTsrCodeReplacer(String tsrCode, String ownerFullName, String replacerFullName, String keyCode) throws Exception {
@@ -585,9 +625,6 @@ public class KpiService {
 	public TsrInfo addTsrInfo(TsrInfo tsrInfo) throws Exception {
 		TsrInfoBo bo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
 		TsrInfo result = bo.addTsrInfo(tsrInfo, USER_LOGIN);
-		if(null != result) {
-			prepareTsrInfo();
-		}
 		return result;
 	}
 	
@@ -864,6 +901,31 @@ public class KpiService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public String getMsigWBKeycode(String processDate) throws Exception {
+		KpiCategorySetupBo bo = (KpiCategorySetupBo) AppConfig.getInstance().getBean("kpiCategorySetupBo");
+		
+		String hql = " from KpiCategorySetup d "
+				+ " where 1 = 1 "
+				+ " and d.keyCode is not null "
+				+ "and CONVERT(nvarchar(6), d.effectiveDate, 112) <= ? "
+				+ "and CONVERT(nvarchar(6), d.endDate, 112) >= ? ";
+
+		List<KpiCategorySetup> list = bo.findByHql(hql, processDate, processDate);
+		
+		String result = "";
+		for(KpiCategorySetup data : list) {
+			if(!result.contains(data.getKeyCode())) {
+				result += data.getKeyCode() + ",";
+			}
+		}
+		
+		if(StringUtils.isNoneBlank(result) && result.endsWith(",")) {
+			result = result.substring(0, result.lastIndexOf(","));
+		}
+		
+		return result;
 	}
 	
 	public List<KpiCategorySetup> getKpiCategorySetups(String tsrLevel, String campaignCode, String keyCode, String tsrCode, String processYearMonth) {
@@ -1155,7 +1217,6 @@ public class KpiService {
 			System.err.println("Found TSR Hierarchical more than 1 ==> tsrCode: " + tsrCode + " | tmrCode: " + tmrCode + " | campaignCode: " + campaignCode + " | saleDate: " + saleDate);
 			return list;
 		}
-		System.err.println("not found => tsrCode: " + tsrCode + " | tmrCode: " + tmrCode + " | campaignCode: " + campaignCode + " | saleDate: " + saleDate);
 		return null;
 	}
 	
@@ -1274,9 +1335,9 @@ public class KpiService {
 		if(list != null && !list.isEmpty()) {
 			if(saleDate != null) {
 				for(TsrInfo t : list) {
-					if(t.getTsrContract().getResignDate() == null) {
+					if(t.getResignDate() == null) {
 						return t;
-					} else if(t.getTsrContract().getResignDate().compareTo(saleDate) >= 0) {
+					} else if(t.getResignDate().compareTo(saleDate) >= 0) {
 						return t;
 					}
 				}
@@ -1303,7 +1364,7 @@ public class KpiService {
 			if(null != rs && !rs.isEmpty()) {
 				tsrInfo = KpiService.getInstance().getTsrInfoInMap(rs.get(0).getTsrCode());
 			} else {
-				tsrInfo = this.getTsrInfoByName(fullName, saleDate);
+				tsrInfo = this.getTsrInfoByName(unTitle, saleDate);
 			}
 			
 		} catch(Exception e) {
@@ -1406,50 +1467,74 @@ public class KpiService {
 		return null;
 	}
 	
-	public SalesRecord isSalesRecordExist(Date saleDate, TsrInfo tsrInfo, PolicyInfo policyInfo) throws Exception {
+//	public void saveSalesRecordByMonth(SalesRecord salesRecord) throws Exception {
+//		initSalesRecordByMonth(salesRecord.getSaleDate());
+//	}
+//	
+//	private void initSalesRecordByMonth(Date date) throws Exception {
+//		SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
+//		
+//		String hql = " from SalesRecord d "
+//				+ " where CONVERT(nvarchar(6), d.saleDate, 112) = ? "
+//				+ " order by d.saleDate, d.tsrInfo.tsrCode, d.policyInfo.xRef";
+//		List<SalesRecord> list = bo.findByHQL(hql, DateUtil.convDateToString("yyyyMM", date));
+//		
+//		salesRecordByMonthMap = new HashMap<>();
+//		Map<String, Map<String, SalesRecord>> byTsr = null;
+//		Map<String, SalesRecord> byXref = null;
+//		
+//		String saleDate = "";
+//		for(SalesRecord sr : list) {
+//			saleDate = DateUtil.convDateToString("yyyyMMdd", date);
+//			
+//			byTsr = salesRecordByMonthMap.get(saleDate);
+//			if(byTsr == null) {
+//				byTsr = new HashMap<>();
+//				salesRecordByMonthMap.put(saleDate, byTsr);
+//			}
+//			
+//			byXref = byTsr.get(sr.getTsrInfo().getTsrCode());
+//			if(byXref == null) {
+//				byXref = new HashMap<>();
+//				byTsr.put(sr.getTsrInfo().getTsrCode(), byXref);
+//			}
+//			
+//			SalesRecord sale = byXref.get(sr.getPolicyInfo().getxRef());
+//			if(sale == null) {
+//				byXref.put(sr.getPolicyInfo().getxRef(), sr);
+//			}
+//			
+//		}
+//		
+//		System.out.println("init SalesRecord finished: " + salesRecordByMonthMap.size() + " dates");
+//	}
+	
+	public SalesRecord isSalesRecordExist(Date saleDate, PolicyInfo policyInfo) throws Exception {
+		
 		SalesRecordBo bo = (SalesRecordBo) AppConfig.getInstance().getBean("salesRecordBo");
 		
-//		SalesRecord sale = new SalesRecord();
-//		sale.setSaleDate(saleDate);
-//		
-//		Example saleEx = Example.create(sale);
-//		Example tsrEx = Example.create(new TsrInfo(tsrInfo.getTsrCode()));
-//		Example policyEx = Example.create(new PolicyInfo(policyInfo.getxRef()));
-//		
-//		DetachedCriteria criteria = DetachedCriteria.forClass(SalesRecord.class).add(saleEx)
-//				.createCriteria("tsrInfo").add(tsrEx);
-//		criteria.createCriteria("policyInfo").add(policyEx);
-//		
-//		List<SalesRecord> results = bo.findByCriteria(criteria);
-//		if(results != null && !results.isEmpty()) {
-//			return results.get(0);
-//		}
-		
 		String hql = "from SalesRecord d "
-//				+ " left join TsrInfo d2 on d.tsrInfo.id = d2.id"
-//				+ " left join PolicyInfo d3 on d.policyInfo.id = d3.id"
 				+ " where d.saleDate = ? "
-				+ " and d.tsrInfo.tsrCode = ? "
 				+ " and d.policyInfo.xRef = ? ";
 		
-		List<SalesRecord> list = bo.findByHQL(hql, saleDate, tsrInfo.getTsrCode(), policyInfo.getxRef());
+		List<SalesRecord> list = bo.findByHQL(hql, saleDate, policyInfo.getxRef());
 		if(null != list && !list.isEmpty()) {
 			return list.get(0);
 		}
 		return null;
 	}
 	
-	public List<TsrTalkTimeDetail> isTalkDateExist(Date talkDate, TsrInfo tsrInfo, String keyCode) throws Exception {
-		TsrTalkTimeDetail detail = new TsrTalkTimeDetail();
-		detail.setTalkDate(talkDate);
-		detail.setKeyCode(keyCode);
+	public List<TsrPerformance> isTalkDateExist(Date talkDate, TsrInfo tsrInfo, String keyCode) throws Exception {
+		TsrPerformance tsrPerformance = new TsrPerformance();
+		tsrPerformance.setTalkDate(talkDate);
+		tsrPerformance.setKeyCode(keyCode);
 		
-		Example talkTimeExample = Example.create(detail);
+		Example talkTimeExample = Example.create(tsrPerformance);
 		Example tsrInfoExample = Example.create(tsrInfo);
-		DetachedCriteria criteria = DetachedCriteria.forClass(TsrTalkTimeDetail.class)
+		DetachedCriteria criteria = DetachedCriteria.forClass(TsrPerformance.class)
 				.add(talkTimeExample).createCriteria("tsrInfo").add(tsrInfoExample);
 		
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
+		TsrPerformanceBo bo = (TsrPerformanceBo) AppConfig.getInstance().getBean("tsrPerformanceBo");
 		return bo.findByCriteria(criteria);
 	}
 	
@@ -1483,6 +1568,10 @@ public class KpiService {
 		}
 	}
 	
+	public void refreshTsrInfoMap() {
+		prepareTsrInfo();
+	}
+	
 	private void prepareTsrInfo() {
 		try {
 			tsrMap = new HashMap<String, TsrInfo>();
@@ -1497,7 +1586,7 @@ public class KpiService {
 	public String removeTitle(String val) {
 		for(String t : TITLES) {
 			if(val.startsWith(t)) {
-				return val.replace(t, "").trim();
+				val = val.replace(t, "").trim();
 			}
 		}
 		return val;
@@ -1556,9 +1645,9 @@ public class KpiService {
 		return tsrTalkTimeBo.updateTsrTalkTime(tsrTalkTime, USER_LOGIN);
 	}
 	
-	public TsrTalkTimeDetail updateTalkTimeDetail(TsrTalkTimeDetail tsrTalkTimeDetail) throws Exception {
-		TsrTalkTimeDetailBo bo = (TsrTalkTimeDetailBo) AppConfig.getInstance().getBean("tsrTalkTimeDetailBo");
-		return bo.updateTsrTalkTimeDetail(tsrTalkTimeDetail, USER_LOGIN);
+	public TsrPerformance updateTsrPerformance(TsrPerformance tsrPerformance) throws Exception {
+		TsrPerformanceBo bo = (TsrPerformanceBo) AppConfig.getInstance().getBean("tsrPerformanceBo");
+		return bo.updateTsrPerformance(tsrPerformance, USER_LOGIN);
 	}
 	
 	public TsrContract updateTsrContract(TsrContract tsrContract) throws Exception {
@@ -1569,9 +1658,6 @@ public class KpiService {
 	public TsrInfo updateTsrInfo(TsrInfo tsrInfo) throws Exception {
 		TsrInfoBo bo = (TsrInfoBo) AppConfig.getInstance().getBean("tsrInfoBo");
 		TsrInfo t = bo.updateTsrInfo(tsrInfo, USER_LOGIN);
-		if(tsrInfo != null) {
-			prepareTsrInfo();
-		}
 		return t;
 	}
 	
