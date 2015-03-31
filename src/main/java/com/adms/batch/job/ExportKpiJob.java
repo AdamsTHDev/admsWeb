@@ -90,15 +90,19 @@ public class ExportKpiJob {
 	
 	public static ExportKpiJob getInstance(String processDate) {
 		if(instance == null) {
-			instance = new ExportKpiJob();
-			instance.processYearMonth = processDate.substring(0, 4);
-			try {
-				instance.setFixMsigWBKeyCode();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			instance = new ExportKpiJob(processDate);
 		}
 		return instance;
+	}
+	
+	public ExportKpiJob(String processDate) {
+		processYearMonth = processDate.substring(0, 4);
+		
+		try {
+			instance.setFixMsigWBKeyCode();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private KpiService kpiService() {

@@ -48,10 +48,13 @@ public class ImportForKpiJob {
 	
 	public static ImportForKpiJob getInstance(final String processDate) {
 		if(instance == null) {
-			instance = new ImportForKpiJob();
-			instance.yyyyMMprocess = processDate.substring(0, 4);
+			instance = new ImportForKpiJob(processDate);
 		}
 		return instance;
+	}
+	
+	public ImportForKpiJob(String processDate) {
+		yyyyMMprocess = processDate.substring(0, 4);
 	}
 	
 	private static String getProcessTime(Date start, Date end) {

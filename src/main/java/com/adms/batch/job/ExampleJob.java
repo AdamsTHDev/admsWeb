@@ -13,6 +13,7 @@ public class ExampleJob {
 		String processDate = "20120228";
 		
 		importProcess(processDate);
+		
 		exportProcess(processDate);
 		
 	}
@@ -24,9 +25,10 @@ public class ExampleJob {
 		
 		try {
 			ImportForKpiJob importKpi = ImportForKpiJob.getInstance(processDate);
+			
 			importKpi.importTsr("D:/Test/upload/TSRUpdate/Update New Staff by month for comm_March-2015.xlsx");
 			importKpi.importSupDsmHierarchy("D:/Test/upload/TSRUpdate", "UPDATE_SUP_DSM.xlsx");
-			importKpi.importKpiTargetSetup("D:/Test/upload/KpiTarget", "Sales KPIs Target Setup -#yyyyMM.xlsx");
+			importKpi.importKpiTargetSetup("D:/Test/upload/KpiTarget", "Sales KPIs Target Setup - #yyyyMM.xlsx");
 			importKpi.importDataForKPI("D:/Test/upload/kpi");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -45,6 +47,7 @@ public class ExampleJob {
 		
 		try {
 			ExportKpiJob exportKpi = ExportKpiJob.getInstance(processDate);
+			
 			exportKpi.getDataToTable();
 			exportKpi.exportKpiReport();
 		} catch(Exception e) {
