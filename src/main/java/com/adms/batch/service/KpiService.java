@@ -1350,7 +1350,7 @@ public class KpiService {
 	
 	public TsrInfo getTsrInfoByNameAdvanceMode(String fullName, String keyCode, Date saleDate) throws Exception {
 		TsrInfo tsrInfo = null;
-		String unTitle = this.removeTitle(fullName).replaceAll("  ", " ");
+		String unTitle = this.removeTitle(fullName).replaceAll("  ", " ").trim();
 		List<TsrCodeReplacer> rs = null;
 		String campaignCode = getCampaignByKeyCode(keyCode).getCode();
 		try {

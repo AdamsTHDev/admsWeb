@@ -89,14 +89,14 @@
 	    <property name="jobDetails">
 	        <list>
 <!-- 	            <ref bean="importKpiJob" /> -->
-	            <ref bean="exportJob" />
+<!-- 	            <ref bean="exportJob" /> -->
 	        </list>
 	    </property>
 	 
 	    <property name="triggers">
 	        <list>
 <!-- 	            <ref bean="kpiTrigger" /> -->
-	            <ref bean="exportKpiTrigger" />
+<!-- 	            <ref bean="exportKpiTrigger" /> -->
 	        </list>
 	    </property>
 	</bean>

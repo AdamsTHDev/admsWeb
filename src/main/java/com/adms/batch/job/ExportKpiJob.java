@@ -84,12 +84,28 @@ public class ExportKpiJob {
 	private Cell tsmActualRetenCell;
 	
 	private String processYearMonth = null;
+
+	private static ExportKpiJob instance;
+	
+	
+	public static ExportKpiJob getInstance(String processDate) {
+		if(instance == null) {
+			instance = new ExportKpiJob();
+			instance.processYearMonth = processDate.substring(0, 4);
+			try {
+				instance.setFixMsigWBKeyCode();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return instance;
+	}
 	
 	private KpiService kpiService() {
 		return KpiService.getInstance();
 	}
 
-	public void execute() {
+	public void execute(String processDate) {
 			
 		Date start = Calendar.getInstance().getTime();
 		System.out.println("=======================================================================");
@@ -97,12 +113,12 @@ public class ExportKpiJob {
 		System.out.println("=======================================================================");
 		
 		try {
-			processYearMonth = new String("201501");
+			processYearMonth = processDate.substring(0, 4);
 			System.out.println("Process Year Month: " + processYearMonth);
 			setFixMsigWBKeyCode();
 			
-//			processToDB(processYearMonth);
-			processData();
+			getDataToTable();
+			exportKpiReport();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -114,18 +130,18 @@ public class ExportKpiJob {
 		System.out.println("=======================================================================");
 	}
 	
-	public void setFixMsigWBKeyCode() throws Exception {
+	private void setFixMsigWBKeyCode() throws Exception {
 		FIX_MSIG_WB_KEYCODE = kpiService().getMsigWBKeycode(processYearMonth);
 		System.out.println("Fix MSIG WB KeyCode: " + FIX_MSIG_WB_KEYCODE);
 	}
 
-	public void processToDB(String yyyyMM) throws Exception {
+	public void getDataToTable() throws Exception {
 		System.out.println("Getting data...");
-		List<KpiBean> list = kpiService().getKpi(yyyyMM);
+		List<KpiBean> list = kpiService().getKpi(processYearMonth);
 
 		System.out.println("KPI Result size: " + list.size());
-		kpiService().deleteKpiResultByYearMonth(yyyyMM);
-		kpiService().addKpiResult(list, yyyyMM, FIX_MSIG_WB_KEYCODE);
+		kpiService().deleteKpiResultByYearMonth(processYearMonth);
+		kpiService().addKpiResult(list, processYearMonth, FIX_MSIG_WB_KEYCODE);
 //		for(KpiBean kpi : list) {
 //			kpiService().addOrUpdateKpiResult(kpi, yyyyMM, FIX_MSIG_WB_KEYCODE);
 //		}
@@ -140,7 +156,7 @@ public class ExportKpiJob {
 		return false;
 	}
 	
-	private void processData() throws Exception {
+	public void exportKpiReport() throws Exception {
 		kpiResults = kpiService().getKpiResults(processYearMonth);
 		if(null == kpiResults) throw new Exception("No data has been found: " + processYearMonth);
 		
@@ -252,6 +268,10 @@ public class ExportKpiJob {
 					
 					Map<String, TsmActualKpi> campaignMap = null;
 					
+					System.out.println("tsmCode: " + tsmCode);
+					if(tsmCode.equals("603039") || tsmCode.equals("602110"))
+							System.out.println("YEAH!!");
+					
 					if(tsmActualMaps.get(tsmCode) == null) {
 						campaignMap = new HashMap<>();
 						tsmActualMaps.put(tsmCode, campaignMap);
@@ -259,9 +279,6 @@ public class ExportKpiJob {
 						campaignMap = tsmActualMaps.get(tsmCode);
 					}
 					
-//					if(FIX_MSIG_WB_KEYCODE.equals(keyCode)) {
-//						System.out.println("WB");
-//					}
 					String campaignCode = isSpecialCampaign("", keyCode) ? this.campaignCode + keyCode : this.campaignCode;
 					if(campaignMap.get(campaignCode) == null) {
 						campaignMap.put(campaignCode, new TsmActualKpi());
@@ -366,7 +383,8 @@ public class ExportKpiJob {
 					sheet.addMergedRegion(new CellRangeAddress(currRowNum, currRowNum + 1, SCORE_COL, SCORE_COL));
 					
 				} else if(groupStartRow != totalRowNum) {
-					if((level.toUpperCase().contains(TSM) && groupStartRow != 1 && groupStartRow != 2) || !level.toUpperCase().contains(TSM)) scoreCell.setCellValue(scoreValue);
+					if((level.toUpperCase().contains(TSM) && groupStartRow != 1 && groupStartRow != 2) 
+							|| !level.toUpperCase().contains(TSM)) scoreCell.setCellValue(scoreValue);
 					
 				} else if(groupStartRow == totalRowNum) {
 					scoreCell.setCellValue(sumScore);
@@ -392,7 +410,11 @@ public class ExportKpiJob {
 				}
 //			}
 		}
-		return scoreValue;
+		if(level.toUpperCase().contains(TSM) && groupStartRow == 1) {
+			return 0D;
+		} else {
+			return scoreValue;
+		}
 	}
 	
 //	private void calculateWorkingDayInMonth(Date monthDate) {
@@ -687,7 +709,7 @@ public class ExportKpiJob {
 		}
 	}
 	
-	private void doDsmGroup(Sheet toSheet) {
+//	private void doDsmGroup(Sheet toSheet) {
 //		<!-- do All for DSM -->
 //		if(toSheet != null && dsmCode != null) {
 //			DsmKpiByCampaign dsmKpiByCampaign = dsmActualMaps.get(dsmCode).get(campaignCode);
@@ -710,7 +732,7 @@ public class ExportKpiJob {
 //			
 //			doCalculate(toSheet, true);
 //		}
-	}
+//	}
 	
 	private void doDsmKpi() {
 		System.out.println("START do DSM Workbook");
